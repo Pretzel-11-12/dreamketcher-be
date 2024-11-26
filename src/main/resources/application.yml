@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: dreamketcherbe
+  profiles:
+    active: local
+  servlet:
+    multipart:
+      max-file-size: 10MB
