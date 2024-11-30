@@ -5,7 +5,9 @@ spring:
     active: local
   servlet:
     multipart:
-      max-file-size: 10MB
+      max-file-size: 5MB
+      max-request-size: 50MB
+      location: :/Users/chuyeonsoo/temp
 cloud:
   aws:
     s3:
