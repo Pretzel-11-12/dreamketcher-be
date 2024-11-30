@@ -13,7 +13,7 @@ import pretzel.dreamketcherbe.auth.service.AuthService;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private AuthService authService;
+    private final AuthService authService;
 
     @GetMapping("/{socialType}/callback")
     public ResponseEntity<TokenResponse> loginOrRegister(

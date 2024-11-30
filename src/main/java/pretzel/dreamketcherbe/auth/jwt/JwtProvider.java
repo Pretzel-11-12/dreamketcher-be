@@ -3,6 +3,8 @@ package pretzel.dreamketcherbe.auth.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import pretzel.dreamketcherbe.auth.dto.AuthPayload;
@@ -14,6 +16,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class JwtProvider implements TokenProvider {
 
@@ -25,10 +28,10 @@ public class JwtProvider implements TokenProvider {
     private final JwtParser jwtParser;
 
     public JwtProvider(
-            @Value("${jwt.secret-key}") String secretKey,
+            @Value("${jwt.secret-key}") String secretKeyString,
             @Value("${jwt.expiration}") Long expired
     ) {
-        this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        this.secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes(StandardCharsets.UTF_8));
         this.EXPIRED = expired;
         this.jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
     }
@@ -36,13 +39,18 @@ public class JwtProvider implements TokenProvider {
     @Override
     public String generated(AuthPayload authPayload){
         long now = System.currentTimeMillis();
-        return Jwts.builder()
-                .claim(MEMBER_ID, authPayload.memberId())
-                .claim(ROLE, authPayload.role())
+        Claims claims = Jwts.claims();
+        claims.put(MEMBER_ID, authPayload.memberId());
+        claims.put(ROLE, authPayload.role().name());
+
+        String jwtToken = Jwts.builder()
+                .setClaims(claims)
                 .setIssuedAt(new Date(now))
                 .setExpiration(new Date(now + EXPIRED))
-                .signWith(secretKey)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
+        log.info("jwtToken: {}", jwtToken);
+        return jwtToken;
     }
 
     @Override
