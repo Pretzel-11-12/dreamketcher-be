@@ -6,7 +6,6 @@ import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import pretzel.dreamketcherbe.auth.dto.AuthPayload;
-import pretzel.dreamketcherbe.auth.utils.TokenProvider;
 
 import io.jsonwebtoken.security.Keys;
 import pretzel.dreamketcherbe.member.entity.Role;
@@ -15,7 +14,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-Component
+@Component
 public class JwtProvider implements TokenProvider {
 
     private static final String MEMBER_ID = "memberId";
