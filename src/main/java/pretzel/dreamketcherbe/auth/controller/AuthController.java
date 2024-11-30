@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import pretzel.dreamketcherbe.auth.dto.TokenResponse;
 import pretzel.dreamketcherbe.auth.service.AuthService;
 import pretzel.dreamketcherbe.auth.service.AuthWorkflowService;
+import pretzel.dreamketcherbe.auth.utils.TokenProvider;
 import pretzel.dreamketcherbe.common.cookie.CookieHandler;
 
 @Slf4j
@@ -21,11 +22,11 @@ public class AuthController {
     private AuthService authService;
 
     @GetMapping("/{socialType}/callback")
-    public void loginOrRegister(
+    public TokenResponse loginOrRegister(
         @PathVariable("socialType") String socialType,
         @RequestParam("code") String code
     ) {
         log.info("socialType: {}, code: {}", socialType, code);
-        authService.loginOrRegister(socialType, code);
+        return authService.loginOrRegister(socialType, code);
     }
 }
