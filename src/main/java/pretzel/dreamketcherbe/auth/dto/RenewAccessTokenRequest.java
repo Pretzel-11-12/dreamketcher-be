@@ -1,6 +1,8 @@
 package pretzel.dreamketcherbe.auth.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 public record RenewAccessTokenRequest(
-    String refreshToken
+    @NotNull String refreshToken
 ) {
 }
