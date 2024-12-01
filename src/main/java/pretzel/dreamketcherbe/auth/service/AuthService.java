@@ -33,7 +33,7 @@ public class AuthService {
 
         log.info("member: {}", member);
 
-        String accessToken = tokenprovider.generated(new AuthPayload(member.getId(), member.getRole()));
+        String accessToken = tokenprovider.generated(member.getId());
         return new TokenResponse(accessToken);
     }
 }

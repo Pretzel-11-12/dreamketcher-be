@@ -7,7 +7,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import pretzel.dreamketcherbe.auth.dto.AuthPayload;
 import pretzel.dreamketcherbe.member.entity.Role;
 
 import javax.crypto.SecretKey;
@@ -18,7 +17,6 @@ import java.util.Date;
 public class JwtExtractor implements TokenExtractor {
 
     private static final String MEMBER_ID = "memberId";
-    private static final String ROLE = "role";
 
     private final JwtParser jwtParser;
 
@@ -30,10 +28,8 @@ public class JwtExtractor implements TokenExtractor {
     }
 
     @Override
-    public AuthPayload extract(String token){
+    public Long extract(String token){
         Claims claims = jwtParser.parseClaimsJws(token).getBody();
-        Long memberId = claims.get(MEMBER_ID, Long.class);
-        String role = claims.get(ROLE, String.class);
-        return new AuthPayload(memberId, Role.of(role));
+        return claims.get(MEMBER_ID, Long.class);
     }
 }

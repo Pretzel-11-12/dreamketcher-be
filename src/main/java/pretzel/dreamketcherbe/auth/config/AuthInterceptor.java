@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import pretzel.dreamketcherbe.auth.dto.AuthPayload;
 import pretzel.dreamketcherbe.auth.exception.AuthException;
 import pretzel.dreamketcherbe.auth.exception.AuthExceptionType;
 import pretzel.dreamketcherbe.auth.jwt.TokenExtractor;
@@ -32,9 +31,9 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         String token = AuthHeaderExtractor.extract(request)
             .orElseThrow(() -> new AuthException(AuthExceptionType.UNAUTHORIZED));
-        AuthPayload authPayload = tokenExtractor.extract(token);
-        log.info("authPayload: {}", authPayload);
-        authContext.setMemberId(authPayload.memberId());
+        Long memberId = tokenExtractor.extract(token);
+        log.info("memberId: {}", memberId);
+        authContext.setMemberId(memberId);
         return true;
     }
 }

@@ -7,7 +7,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import pretzel.dreamketcherbe.auth.dto.AuthPayload;
 
 import io.jsonwebtoken.security.Keys;
 import pretzel.dreamketcherbe.member.entity.Role;
@@ -35,12 +34,10 @@ public class JwtProvider implements TokenProvider {
     }
 
     @Override
-    public String generated(AuthPayload authPayload){
+    public String generated(Long memberId){
         long now = System.currentTimeMillis();
         Claims claims = Jwts.claims();
-        claims.put(MEMBER_ID, authPayload.memberId());
-        claims.put(ROLE, authPayload.role().name());
-
+        claims.put(MEMBER_ID, memberId);
         String jwtToken = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date(now))
