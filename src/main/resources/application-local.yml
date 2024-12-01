@@ -49,4 +49,3 @@ jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-exp: 12345678
   refresh-exp: 12345678
-  expiration: 12345678

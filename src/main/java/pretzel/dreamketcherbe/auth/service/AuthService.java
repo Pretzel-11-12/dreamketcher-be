@@ -32,7 +32,8 @@ public class AuthService {
 
         log.info("member: {}", member);
 
-        String accessToken = tokenprovider.generated(member.getId());
-        return new TokenResponse(accessToken);
+        String accessToken = tokenprovider.generatedAccessToken(member.getId());
+        String refreshToken = tokenprovider.generatedRefreshToken(member.getId());
+        return new TokenResponse(accessToken, refreshToken);
     }
 }

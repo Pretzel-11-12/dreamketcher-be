@@ -3,6 +3,10 @@ package pretzel.dreamketcherbe.auth.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public record TokenResponse(
-    String accessToken
+    String accessToken,
+    @JsonIgnore String refreshToken
 ) {
+    public static TokenResponse of(String accessToken, String refreshToken) {
+        return new TokenResponse(accessToken, refreshToken);
+    }
 }

@@ -18,32 +18,52 @@ import java.util.Date;
 @Component
 public class JwtProvider implements TokenProvider {
 
-    private static final String MEMBER_ID = "memberId";
-    private static final String ROLE = "role";
+    private static final String MEMBER_ID = "member_id";
+    private static final String TOKEN_ID = "token_id";
+    private static final String ACCESS_TOKEN = "access_token";
+    private static final String REFRESH_TOKEN = "refresh_token";
 
-    private final SecretKey secretKey;
-    private final Long EXPIRED;
+    private final SecretKey key;
+    private final Long accessTokenExpired;
+    private final Long refreshTokenExpired;
 
     public JwtProvider(
-            @Value("${jwt.secret-key}") String secretKeyString,
-            @Value("${jwt.expiration}") Long expired
+        @Value("${jwt.secret-key}") String secretKeyString,
+        @Value("${jwt.access-exp}") Long accessTokenExpired,
+        @Value("${jwt.refresh-exp}") Long refreshTokenExpired
     ) {
-        this.secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes(StandardCharsets.UTF_8));
-        this.EXPIRED = expired;
+        this.key = Keys.hmacShaKeyFor(secretKeyString.getBytes(StandardCharsets.UTF_8));
+        this.accessTokenExpired = accessTokenExpired;
+        this.refreshTokenExpired = refreshTokenExpired;
     }
 
     @Override
-    public String generated(Long memberId){
-        long now = System.currentTimeMillis();
+    public String generatedAccessToken(Long memberId) {
+        Claims claims = generatedClaims(MEMBER_ID, memberId);
+        return generatedToken(claims, ACCESS_TOKEN, accessTokenExpired);
+    }
+
+    @Override
+    public String generatedRefreshToken(Long tokenId) {
+        Claims claims = generatedClaims(TOKEN_ID, tokenId);
+        return generatedToken(claims, REFRESH_TOKEN, refreshTokenExpired);
+    }
+
+    private Claims generatedClaims(String key, Object value) {
         Claims claims = Jwts.claims();
-        claims.put(MEMBER_ID, memberId);
-        String jwtToken = Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(new Date(now))
-                .setExpiration(new Date(now + EXPIRED))
-                .signWith(secretKey, SignatureAlgorithm.HS256)
-                .compact();
-        log.info("jwtToken: {}", jwtToken);
-        return jwtToken;
+        claims.put(key, value);
+        return claims;
+    }
+
+    private String generatedToken(Claims claims, String subject, Long expired) {
+        long now = System.currentTimeMillis();
+
+        return Jwts.builder()
+                    .setClaims(claims)
+                    .setSubject(subject)
+                    .setIssuedAt(new Date(now))
+                    .setExpiration(new Date(now + expired))
+                    .signWith(key, SignatureAlgorithm.HS256)
+                    .compact();
     }
 }

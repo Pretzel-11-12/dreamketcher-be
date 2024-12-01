@@ -2,5 +2,7 @@ package pretzel.dreamketcherbe.auth.repository;
 
 public interface TokenProvider {
 
-    String generated(Long memberId);
+    String generatedAccessToken(Long memberId);
+
+    String generatedRefreshToken(Long memberId);
 }
