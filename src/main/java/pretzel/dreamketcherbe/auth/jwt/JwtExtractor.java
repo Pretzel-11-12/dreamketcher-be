@@ -6,6 +6,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import pretzel.dreamketcherbe.auth.exception.AuthException;
+import pretzel.dreamketcherbe.auth.exception.AuthExceptionType;
 import pretzel.dreamketcherbe.auth.repository.TokenExtractor;
 
 import javax.crypto.SecretKey;
@@ -14,7 +16,10 @@ import java.nio.charset.StandardCharsets;
 @Component
 public class JwtExtractor implements TokenExtractor {
 
-    private static final String MEMBER_ID = "memberId";
+    private static final String MEMBER_ID = "member_Id";
+    private static final String TOKEN_ID = "token_id";
+    private static final String ACCESS_TOKEN = "access_token";
+    private static final String REFRESH_TOKEN = "refresh_token";
 
     private final JwtParser jwtParser;
 
@@ -26,8 +31,31 @@ public class JwtExtractor implements TokenExtractor {
     }
 
     @Override
-    public Long extract(String token){
-        Claims claims = jwtParser.parseClaimsJws(token).getBody();
-        return claims.get(MEMBER_ID, Long.class);
+    public Long extractAccessToken(String token){
+        return extract(token, ACCESS_TOKEN, MEMBER_ID, Long.class);
+    }
+
+    @Override
+    public String extractRefreshToken(String token){
+        return extract(token, REFRESH_TOKEN, TOKEN_ID, String.class);
+    }
+
+    private <T> T extract(String token, String expectedTokenType, String claimKey, Class<T> T){
+        Claims claims = parseClaim(token);
+        String subject = claims.getSubject();
+
+        if(subject.equals(expectedTokenType)){
+            return claims.get(claimKey, T);
+        }
+        throw new AuthException(AuthExceptionType.INVALID_TOKEN_TYPE);
+    }
+
+    private Claims parseClaim(String token){
+        try{
+            return jwtParser.parseClaimsJws(token)
+                            .getBody();
+        }catch(Exception e){
+            throw new AuthException(AuthExceptionType.INVALID_TOKEN);
+        }
     }
 }
