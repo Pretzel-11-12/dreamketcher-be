@@ -25,7 +25,6 @@ public class JwtProvider implements TokenProvider {
 
     private final SecretKey secretKey;
     private final Long EXPIRED;
-    private final JwtParser jwtParser;
 
     public JwtProvider(
             @Value("${jwt.secret-key}") String secretKeyString,
@@ -33,7 +32,6 @@ public class JwtProvider implements TokenProvider {
     ) {
         this.secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes(StandardCharsets.UTF_8));
         this.EXPIRED = expired;
-        this.jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
     }
 
     @Override
@@ -51,13 +49,5 @@ public class JwtProvider implements TokenProvider {
                 .compact();
         log.info("jwtToken: {}", jwtToken);
         return jwtToken;
-    }
-
-    @Override
-    public AuthPayload extract(String token){
-        Claims claims = jwtParser.parseClaimsJws(token).getBody();
-        Long memberId = claims.get(MEMBER_ID, Long.class);
-        String role = claims.get(ROLE, String.class);
-        return new AuthPayload(memberId, Role.of(role));
     }
 }

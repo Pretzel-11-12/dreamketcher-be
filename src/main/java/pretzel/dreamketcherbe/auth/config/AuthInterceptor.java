@@ -9,6 +9,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import pretzel.dreamketcherbe.auth.dto.AuthPayload;
 import pretzel.dreamketcherbe.auth.exception.AuthException;
 import pretzel.dreamketcherbe.auth.exception.AuthExceptionType;
+import pretzel.dreamketcherbe.auth.jwt.TokenExtractor;
 import pretzel.dreamketcherbe.auth.jwt.TokenProvider;
 import pretzel.dreamketcherbe.auth.service.internal.AuthContext;
 import pretzel.dreamketcherbe.auth.utils.AuthHeaderExtractor;
@@ -18,7 +19,7 @@ import pretzel.dreamketcherbe.auth.utils.AuthHeaderExtractor;
 @RequiredArgsConstructor
 public class AuthInterceptor implements HandlerInterceptor {
 
-    private final TokenProvider tokenProvider;
+    private final TokenExtractor tokenExtractor;
     private final AuthContext authContext;
 
     @Override
@@ -31,7 +32,8 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         String token = AuthHeaderExtractor.extract(request)
             .orElseThrow(() -> new AuthException(AuthExceptionType.UNAUTHORIZED));
-        AuthPayload authPayload = tokenProvider.extract(token);
+        AuthPayload authPayload = tokenExtractor.extract(token);
+        log.info("authPayload: {}", authPayload);
         authContext.setMemberId(authPayload.memberId());
         return true;
     }
