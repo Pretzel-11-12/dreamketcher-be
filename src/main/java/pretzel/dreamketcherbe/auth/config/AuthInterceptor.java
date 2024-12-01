@@ -8,8 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import pretzel.dreamketcherbe.auth.exception.AuthException;
 import pretzel.dreamketcherbe.auth.exception.AuthExceptionType;
-import pretzel.dreamketcherbe.auth.jwt.TokenExtractor;
-import pretzel.dreamketcherbe.auth.jwt.TokenProvider;
+import pretzel.dreamketcherbe.auth.repository.TokenExtractor;
 import pretzel.dreamketcherbe.auth.service.internal.AuthContext;
 import pretzel.dreamketcherbe.auth.utils.AuthHeaderExtractor;
 

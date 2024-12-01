@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pretzel.dreamketcherbe.auth.dto.AuthPayload;
 import pretzel.dreamketcherbe.auth.dto.TokenResponse;
 import pretzel.dreamketcherbe.auth.google.GoogleOAuthClient;
 import pretzel.dreamketcherbe.auth.google.dto.GoogleUserInfo;
-import pretzel.dreamketcherbe.auth.jwt.TokenProvider;
+import pretzel.dreamketcherbe.auth.repository.TokenProvider;
 import pretzel.dreamketcherbe.member.entity.Member;
 import pretzel.dreamketcherbe.member.repository.MemberRepository;
 

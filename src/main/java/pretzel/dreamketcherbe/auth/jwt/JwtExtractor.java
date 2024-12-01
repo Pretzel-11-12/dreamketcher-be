@@ -3,15 +3,13 @@ package pretzel.dreamketcherbe.auth.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import pretzel.dreamketcherbe.member.entity.Role;
+import pretzel.dreamketcherbe.auth.repository.TokenExtractor;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 
 @Component
 public class JwtExtractor implements TokenExtractor {

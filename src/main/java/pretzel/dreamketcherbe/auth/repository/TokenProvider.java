@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.auth.jwt;
+package pretzel.dreamketcherbe.auth.repository;
 
 public interface TokenProvider {
 
