@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import pretzel.dreamketcherbe.auth.entity.Token;
+import pretzel.dreamketcherbe.common.exception.redis.RedisException;
+import pretzel.dreamketcherbe.common.exception.redis.RedisExceptionType;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -47,7 +49,7 @@ public class RedisTokenRepository implements TokenRepository {
         try {
             return ObjectMapper.writeValueAsString(token);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RedisException(RedisExceptionType.SERIALIZE_ERROR);
         }
     }
 
@@ -55,7 +57,7 @@ public class RedisTokenRepository implements TokenRepository {
         try {
             return ObjectMapper.readValue(tokenJson, Token.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RedisException(RedisExceptionType.DESERIALIZE_ERROR);
         }
     }
 }
