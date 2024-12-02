@@ -58,3 +58,16 @@ jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-exp: 12345678
   refresh-exp: 12345678
+
+management:
+  endpoints:
+    web:
+      base-path: /api/v1
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework: trace
+    org.hibernate: trace
