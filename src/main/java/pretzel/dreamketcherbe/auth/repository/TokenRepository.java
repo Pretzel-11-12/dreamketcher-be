@@ -5,8 +5,10 @@ import pretzel.dreamketcherbe.auth.entity.Token;
 
 import java.util.Optional;
 
-public interface TokenRepository extends JpaRepository<Token, Long> {
+public interface TokenRepository {
     Optional<Token> findByTokenId(String tokenId);
 
     void deleteByTokenId(String tokenId);
+
+    void save(Token token);
 }
