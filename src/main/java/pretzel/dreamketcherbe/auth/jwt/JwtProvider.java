@@ -44,7 +44,7 @@ public class JwtProvider implements TokenProvider {
     }
 
     @Override
-    public String generatedRefreshToken(Long tokenId) {
+    public String generatedRefreshToken(String tokenId) {
         Claims claims = generatedClaims(TOKEN_ID, tokenId);
         return generatedToken(claims, REFRESH_TOKEN, refreshTokenExpired);
     }

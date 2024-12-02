@@ -24,12 +24,15 @@ public class Token extends BaseTimeEntity {
         private String tokenId;
 
         @Builder
-        public Token(Long memberId, String tokenId) {
-            this.memberId = memberId;
-            this.tokenId = tokenId;
+        public Token(Long memberId) {
+            this.tokenId = generatedTokenId();
         }
 
-        public void updateTokenId(String tokenId) {
-            this.tokenId = tokenId;
+        public void renewTokenId() {
+            this.tokenId = generatedTokenId();
+        }
+
+        private String generatedTokenId() {
+            return java.util.UUID.randomUUID().toString();
         }
 }

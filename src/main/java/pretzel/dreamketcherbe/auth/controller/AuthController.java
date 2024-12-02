@@ -6,9 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pretzel.dreamketcherbe.auth.dto.RenewAccessTokenRequest;
-import pretzel.dreamketcherbe.auth.dto.RenewAccessTokenResponse;
 import pretzel.dreamketcherbe.auth.dto.TokenResponse;
-import pretzel.dreamketcherbe.auth.service.AuthService;
+import pretzel.dreamketcherbe.auth.service.AuthFacadeService;
 
 @Slf4j
 @RestController
@@ -16,7 +15,7 @@ import pretzel.dreamketcherbe.auth.service.AuthService;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+    private final AuthFacadeService authWorkflowService;
 
     @GetMapping("/{socialType}/callback")
     public ResponseEntity<TokenResponse> loginOrRegister(
@@ -24,16 +23,14 @@ public class AuthController {
         @RequestParam("code") String code
     ) {
         log.info("socialType: {}, code: {}", socialType, code);
-        return ResponseEntity.ok(authService.loginOrRegister(socialType, code));
+        return ResponseEntity.ok(authWorkflowService.loginOrRegister(code));
     }
 
     @GetMapping("/renew")
-    public ResponseEntity<RenewAccessTokenResponse> renewAccessToken(
+    public ResponseEntity<TokenResponse> renewAccessToken(
         @RequestHeader @Valid RenewAccessTokenRequest renewAccessTokenRequest
         ) {
         log.info("renewAccessTokenRequest: {}", renewAccessTokenRequest);
-        return ResponseEntity.ok(authService.renewAccessToken(
-            renewAccessTokenRequest.refreshToken()
-        ));
+        return ResponseEntity.ok(authWorkflowService.renewAccessToken(renewAccessTokenRequest));
     }
 }
