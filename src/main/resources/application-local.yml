@@ -30,7 +30,11 @@ spring:
     http-only: true
     secure: false
 
-springdoc:
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS}
+    allowed-methods: ${ALLOWED_METHODS}
+
+  springdoc:
     swagger-ui:
       display-request-duration: true
     api-docs:
