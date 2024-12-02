@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 
+@Table(name = "authors")
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -13,7 +14,6 @@ public class Author extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "author_id")
     private Long id;
 
     @Column(nullable = false)
