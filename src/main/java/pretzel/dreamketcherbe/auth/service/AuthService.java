@@ -42,26 +42,29 @@ public class AuthService {
 
         log.info("member: {}", member);
         String tokenId = UUID.randomUUID().toString();
-        Token token = Token.builder()
-            .tokenId(tokenId)
-            .memberId(member.getId())
-            .build();
+        Token token = new Token(member.getId(), tokenId);
 
         tokenRepository.save(token);
 
-        String accessToken = tokenprovider.generatedAccessToken(member.getId());
-        String refreshToken = tokenprovider.generatedRefreshToken(member.getId());
-        return TokenResponse.of(accessToken, refreshToken);
+        return generatedTokenPair(token);
     }
 
-    public RenewAccessTokenResponse renewAccessToken(String refreshToken) {
+    public TokenResponse renewAccessToken(String refreshToken) {
         String tokenId = tokenExtractor.extractRefreshToken(refreshToken);
 
         Token token = tokenRepository.findByTokenId(tokenId)
             .orElseThrow(() -> new AuthException(AuthExceptionType.INVALID_TOKEN));
 
-        String accessToken = tokenprovider.generatedAccessToken(token.getMemberId());
+        String newTokenId = UUID.randomUUID().toString();
+        token.updateTokenId(newTokenId);
 
-        return RenewAccessTokenResponse.of(accessToken);
+        return generatedTokenPair(token);
+    }
+
+    private TokenResponse generatedTokenPair(Token token) {
+        String accessToken = tokenprovider.generatedAccessToken(token.getMemberId());
+        String refreshToken = tokenprovider.generatedRefreshToken(token.getTokenId());
+
+        return TokenResponse.of(accessToken, refreshToken);
     }
 }

@@ -28,4 +28,8 @@ public class Token extends BaseTimeEntity {
             this.memberId = memberId;
             this.tokenId = tokenId;
         }
+
+        public void updateTokenId(String tokenId) {
+            this.tokenId = tokenId;
+        }
 }
