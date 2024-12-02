@@ -1,15 +1,18 @@
 package pretzel.dreamketcherbe.auth.controller;
 
+import static org.springframework.http.HttpHeaders.*;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pretzel.dreamketcherbe.auth.dto.LogoutRequest;
-import pretzel.dreamketcherbe.auth.dto.RenewAccessTokenRequest;
 import pretzel.dreamketcherbe.auth.dto.TokenResponse;
 import pretzel.dreamketcherbe.auth.service.AuthFacadeService;
 import pretzel.dreamketcherbe.common.annotation.Auth;
+import pretzel.dreamketcherbe.common.cookie.CookieHandler;
 
 @Slf4j
 @RestController
@@ -17,32 +20,43 @@ import pretzel.dreamketcherbe.common.annotation.Auth;
 @RequiredArgsConstructor
 public class AuthController {
 
+    private static final String COOKIE_REFRESH_TOKEN = "refresh_token";
+
     private final AuthFacadeService authFacadeService;
+    private final CookieHandler cookieHandler;
 
     @GetMapping("/{socialType}/callback")
     public ResponseEntity<TokenResponse> loginOrRegister(
         @PathVariable("socialType") String socialType,
         @RequestParam("code") String code
     ) {
-        log.info("socialType: {}, code: {}", socialType, code);
-        return ResponseEntity.ok(authFacadeService.loginOrRegister(code));
+        TokenResponse tokenResponse = authFacadeService.loginOrRegister(code);
+        ResponseCookie cookie = cookieHandler.createCookie(COOKIE_REFRESH_TOKEN, tokenResponse.refreshToken());
+        return ResponseEntity.status(HttpStatus.OK)
+            .header(SET_COOKIE, cookie.toString())
+            .body(tokenResponse);
     }
 
     @GetMapping("/renew")
     public ResponseEntity<TokenResponse> renewAccessToken(
-        @RequestHeader @Valid RenewAccessTokenRequest renewAccessTokenRequest
+        @CookieValue(COOKIE_REFRESH_TOKEN) String refreshToken
         ) {
-        log.info("renewAccessTokenRequest: {}", renewAccessTokenRequest);
-        return ResponseEntity.ok(authFacadeService.renewAccessToken(renewAccessTokenRequest));
+        TokenResponse tokenResponse = authFacadeService.renewAccessToken(refreshToken);
+        ResponseCookie cookie = cookieHandler.createCookie(COOKIE_REFRESH_TOKEN, tokenResponse.refreshToken());
+        return ResponseEntity.status(HttpStatus.OK)
+            .header(SET_COOKIE, cookie.toString())
+            .body(tokenResponse);
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
         @Auth Long memberId,
-        @RequestBody @Valid LogoutRequest logoutRequest
+        @CookieValue(COOKIE_REFRESH_TOKEN) String refreshToken
     ) {
-        log.info("memberId: {}, logoutRequest: {}", memberId, logoutRequest);
-        authFacadeService.logout(memberId, logoutRequest);
-        return ResponseEntity.ok().build();
+        authFacadeService.logout(memberId, refreshToken);
+        ResponseCookie cookie = cookieHandler.deleteCookie(COOKIE_REFRESH_TOKEN);
+        return ResponseEntity.status(HttpStatus.OK)
+            .header(SET_COOKIE, cookie.toString())
+            .build();
     }
 }
