@@ -30,11 +30,11 @@ public class AuthService {
     public TokenResponse loginOrRegister(GoogleUserInfo googleUserInfo) {
         Member member = memberRepository.findBySocialId(googleUserInfo.socialId())
             .orElseGet(() -> memberRepository.save(googleUserInfo.toMember()));
-        return createToken(member);
+        return createToken(member.getId());
     }
 
-    private TokenResponse createToken(Member member) {
-        Token token = new Token(member.getId());
+    private TokenResponse createToken(Long memberId) {
+        Token token = new Token(memberId);
         tokenRepository.save(token);
         return generatedTokenPair(token);
     }
@@ -45,15 +45,10 @@ public class AuthService {
         return TokenResponse.of(accessToken, refreshToken);
     }
 
-    @Transactional
     public TokenResponse refreshTokenById(String tokenId) {
         Token token = tokenRepository.findByTokenId(tokenId)
             .orElseThrow(() -> new AuthException(AuthExceptionType.INVALID_TOKEN));
-        return recreateToken(token);
-    }
-
-    private TokenResponse recreateToken(Token token) {
-        token.renewTokenId();
-        return generatedTokenPair(token);
+        tokenRepository.deleteByTokenId(token.getTokenId());
+        return createToken(token.getMemberId());
     }
 }
