@@ -6,14 +6,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 
-@Table(name = "hash_tag")
+@Table(name = "genres")
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class HashTag extends BaseTimeEntity {
+public class Genre extends BaseTimeEntity {
 
     @Id
-    @Column(name = "hash_tag_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

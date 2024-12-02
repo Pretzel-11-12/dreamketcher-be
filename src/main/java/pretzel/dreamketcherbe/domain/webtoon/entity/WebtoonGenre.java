@@ -6,20 +6,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 
-@Table(name = "webtoon_hash_tag")
+@Table(name = "webtoon_genres")
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class WebtoonHashTag extends BaseTimeEntity {
+public class WebtoonGenre extends BaseTimeEntity {
 
     @Id
-    @Column(name = "webtoon_hash_tag_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "hash_tag_id")
-    private HashTag hashTag;
+    @JoinColumn(name = "genre_id")
+    private Genre genre;
 
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
