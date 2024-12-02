@@ -28,9 +28,20 @@ public class AuthService {
 
     @Transactional
     public TokenResponse loginOrRegister(GoogleUserInfo googleUserInfo) {
-        Member member = memberRepository.findBySocialId(googleUserInfo.socialId())
-            .orElseGet(() -> memberRepository.save(googleUserInfo.toMember()));
+        Member member = getOrCreateMember(googleUserInfo);
         return createToken(member.getId());
+    }
+
+    private Token getAndDeleteToken(String tokenId) {
+        Token token = tokenRepository.findByTokenId(tokenId)
+            .orElseThrow(() -> new AuthException(AuthExceptionType.INVALID_TOKEN));
+        tokenRepository.deleteByTokenId(tokenId);
+        return token;
+    }
+
+    private Member getOrCreateMember(GoogleUserInfo googleUserInfo) {
+        return memberRepository.findBySocialId(googleUserInfo.socialId())
+            .orElseGet(() -> memberRepository.save(googleUserInfo.toMember()));
     }
 
     private TokenResponse createToken(Long memberId) {
@@ -46,9 +57,7 @@ public class AuthService {
     }
 
     public TokenResponse refreshTokenById(String tokenId) {
-        Token token = tokenRepository.findByTokenId(tokenId)
-            .orElseThrow(() -> new AuthException(AuthExceptionType.INVALID_TOKEN));
-        tokenRepository.deleteByTokenId(token.getTokenId());
+        Token token = getAndDeleteToken(tokenId);
         return createToken(token.getMemberId());
     }
 }
