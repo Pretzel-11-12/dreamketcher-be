@@ -21,4 +21,8 @@ public class Token {
         private String generatedTokenId() {
             return UUID.randomUUID().toString();
         }
+
+    public boolean isMatchedMemberId(Long memberId) {
+        return this.memberId.equals(memberId);
+    }
 }

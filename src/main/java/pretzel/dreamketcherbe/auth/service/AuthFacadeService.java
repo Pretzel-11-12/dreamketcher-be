@@ -2,6 +2,7 @@ package pretzel.dreamketcherbe.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import pretzel.dreamketcherbe.auth.dto.LogoutRequest;
 import pretzel.dreamketcherbe.auth.dto.RenewAccessTokenRequest;
 import pretzel.dreamketcherbe.auth.dto.TokenResponse;
 import pretzel.dreamketcherbe.auth.google.GoogleOAuthClient;
@@ -13,7 +14,7 @@ import pretzel.dreamketcherbe.auth.repository.TokenExtractor;
 public class AuthFacadeService {
 
     private final AuthService authService;
-    private final TokenExtractor TokenExtractor;
+    private final TokenExtractor tokenExtractor;
     private final GoogleOAuthClient googleOAuthClient;
 
     public TokenResponse loginOrRegister(String code) {
@@ -23,7 +24,13 @@ public class AuthFacadeService {
 
     public TokenResponse renewAccessToken(RenewAccessTokenRequest request) {
         String refreshToken = request.refreshToken();
-        String tokenId = TokenExtractor.extractRefreshToken(refreshToken);
+        String tokenId = tokenExtractor.extractRefreshToken(refreshToken);
         return authService.refreshTokenById(tokenId);
+    }
+
+    public void logout(Long memberId, LogoutRequest request) {
+        String refreshToken = request.refreshToken();
+        String tokenId = tokenExtractor.extractRefreshToken(refreshToken);
+        authService.logout(memberId, tokenId);
     }
 }

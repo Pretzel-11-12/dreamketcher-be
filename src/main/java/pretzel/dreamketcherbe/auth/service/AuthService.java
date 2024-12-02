@@ -60,4 +60,22 @@ public class AuthService {
         Token token = getAndDeleteToken(tokenId);
         return createToken(token.getMemberId());
     }
+
+    public void logout(Long memberId, String tokenId) {
+        Token token = getTokenById(tokenId);
+        validateTokenOwnership(token, memberId);
+        tokenRepository.deleteByTokenId(tokenId);
+    }
+
+    public Token getTokenById(String tokenId) {
+        return tokenRepository.findByTokenId(tokenId)
+            .orElseThrow(() -> new AuthException(AuthExceptionType.INVALID_TOKEN));
+    }
+
+    public void validateTokenOwnership(Token token, Long memberId) {
+        if (token.isMatchedMemberId(memberId)) {
+            return;
+        }
+        throw new AuthException(AuthExceptionType.DISMATCHED_AUTHORIZATION);
+    }
 }
