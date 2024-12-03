@@ -8,7 +8,6 @@ import org.springframework.util.MultiValueMap;
 import pretzel.dreamketcherbe.auth.google.dto.GoogleToken;
 import pretzel.dreamketcherbe.auth.google.dto.GoogleUserInfo;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class GoogleOAuthClient {

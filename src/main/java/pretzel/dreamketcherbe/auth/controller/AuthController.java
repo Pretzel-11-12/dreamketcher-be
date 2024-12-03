@@ -14,7 +14,6 @@ import pretzel.dreamketcherbe.auth.service.AuthFacadeService;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.common.cookie.CookieHandler;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor

@@ -12,7 +12,6 @@ import pretzel.dreamketcherbe.auth.repository.TokenExtractor;
 import pretzel.dreamketcherbe.auth.service.internal.AuthContext;
 import pretzel.dreamketcherbe.auth.utils.AuthHeaderExtractor;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AuthInterceptor implements HandlerInterceptor {
@@ -26,12 +25,11 @@ public class AuthInterceptor implements HandlerInterceptor {
         HttpServletResponse response,
         Object handler
     ) throws Exception {
-        log.info("AuthInterceptor preHandle: {}", request.getRequestURI());
 
         String token = AuthHeaderExtractor.extract(request)
             .orElseThrow(() -> new AuthException(AuthExceptionType.UNAUTHORIZED));
         Long memberId = tokenExtractor.extractAccessToken(token);
-        log.info("memberId: {}", memberId);
+
         authContext.setMemberId(memberId);
         return true;
     }

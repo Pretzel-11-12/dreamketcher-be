@@ -14,9 +14,6 @@ import pretzel.dreamketcherbe.auth.repository.TokenRepository;
 import pretzel.dreamketcherbe.member.entity.Member;
 import pretzel.dreamketcherbe.member.repository.MemberRepository;
 
-import java.util.UUID;
-
-@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
