@@ -13,7 +13,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -117,4 +116,30 @@ public class S3Service {
             throw new S3Exception(S3ErrorCode.INVALID_FILE_SIZE);
         }
     }
+
+    /*
+     * 이미지 파일 삭제
+     */
+    public void deleteImageFile(String imageUrl) {
+        String key = getKeyFromImageUrl(imageUrl);
+        try {
+            amazonS3.deleteObject(new DeleteObjectRequest(bucketName, key));
+        } catch (Exception e) {
+            throw new S3Exception(S3ErrorCode.DELETE_FAILED);
+        }
+    }
+
+    /*
+     * 이미지 URL로부터 key 추출
+     */
+    private String getKeyFromImageUrl(String imageUrl) {
+        try {
+            URL url = new URL(imageUrl);
+            String decodingKey = URLDecoder.decode(url.getPath(), "UTF-8");
+            return decodingKey.substring(1);
+        } catch (MalformedURLException | UnsupportedEncodingException e) {
+            throw new S3Exception(S3ErrorCode.DELETE_FAILED);
+        }
+    }
 }
+
