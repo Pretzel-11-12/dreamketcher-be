@@ -46,4 +46,37 @@ public class S3Service {
             throw new S3Exception(S3ErrorCode.UPLOAD_FAILED);
         }
     }
+
+    /*
+     * S3에 단일 이미지 업로드
+     */
+    private String uploadImageToS3(MultipartFile image) throws IOException {
+        String originalFileName = image.getOriginalFilename();
+        String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+
+        String s3FileName = UUID.randomUUID().toString().substring(0, 10) + originalFileName;
+
+        InputStream inputStream = image.getInputStream();
+        byte[] bytes = IOUtils.toByteArray(inputStream); // 이미지 바이트 배열로 전환
+
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentType("image/" + extension);
+        objectMetadata.setContentLength(bytes.length);
+
+        // S3에 이미지 업로드
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+
+        try {
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, s3FileName,
+                byteArrayInputStream, objectMetadata)
+                .withCannedAcl(CannedAccessControlList.AuthenticatedRead.PublicRead);
+            amazonS3.putObject(putObjectRequest); // 이미지 업로드
+        } catch (Exception e) {
+            throw new S3Exception(S3ErrorCode.UPLOAD_FAILED);
+        } finally {
+            byteArrayInputStream.close();
+            inputStream.close();
+        }
+        return amazonS3.getUrl(bucketName, s3FileName).toString();
+    }
 }
