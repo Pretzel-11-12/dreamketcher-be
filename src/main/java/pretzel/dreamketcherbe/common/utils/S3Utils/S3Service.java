@@ -13,6 +13,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -88,6 +89,31 @@ public class S3Service {
         }
 
         return imageUpload(image);
+    }
+
+    /*
+     * 이미지 파일 다중 업로드
+     */
+    public List<String> uploadImages(List<MultipartFile> iamges) {
+        List<String> fileNameList = new ArrayList<>();
+
+        iamges.forEach(img -> {
+            String fileName = UUID.randomUUID().toString().substring(0, 10) + fileNameList;
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentLength(img.getSize());
+            objectMetadata.setContentType(img.getContentType());
+
+            try {
+                InputStream inputStream = img.getInputStream();
+                PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, fileName,
+                    inputStream, objectMetadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead);
+            } catch (Exception e) {
+                throw new S3Exception(S3ErrorCode.UPLOAD_FAILED);
+            }
+            fileNameList.add(fileName);
+        });
+        return fileNameList;
     }
 
     /*
