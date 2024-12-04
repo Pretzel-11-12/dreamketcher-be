@@ -32,4 +32,13 @@ public class S3Controller {
         return ResponseEntity.ok(thumbnailImage);
     }
 
+    /*
+     * 이미지 파일 삭제
+     */
+    @GetMapping("/delete")
+    public ResponseEntity<?> s3Delete(@RequestParam String imageUrlKey) {
+        s3Service.deleteImageFile(imageUrlKey);
+        return ResponseEntity.ok(null);
+    }
+
 }
