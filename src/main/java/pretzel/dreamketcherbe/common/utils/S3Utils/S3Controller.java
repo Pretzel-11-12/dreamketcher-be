@@ -33,6 +33,15 @@ public class S3Controller {
     }
 
     /*
+     * 이미지 파일 다중 업로드
+     */
+    @PostMapping("/uploads")
+    public ResponseEntity<?> s3Uploads(@RequestPart(value = "images") List<MultipartFile> images) {
+        return ResponseEntity.ok(s3Service.uploadImages(images));
+    }
+
+
+    /*
      * 이미지 파일 삭제
      */
     @GetMapping("/delete")
