@@ -79,4 +79,42 @@ public class S3Service {
         }
         return amazonS3.getUrl(bucketName, s3FileName).toString();
     }
+
+    /*
+     * 이미지 파일 검증
+     */
+    private String validateImageFile(MultipartFile image) {
+        if (Objects.isNull(image.getOriginalFilename()) || image.isEmpty()) {
+            throw new S3Exception(S3ErrorCode.EMPTY_FILE);
+        }
+
+        return imageUpload(image);
+    }
+
+    /*
+     * 이미지 파일 형식 검사
+     */
+    private void validateImageFileFormat(String imageFileName) {
+        int index = imageFileName.lastIndexOf(".");
+
+        if (index == -1) {
+            throw new S3Exception(S3ErrorCode.INVALID_FILE_EXTENSION);
+        }
+
+        String extension = imageFileName.substring(index + 1).toLowerCase();
+        List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "JPG", "JPEG", "png", "gif");
+
+        if (!allowedExtensions.contains(extension)) {
+            throw new S3Exception(S3ErrorCode.INVALID_FILE_EXTENSION);
+        }
+    }
+
+    /*
+     * 이미지 파일 크기 검증
+     */
+    private void validateImageFileSize(MultipartFile image) {
+        if (image.getSize() > 5 * 1024 * 1024) {
+            throw new S3Exception(S3ErrorCode.INVALID_FILE_SIZE);
+        }
+    }
 }
