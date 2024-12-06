@@ -24,6 +24,9 @@ public class Webtoon extends BaseTimeEntity {
     private String thumnail;
 
     @Column(nullable = false)
+    private String prologue;
+
+    @Column(nullable = false)
     private String story;
 
     @Column(nullable = false)
