@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.common.utils.S3Utils;
+package pretzel.dreamketcherbe.S3Utils;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -23,8 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import pretzel.dreamketcherbe.common.utils.S3Utils.exception.S3Exception;
-import pretzel.dreamketcherbe.common.utils.S3Utils.exception.S3ErrorCode;
+import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
+import pretzel.dreamketcherbe.S3Utils.exception.S3ErrorCode;
 
 @Slf4j
 @RequiredArgsConstructor
