@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
-@RequestMapping("/s3")
+@RequestMapping("/image")
 public class S3Controller {
 
     private final S3Service s3Service;
