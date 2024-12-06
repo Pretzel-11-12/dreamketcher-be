@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
-import pretzel.dreamketcherbe.S3Utils.exception.S3ErrorCode;
+import pretzel.dreamketcherbe.S3Utils.exception.S3ExceptionType;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -43,7 +43,7 @@ public class S3Service {
         try {
             return uploadImageToS3(image);
         } catch (IOException e) {
-            throw new S3Exception(S3ErrorCode.UPLOAD_FAILED);
+            throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
         }
     }
 
@@ -72,7 +72,7 @@ public class S3Service {
                 .withCannedAcl(CannedAccessControlList.AuthenticatedRead.PublicRead);
             amazonS3.putObject(putObjectRequest); // 이미지 업로드
         } catch (Exception e) {
-            throw new S3Exception(S3ErrorCode.UPLOAD_FAILED);
+            throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
         } finally {
             byteArrayInputStream.close();
             inputStream.close();
@@ -85,7 +85,7 @@ public class S3Service {
      */
     private String validateImageFile(MultipartFile image) {
         if (Objects.isNull(image.getOriginalFilename()) || image.isEmpty()) {
-            throw new S3Exception(S3ErrorCode.EMPTY_FILE);
+            throw new S3Exception(S3ExceptionType.EMPTY_FILE);
         }
 
         return imageUpload(image);
@@ -109,7 +109,7 @@ public class S3Service {
                     inputStream, objectMetadata)
                     .withCannedAcl(CannedAccessControlList.PublicRead);
             } catch (Exception e) {
-                throw new S3Exception(S3ErrorCode.UPLOAD_FAILED);
+                throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
             }
             fileNameList.add(fileName);
         });
@@ -123,14 +123,14 @@ public class S3Service {
         int index = imageFileName.lastIndexOf(".");
 
         if (index == -1) {
-            throw new S3Exception(S3ErrorCode.INVALID_FILE_EXTENSION);
+            throw new S3Exception(S3ExceptionType.INVALID_FILE_EXTENSION);
         }
 
         String extension = imageFileName.substring(index + 1).toLowerCase();
         List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "JPG", "JPEG", "png", "gif");
 
         if (!allowedExtensions.contains(extension)) {
-            throw new S3Exception(S3ErrorCode.INVALID_FILE_EXTENSION);
+            throw new S3Exception(S3ExceptionType.INVALID_FILE_EXTENSION);
         }
     }
 
@@ -139,7 +139,7 @@ public class S3Service {
      */
     private void validateImageFileSize(MultipartFile image) {
         if (image.getSize() > 5 * 1024 * 1024) {
-            throw new S3Exception(S3ErrorCode.INVALID_FILE_SIZE);
+            throw new S3Exception(S3ExceptionType.INVALID_FILE_SIZE);
         }
     }
 
@@ -151,7 +151,7 @@ public class S3Service {
         try {
             amazonS3.deleteObject(new DeleteObjectRequest(bucketName, key));
         } catch (Exception e) {
-            throw new S3Exception(S3ErrorCode.DELETE_FAILED);
+            throw new S3Exception(S3ExceptionType.DELETE_FAILED);
         }
     }
 
@@ -164,8 +164,7 @@ public class S3Service {
             String decodingKey = URLDecoder.decode(url.getPath(), "UTF-8");
             return decodingKey.substring(1);
         } catch (MalformedURLException | UnsupportedEncodingException e) {
-            throw new S3Exception(S3ErrorCode.DELETE_FAILED);
+            throw new S3Exception(S3ExceptionType.DELETE_FAILED);
         }
     }
 }
-
