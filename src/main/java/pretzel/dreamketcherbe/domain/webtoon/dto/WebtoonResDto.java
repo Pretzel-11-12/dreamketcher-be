@@ -5,15 +5,16 @@ import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
 @Builder
 public record WebtoonResDto(
-        String thumnail,
-        String author,
-        String title
+    String thumbnail,
+    String member,
+    String title
 ) {
+
     public static WebtoonResDto of(Webtoon webtoon) {
         return WebtoonResDto.builder()
-                .thumnail(webtoon.getThumbnail())
-                .author(webtoon.getAuthor().getName())
-                .title(webtoon.getTitle())
-                .build();
+            .thumbnail(webtoon.getThumbnail())
+            .member(webtoon.getMember().getName())
+            .title(webtoon.getTitle())
+            .build();
     }
 }
