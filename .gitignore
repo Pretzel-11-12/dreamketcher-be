@@ -27,12 +27,6 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
-### macOS ###
-# General
-.DS_Store
-.AppleDouble
-.LSOverride
-
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -43,8 +37,4 @@ out/
 ### VS Code ###
 .vscode/
 
-### env ###
-*.env
-
-### Mac OS ###
-.DS_Store
+.env
