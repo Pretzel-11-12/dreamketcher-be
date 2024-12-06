@@ -7,16 +7,4 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 50MB
-      location: :/Users/chuyeonsoo/temp
-cloud:
-  aws:
-    s3:
-      bucket: ${AWS_S3_BUCKET_NAME}
-    credentials:
-      access-key: ${AWS_ACCESS_KEY}
-      secret-key: ${AWS_SECRET_KEY}
-    region:
-      static: ${AWS_REGION}
-    stack:
-      auto: false
 
