@@ -1,11 +1,18 @@
 package pretzel.dreamketcherbe.domain.webtoon.controller;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import pretzel.dreamketcherbe.common.annotation.Auth;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
 
@@ -26,4 +33,14 @@ public class WebtoonController {
         return ResponseEntity.ok(webtoonService.getWebtoonsByGenre(genre));
     }
 
+    /**
+     * 웹툰 등록
+     */
+    @PostMapping
+    public ResponseEntity<CreateWebtoonResDto> createWebtoon(@Auth Long memberId,
+        @RequestBody @Valid
+        CreateWebtoonReqDto request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(webtoonService.createWebtoon(memberId, request));
+    }
 }
