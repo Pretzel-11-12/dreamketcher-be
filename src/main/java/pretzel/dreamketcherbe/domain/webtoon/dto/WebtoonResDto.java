@@ -11,7 +11,7 @@ public record WebtoonResDto(
 ) {
     public static WebtoonResDto of(Webtoon webtoon) {
         return WebtoonResDto.builder()
-                .thumnail(webtoon.getThumnail())
+                .thumnail(webtoon.getThumbnail())
                 .author(webtoon.getAuthor().getName())
                 .title(webtoon.getTitle())
                 .build();
