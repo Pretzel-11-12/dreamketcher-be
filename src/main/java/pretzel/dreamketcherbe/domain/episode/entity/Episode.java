@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -43,6 +44,7 @@ public class Episode extends BaseTimeEntity {
     @Column(name = "view_count")
     private Long viewCount;
 
+    @ManyToOne
     @JoinColumn(name = "webtoon_id")
     private Webtoon webtoon;
 }
