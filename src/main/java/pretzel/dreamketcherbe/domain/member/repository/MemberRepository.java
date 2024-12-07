@@ -1,7 +1,7 @@
-package pretzel.dreamketcherbe.member.repository;
+package pretzel.dreamketcherbe.domain.member.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import pretzel.dreamketcherbe.member.entity.Member;
+import pretzel.dreamketcherbe.domain.member.entity.Member;
 
 import java.util.Optional;
 

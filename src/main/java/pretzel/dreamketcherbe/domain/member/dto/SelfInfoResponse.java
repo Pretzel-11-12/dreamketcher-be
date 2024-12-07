@@ -1,7 +1,7 @@
-package pretzel.dreamketcherbe.member.dto;
+package pretzel.dreamketcherbe.domain.member.dto;
 
-import pretzel.dreamketcherbe.member.entity.Member;
-import pretzel.dreamketcherbe.member.entity.Role;
+import pretzel.dreamketcherbe.domain.member.entity.Member;
+import pretzel.dreamketcherbe.domain.member.entity.Role;
 
 public record SelfInfoResponse(
     Long id,

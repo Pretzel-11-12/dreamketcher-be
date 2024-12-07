@@ -1,9 +1,9 @@
 package pretzel.dreamketcherbe.domain.auth.google.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import pretzel.dreamketcherbe.member.entity.Member;
-import pretzel.dreamketcherbe.member.entity.Role;
-import pretzel.dreamketcherbe.member.entity.SocialType;
+import pretzel.dreamketcherbe.domain.member.entity.Member;
+import pretzel.dreamketcherbe.domain.member.entity.Role;
+import pretzel.dreamketcherbe.domain.member.entity.SocialType;
 
 public record GoogleUserInfo(
     @JsonProperty("sub") String socialId,

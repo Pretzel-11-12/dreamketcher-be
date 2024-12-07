@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.member.entity;
+package pretzel.dreamketcherbe.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

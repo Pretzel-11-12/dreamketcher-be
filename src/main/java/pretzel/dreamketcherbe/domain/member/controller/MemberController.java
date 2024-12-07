@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.member.controller;
+package pretzel.dreamketcherbe.domain.member.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Auth;
-import pretzel.dreamketcherbe.member.dto.SelfInfoResponse;
-import pretzel.dreamketcherbe.member.service.MemberService;
+import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
+import pretzel.dreamketcherbe.domain.member.service.MemberService;
 
 @Slf4j
 @RestController

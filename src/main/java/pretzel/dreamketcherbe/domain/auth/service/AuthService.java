@@ -10,8 +10,8 @@ import pretzel.dreamketcherbe.domain.auth.exception.AuthExceptionType;
 import pretzel.dreamketcherbe.domain.auth.google.dto.GoogleUserInfo;
 import pretzel.dreamketcherbe.domain.auth.repository.TokenProvider;
 import pretzel.dreamketcherbe.domain.auth.repository.TokenRepository;
-import pretzel.dreamketcherbe.member.entity.Member;
-import pretzel.dreamketcherbe.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.member.entity.Member;
+import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 
 @Service
 @Transactional(readOnly = true)

@@ -1,13 +1,13 @@
-package pretzel.dreamketcherbe.member.service;
+package pretzel.dreamketcherbe.domain.member.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pretzel.dreamketcherbe.member.dto.SelfInfoResponse;
-import pretzel.dreamketcherbe.member.entity.Member;
-import pretzel.dreamketcherbe.member.exception.MemberException;
-import pretzel.dreamketcherbe.member.exception.MemberExceptionType;
-import pretzel.dreamketcherbe.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
+import pretzel.dreamketcherbe.domain.member.entity.Member;
+import pretzel.dreamketcherbe.domain.member.exception.MemberException;
+import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
+import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 
 @Service
 @Transactional(readOnly = true)
