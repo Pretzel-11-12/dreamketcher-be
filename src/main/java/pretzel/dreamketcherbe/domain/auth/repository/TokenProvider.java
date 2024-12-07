@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.auth.repository;
+package pretzel.dreamketcherbe.domain.auth.repository;
 
 public interface TokenProvider {
 

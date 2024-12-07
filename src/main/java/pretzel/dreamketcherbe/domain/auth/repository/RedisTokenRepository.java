@@ -1,11 +1,11 @@
-package pretzel.dreamketcherbe.auth.repository;
+package pretzel.dreamketcherbe.domain.auth.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-import pretzel.dreamketcherbe.auth.entity.Token;
+import pretzel.dreamketcherbe.domain.auth.entity.Token;
 import pretzel.dreamketcherbe.common.exception.redis.RedisException;
 import pretzel.dreamketcherbe.common.exception.redis.RedisExceptionType;
 

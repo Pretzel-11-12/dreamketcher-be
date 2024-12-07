@@ -1,12 +1,11 @@
-package pretzel.dreamketcherbe.auth.google;
+package pretzel.dreamketcherbe.domain.auth.google;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import pretzel.dreamketcherbe.auth.google.dto.GoogleToken;
-import pretzel.dreamketcherbe.auth.google.dto.GoogleUserInfo;
+import pretzel.dreamketcherbe.domain.auth.google.dto.GoogleToken;
+import pretzel.dreamketcherbe.domain.auth.google.dto.GoogleUserInfo;
 
 @Component
 @RequiredArgsConstructor

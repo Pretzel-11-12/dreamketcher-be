@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.auth.google.dto;
+package pretzel.dreamketcherbe.domain.auth.google.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import pretzel.dreamketcherbe.member.entity.Member;

@@ -1,7 +1,6 @@
-package pretzel.dreamketcherbe.auth.repository;
+package pretzel.dreamketcherbe.domain.auth.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import pretzel.dreamketcherbe.auth.entity.Token;
+import pretzel.dreamketcherbe.domain.auth.entity.Token;
 
 import java.util.Optional;
 

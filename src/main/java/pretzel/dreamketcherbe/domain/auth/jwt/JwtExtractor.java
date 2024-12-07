@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.auth.jwt;
+package pretzel.dreamketcherbe.domain.auth.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
@@ -6,9 +6,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import pretzel.dreamketcherbe.auth.exception.AuthException;
-import pretzel.dreamketcherbe.auth.exception.AuthExceptionType;
-import pretzel.dreamketcherbe.auth.repository.TokenExtractor;
+import pretzel.dreamketcherbe.domain.auth.exception.AuthException;
+import pretzel.dreamketcherbe.domain.auth.exception.AuthExceptionType;
+import pretzel.dreamketcherbe.domain.auth.repository.TokenExtractor;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;

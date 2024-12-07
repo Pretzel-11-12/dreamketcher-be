@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.auth.google;
+package pretzel.dreamketcherbe.domain.auth.google;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

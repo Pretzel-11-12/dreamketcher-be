@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.auth.dto;
+package pretzel.dreamketcherbe.domain.auth.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

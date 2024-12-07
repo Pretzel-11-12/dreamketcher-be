@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.auth.entity;
+package pretzel.dreamketcherbe.domain.auth.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
