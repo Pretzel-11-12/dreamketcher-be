@@ -18,6 +18,12 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -26,6 +32,12 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
 
 ### NetBeans ###
 /nbproject/private/
