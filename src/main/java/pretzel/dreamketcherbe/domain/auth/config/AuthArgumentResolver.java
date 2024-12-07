@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.auth.config;
+package pretzel.dreamketcherbe.domain.auth.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import pretzel.dreamketcherbe.auth.service.internal.AuthContext;
+import pretzel.dreamketcherbe.domain.auth.service.internal.AuthContext;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 
 @Slf4j

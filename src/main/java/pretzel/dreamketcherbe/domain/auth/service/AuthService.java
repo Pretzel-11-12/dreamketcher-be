@@ -1,16 +1,15 @@
-package pretzel.dreamketcherbe.auth.service;
+package pretzel.dreamketcherbe.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pretzel.dreamketcherbe.auth.dto.TokenResponse;
-import pretzel.dreamketcherbe.auth.entity.Token;
-import pretzel.dreamketcherbe.auth.exception.AuthException;
-import pretzel.dreamketcherbe.auth.exception.AuthExceptionType;
-import pretzel.dreamketcherbe.auth.google.dto.GoogleUserInfo;
-import pretzel.dreamketcherbe.auth.repository.TokenProvider;
-import pretzel.dreamketcherbe.auth.repository.TokenRepository;
+import pretzel.dreamketcherbe.domain.auth.dto.TokenResponse;
+import pretzel.dreamketcherbe.domain.auth.entity.Token;
+import pretzel.dreamketcherbe.domain.auth.exception.AuthException;
+import pretzel.dreamketcherbe.domain.auth.exception.AuthExceptionType;
+import pretzel.dreamketcherbe.domain.auth.google.dto.GoogleUserInfo;
+import pretzel.dreamketcherbe.domain.auth.repository.TokenProvider;
+import pretzel.dreamketcherbe.domain.auth.repository.TokenRepository;
 import pretzel.dreamketcherbe.member.entity.Member;
 import pretzel.dreamketcherbe.member.repository.MemberRepository;
 

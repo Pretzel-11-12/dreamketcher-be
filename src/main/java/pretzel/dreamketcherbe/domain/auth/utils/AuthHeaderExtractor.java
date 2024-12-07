@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.auth.utils;
+package pretzel.dreamketcherbe.domain.auth.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;

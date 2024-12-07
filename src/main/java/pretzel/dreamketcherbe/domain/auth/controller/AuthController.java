@@ -1,16 +1,14 @@
-package pretzel.dreamketcherbe.auth.controller;
+package pretzel.dreamketcherbe.domain.auth.controller;
 
 import static org.springframework.http.HttpHeaders.*;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pretzel.dreamketcherbe.auth.dto.TokenResponse;
-import pretzel.dreamketcherbe.auth.service.AuthFacadeService;
+import pretzel.dreamketcherbe.domain.auth.dto.TokenResponse;
+import pretzel.dreamketcherbe.domain.auth.service.AuthFacadeService;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.common.cookie.CookieHandler;
 

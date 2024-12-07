@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.auth.exception;
+package pretzel.dreamketcherbe.domain.auth.exception;
 
 import org.springframework.http.HttpStatus;
 import pretzel.dreamketcherbe.common.exception.ExceptionType;

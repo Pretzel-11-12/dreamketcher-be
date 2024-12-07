@@ -1,11 +1,11 @@
-package pretzel.dreamketcherbe.auth.service;
+package pretzel.dreamketcherbe.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pretzel.dreamketcherbe.auth.dto.TokenResponse;
-import pretzel.dreamketcherbe.auth.google.GoogleOAuthClient;
-import pretzel.dreamketcherbe.auth.google.dto.GoogleUserInfo;
-import pretzel.dreamketcherbe.auth.repository.TokenExtractor;
+import pretzel.dreamketcherbe.domain.auth.dto.TokenResponse;
+import pretzel.dreamketcherbe.domain.auth.google.GoogleOAuthClient;
+import pretzel.dreamketcherbe.domain.auth.google.dto.GoogleUserInfo;
+import pretzel.dreamketcherbe.domain.auth.repository.TokenExtractor;
 
 @Service
 @RequiredArgsConstructor

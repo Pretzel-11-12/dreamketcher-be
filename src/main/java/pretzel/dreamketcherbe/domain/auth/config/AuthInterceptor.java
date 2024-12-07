@@ -1,16 +1,15 @@
-package pretzel.dreamketcherbe.auth.config;
+package pretzel.dreamketcherbe.domain.auth.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import pretzel.dreamketcherbe.auth.exception.AuthException;
-import pretzel.dreamketcherbe.auth.exception.AuthExceptionType;
-import pretzel.dreamketcherbe.auth.repository.TokenExtractor;
-import pretzel.dreamketcherbe.auth.service.internal.AuthContext;
-import pretzel.dreamketcherbe.auth.utils.AuthHeaderExtractor;
+import pretzel.dreamketcherbe.domain.auth.exception.AuthException;
+import pretzel.dreamketcherbe.domain.auth.exception.AuthExceptionType;
+import pretzel.dreamketcherbe.domain.auth.repository.TokenExtractor;
+import pretzel.dreamketcherbe.domain.auth.service.internal.AuthContext;
+import pretzel.dreamketcherbe.domain.auth.utils.AuthHeaderExtractor;
 
 @Component
 @RequiredArgsConstructor

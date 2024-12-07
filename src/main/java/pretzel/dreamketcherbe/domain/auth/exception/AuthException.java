@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.auth.exception;
+package pretzel.dreamketcherbe.domain.auth.exception;
 
 import pretzel.dreamketcherbe.common.exception.BaseException;
 import pretzel.dreamketcherbe.common.exception.ExceptionType;
