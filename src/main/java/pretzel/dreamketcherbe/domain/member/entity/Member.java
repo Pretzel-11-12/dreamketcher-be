@@ -31,6 +31,9 @@ public class Member extends BaseTimeEntity {
     @Column(unique = true)
     private String name;
 
+    @Column(unique = true)
+    private String nickname;
+
     @Column(name = "image_uri")
     private String imageUri;
 
@@ -38,10 +41,11 @@ public class Member extends BaseTimeEntity {
     private Role role;
 
     @Builder
-    public Member(SocialType socialType, String socialId, String email, String name, String imageUri, Role role) {
+    public Member(SocialType socialType, String socialId, String email, String name,String nickName, String imageUri, Role role) {
         this.socialType = socialType;
         this.socialId = socialId;
         this.name = name;
+        this.nickname = nickName;
         this.email = email;
         this.imageUri = imageUri;
         this.role = role;
@@ -49,6 +53,10 @@ public class Member extends BaseTimeEntity {
 
     public boolean isAdmin() {
         return this.role == Role.ADMIN;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public void updateName(String name) {

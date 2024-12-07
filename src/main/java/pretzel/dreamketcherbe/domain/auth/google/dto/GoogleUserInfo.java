@@ -11,12 +11,13 @@ public record GoogleUserInfo(
     @JsonProperty("name") String name,
     @JsonProperty("picture") String imageUri
 ) {
-    public Member toMember() {
+    public Member toMember(String nickName) {
         return Member.builder()
                    .socialType(SocialType.GOOGLE)
                    .socialId(socialId)
                    .email(email)
                    .name(name)
+                   .nickName(nickName)
                    .imageUri(imageUri)
                    .role(Role.MEMBER)
                    .build();
