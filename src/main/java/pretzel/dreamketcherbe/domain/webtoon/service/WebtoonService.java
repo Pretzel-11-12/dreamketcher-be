@@ -90,4 +90,14 @@ public class WebtoonService {
 
         webtoonRepository.save(findWebtoon);
     }
+
+    /**
+     * 웹툰 삭제
+     */
+    public void deleteWebtoon(Long memberId, Long webtoonId) {
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        webtoonRepository.delete(findWebtoon);
+    }
 }

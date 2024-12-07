@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +56,16 @@ public class WebtoonController {
         @PathVariable("webtoonId") Long webtoonId,
         @RequestBody @Valid UpdateWebtoonReqDto request) {
         webtoonService.updateWebtoon(memberId, webtoonId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 웹툰 삭제
+     */
+    @DeleteMapping("/{webtoonId}")
+    public ResponseEntity<Void> deleteWebtoon(@Auth Long memberId,
+        @PathVariable("webtoonId") Long webtoonId) {
+        webtoonService.deleteWebtoon(memberId, webtoonId);
         return ResponseEntity.ok().build();
     }
 }
