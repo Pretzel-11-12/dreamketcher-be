@@ -56,4 +56,24 @@ public class Webtoon extends BaseTimeEntity {
         this.status = status;
         this.member = member;
     }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public void updatePrologue(String prologue) {
+        this.prologue = prologue;
+    }
+
+    public void updateStory(String story) {
+        this.story = story;
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
 }
