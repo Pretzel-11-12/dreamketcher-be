@@ -7,4 +7,7 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 50MB
+  batch:
+    job:
+      enabled: false
 
