@@ -43,7 +43,7 @@ public class MemberController {
 
     @GetMapping("/favorite")
     public ResponseEntity<List<FavoriteWebtoonResponse>> getFavoriteWebtoon(
-                                                @RequestParam Long memberId) {
+                                                @Auth Long memberId) {
         return ResponseEntity.ok(memberService.getFavoriteWebtoon(memberId));
     }
 }
