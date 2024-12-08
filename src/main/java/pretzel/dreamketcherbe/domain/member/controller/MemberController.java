@@ -14,7 +14,6 @@ import pretzel.dreamketcherbe.domain.member.service.MemberService;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/v1/member")
 @RequiredArgsConstructor
@@ -24,13 +23,11 @@ public class MemberController {
 
     @GetMapping("/me")
     public ResponseEntity<SelfInfoResponse> me(@Auth Long memberId) {
-        log.info("memberId: {}", memberId);
         return ResponseEntity.ok(memberService.getSelfInfo(memberId));
     }
 
     @PatchMapping("/profile")
     public ResponseEntity<Void> updateProfile(@Auth Long memberId, @Valid @RequestBody NicknameRequest nicknameRequest) {
-        log.info("memberId: {}, nicknameRequest: {}", memberId, nicknameRequest);
         memberService.updateProfile(memberId, nicknameRequest);
         return ResponseEntity.ok().build();
     }
@@ -38,7 +35,6 @@ public class MemberController {
     @GetMapping("/all")
     public ResponseEntity<List<Member>> getAllMembers() {
         List<Member> members = memberService.getAllMembers();
-        log.info("members: {}", members);
         return ResponseEntity.ok(members);
     }
 }

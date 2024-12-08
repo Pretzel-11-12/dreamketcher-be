@@ -13,7 +13,6 @@ import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 
 import java.util.List;
 
-@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
