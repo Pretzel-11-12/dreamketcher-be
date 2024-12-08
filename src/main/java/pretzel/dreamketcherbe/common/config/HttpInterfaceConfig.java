@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
-import pretzel.dreamketcherbe.auth.google.GoogleApiClient;
+import pretzel.dreamketcherbe.domain.auth.google.GoogleApiClient;
 
 @Configuration
 public class HttpInterfaceConfig {
