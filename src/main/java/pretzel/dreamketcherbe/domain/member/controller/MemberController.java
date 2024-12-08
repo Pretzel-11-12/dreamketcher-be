@@ -29,7 +29,7 @@ public class MemberController {
     }
 
     @PatchMapping("/profile")
-    public ResponseEntity<Void> updateProfile(@RequestParam Long memberId, @Valid @RequestBody NicknameRequest nicknameRequest) {
+    public ResponseEntity<Void> updateProfile(@Auth Long memberId, @Valid @RequestBody NicknameRequest nicknameRequest) {
         log.info("memberId: {}, nicknameRequest: {}", memberId, nicknameRequest);
         memberService.updateProfile(memberId, nicknameRequest);
         return ResponseEntity.ok().build();
