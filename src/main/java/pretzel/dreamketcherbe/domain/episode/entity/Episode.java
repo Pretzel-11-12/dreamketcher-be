@@ -9,11 +9,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
+import pretzel.dreamketcherbe.member.entity.Member;
 
 @Table(name = "episodes")
 @Getter
@@ -47,4 +49,34 @@ public class Episode extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
     private Webtoon webtoon;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @Builder
+    public Episode(String title, String thumbnail, String content, String authorNote, Webtoon webtoon, Member member) {
+        this.title = title;
+        this.thumbnail = thumbnail;
+        this.content = content;
+        this.authorNote = authorNote;
+        this.webtoon = webtoon;
+        this.member = member;
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public void updateAuthorNote(String authorNote) {
+        this.authorNote = authorNote;
+    }
 }
