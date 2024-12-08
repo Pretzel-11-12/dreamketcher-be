@@ -15,7 +15,7 @@ import java.util.Objects;
 
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<ExceptionResponse> handleBaseException(BaseException e) {
@@ -32,5 +32,19 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.internalServerError()
             .body(new ExceptionResponse("INTERNAL_SERVER_ERROR", e.getMessage()));
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+        MethodArgumentNotValidException e,
+        HttpHeaders headers,
+        HttpStatusCode status,
+        WebRequest request
+    ) {
+        log.warn(e.getMessage(), e);
+
+        String message = Objects.requireNonNull(e.getBindingResult().getFieldError()).getDefaultMessage();
+        return ResponseEntity.badRequest()
+            .body(new ExceptionResponse("ARGUMENT_NOT_VALID", message));
     }
 }
