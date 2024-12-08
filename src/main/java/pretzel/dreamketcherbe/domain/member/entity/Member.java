@@ -5,8 +5,10 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 
+@Slf4j
 @Table(name = "member")
 @Getter
 @Entity
@@ -31,7 +33,7 @@ public class Member extends BaseTimeEntity {
     @Column(unique = true)
     private String name;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "nickname", unique = true, nullable = false)
     private String nickname;
 
     @Column(name = "image_uri")
@@ -55,12 +57,8 @@ public class Member extends BaseTimeEntity {
         return this.role == Role.ADMIN;
     }
 
-    public void updateNickname(String nickname) {
+    public void updateProfile(String nickname) {
         this.nickname = nickname;
-    }
-
-    public void updateName(String name) {
-        this.name = name;
     }
 
     public void updateRole(Role role) {
