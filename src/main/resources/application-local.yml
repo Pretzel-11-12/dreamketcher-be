@@ -69,8 +69,8 @@ management:
 
 logging:
   level:
-    org.springframework: trace
-    org.hibernate: trace
+    org.springframework: debug
+    org.hibernate: debug
 
   cloud:
     aws:
