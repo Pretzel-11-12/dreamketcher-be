@@ -9,6 +9,7 @@ import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Genre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
+import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.GenreRepository;
@@ -33,7 +34,9 @@ public class WebtoonService {
 
     private final MemberRepository memberRepository;
 
-
+    /**
+     * 웹툰 장르별 목록 조회
+     */
     public List<WebtoonResDto> getWebtoonsByGenre(final String genreName) {
         Genre genre = GenreRepository.findByName(genreName)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
@@ -44,6 +47,16 @@ public class WebtoonService {
             .collect(Collectors.toList());
 
         return webtoonRepository.findAllById(webtoonIds)
+            .stream()
+            .map(WebtoonResDto::of)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 웹툰 완결 목록 조회
+     */
+    public List<WebtoonResDto> getWebtoonsByFinish() {
+        return webtoonRepository.findAllByStatus(WebtoonStatus.FINISH.getStatus())
             .stream()
             .map(WebtoonResDto::of)
             .collect(Collectors.toList());
