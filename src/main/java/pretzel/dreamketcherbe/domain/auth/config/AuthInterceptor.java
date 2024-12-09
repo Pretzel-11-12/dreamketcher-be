@@ -32,9 +32,8 @@ public class AuthInterceptor implements HandlerInterceptor {
         if (handler instanceof HandlerMethod) {
             HandlerMethod hm = (HandlerMethod) handler;
 
-            boolean hasAuthAnnotation =
-                    stream(hm.getMethodParameters())
-                    .anyMatch(p -> p.hasParameterAnnotation(Auth.class));
+            boolean hasAuthAnnotation = stream(hm.getMethodParameters())
+                .anyMatch(p -> p.hasParameterAnnotation(Auth.class));
 
             if (!hasAuthAnnotation) {
                 return true;
