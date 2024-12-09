@@ -10,7 +10,6 @@ import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
 import pretzel.dreamketcherbe.domain.member.service.MemberService;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/v1/member")
 @RequiredArgsConstructor
@@ -20,7 +19,6 @@ public class MemberController {
 
     @GetMapping("/me")
     public ResponseEntity<SelfInfoResponse> me(@Auth Long memberId) {
-        log.info("memberId: {}", memberId);
         return ResponseEntity.ok(memberService.getSelfInfo(memberId));
     }
 }
