@@ -1,6 +1,7 @@
 package pretzel.dreamketcherbe.domain.member.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.member.dto.FavoriteWebtoonResponse;
@@ -57,5 +58,20 @@ public class MemberService {
 
     public List<Member> getAllMembers() {
         return memberRepository.findAll();
+    }
+
+    @Transactional
+    public void deleteFavoriteWebtoon(Long memberId, Long interestedWebtoonId) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findById(interestedWebtoonId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.INTERESTED_WEBTOON_NOT_FOUND));
+
+        if (!interestedWebtoon.getMemberId().equals(member)) {
+            throw new MemberException(MemberExceptionType.MEMBER_NOT_AUTHORIZED);
+        }
+
+        interestedWebtoonRepository.delete(interestedWebtoon);
     }
 }
