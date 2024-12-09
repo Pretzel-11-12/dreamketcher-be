@@ -31,15 +31,19 @@ public class Member extends BaseTimeEntity {
     @Column(unique = true)
     private String name;
 
+    @Column(name = "image_uri")
+    private String imageUri;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
     @Builder
-    public Member(SocialType socialType, String socialId, String email, String name, Role role) {
+    public Member(SocialType socialType, String socialId, String email, String name, String imageUri, Role role) {
         this.socialType = socialType;
         this.socialId = socialId;
         this.name = name;
         this.email = email;
+        this.imageUri = imageUri;
         this.role = role;
     }
 
