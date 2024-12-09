@@ -35,6 +35,16 @@ public class WebtoonService {
     private final MemberRepository memberRepository;
 
     /**
+     * 웹툰 목록 조회
+     */
+    public List<WebtoonResDto> getWebtoons() {
+        return webtoonRepository.findAll()
+                .stream()
+                .map(WebtoonResDto::of)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * 웹툰 장르별 목록 조회
      */
     public List<WebtoonResDto> getWebtoonsByGenre(final String genreName) {

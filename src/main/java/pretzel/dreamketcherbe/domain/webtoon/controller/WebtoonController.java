@@ -26,6 +26,14 @@ public class WebtoonController {
     private final WebtoonService webtoonService;
 
     /**
+     * 웹툰 목록 조회
+     */
+    @GetMapping
+    public ResponseEntity<List<WebtoonResDto>> getWebtoons() {
+        return ResponseEntity.ok(webtoonService.getWebtoons());
+    }
+
+    /**
      * 장르별 웹툰 목록 조회
      */
     @GetMapping
