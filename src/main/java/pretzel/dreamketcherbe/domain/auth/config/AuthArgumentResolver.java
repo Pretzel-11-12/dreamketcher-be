@@ -21,7 +21,7 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         log.info("AuthArgumentResolver supportsParameter: {}", parameter.getParameterType());
-        return parameter.getParameterType().equals(AuthContext.class) &&
+        return parameter.getParameterType().equals(Long.class) &&
                 parameter.hasParameterAnnotation(Auth.class);
     }
 

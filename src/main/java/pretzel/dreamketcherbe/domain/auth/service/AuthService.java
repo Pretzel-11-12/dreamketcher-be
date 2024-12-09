@@ -10,6 +10,7 @@ import pretzel.dreamketcherbe.domain.auth.exception.AuthExceptionType;
 import pretzel.dreamketcherbe.domain.auth.google.dto.GoogleUserInfo;
 import pretzel.dreamketcherbe.domain.auth.repository.TokenProvider;
 import pretzel.dreamketcherbe.domain.auth.repository.TokenRepository;
+import pretzel.dreamketcherbe.domain.auth.utils.NicknameGenerator;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 
@@ -37,7 +38,21 @@ public class AuthService {
 
     private Member getOrCreateMember(GoogleUserInfo googleUserInfo) {
         return memberRepository.findBySocialId(googleUserInfo.socialId())
-            .orElseGet(() -> memberRepository.save(googleUserInfo.toMember()));
+            .orElseGet(() -> memberRepository.save(createNewMember(googleUserInfo)));
+    }
+
+    private Member createNewMember(GoogleUserInfo googleUserInfo) {
+        String nickname = generateUniqueNickname();
+        return googleUserInfo.toMember(nickname);
+    }
+
+    private String generateUniqueNickname() {
+        String baseNickname = NicknameGenerator.generate();
+        String uniqueNickname = baseNickname;
+        while (memberRepository.existsByNickname(uniqueNickname)) {
+            uniqueNickname = NicknameGenerator.generateWithRandomSuffix();
+        }
+        return uniqueNickname;
     }
 
     private TokenResponse createToken(Long memberId) {

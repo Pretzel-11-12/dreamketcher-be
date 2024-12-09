@@ -51,9 +51,11 @@ public class JwtExtractor implements TokenExtractor {
     }
 
     private Claims parseClaim(String token){
-        try{
+        try {
             return jwtParser.parseClaimsJws(token)
-                            .getBody();
+                       .getBody();
+        }catch(io.jsonwebtoken.ExpiredJwtException e){
+            throw new AuthException(AuthExceptionType.EXPIRED_TOKEN);
         }catch(Exception e){
             throw new AuthException(AuthExceptionType.INVALID_TOKEN);
         }
