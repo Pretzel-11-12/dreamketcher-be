@@ -6,6 +6,7 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Genre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
@@ -84,5 +85,32 @@ public class WebtoonService {
         webtoonRepository.save(newWebtoon);
 
         return CreateWebtoonResDto.of(newWebtoon);
+    }
+
+    /**
+     * 웹툰 수정
+     */
+    public void updateWebtoon(Long memberId, Long webtoonId, UpdateWebtoonReqDto request) {
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        findWebtoon.getId();
+        findWebtoon.updateTitle(request.title());
+        findWebtoon.updateThumbnail(request.thumbnail());
+        findWebtoon.updatePrologue(request.prologue());
+        findWebtoon.updateStory(request.story());
+        findWebtoon.updateDescription(request.description());
+
+        webtoonRepository.save(findWebtoon);
+    }
+
+    /**
+     * 웹툰 삭제
+     */
+    public void deleteWebtoon(Long memberId, Long webtoonId) {
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        webtoonRepository.delete(findWebtoon);
     }
 }
