@@ -42,6 +42,14 @@ public class WebtoonController {
     }
 
     /**
+     * 웹툰 신작 목록 조회
+     */
+    @GetMapping("/new")
+    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByNew() {
+        return ResponseEntity.ok(webtoonService.getWebtoonsByNew());
+    }
+
+    /**
      * 웹툰 등록
      */
     @PostMapping
