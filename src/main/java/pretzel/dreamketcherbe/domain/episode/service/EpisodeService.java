@@ -6,6 +6,7 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
+import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeExceptionType;
@@ -45,7 +46,7 @@ public class EpisodeService {
     /**
      * 에피소드 수정
      */
-    public void updateEpisode(Long memberId, Long episodeId, CreateEpisodeReqDto request) {
+    public void updateEpisode(Long memberId, Long episodeId, UpdateEpisodeReqDto request) {
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 

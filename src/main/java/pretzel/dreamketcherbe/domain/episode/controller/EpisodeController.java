@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
+import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.service.EpisodeService;
 
 @Slf4j
@@ -41,7 +42,7 @@ public class EpisodeController {
     @PutMapping("/{episodeId}")
     public ResponseEntity<Void> updateEpisode(@Auth Long memberId,
         @PathVariable("episodeId") Long episodeId,
-        @RequestBody @Valid CreateEpisodeReqDto request) {
+        @RequestBody @Valid UpdateEpisodeReqDto request) {
         episodeService.updateEpisode(memberId, episodeId, request);
         return ResponseEntity.ok().build();
     }
