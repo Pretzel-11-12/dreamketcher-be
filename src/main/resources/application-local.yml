@@ -3,25 +3,19 @@ server:
 
 spring:
   datasource:
-    driver-class-name: org.h2.Driver
-    url: ${H2_LOCAL_URL}
-    username: ${H2_USERNAME}
-    password: ${H2_PASSWORD}
-
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_DATASOURCE_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
 
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
         show_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
 
   cookie:
     max-age: 12345678
@@ -31,11 +25,11 @@ spring:
     secure: false
 
 springdoc:
-    swagger-ui:
-      display-request-duration: true
-    api-docs:
-      path: /api-docs
-      show-actuator: true
+  swagger-ui:
+    display-request-duration: true
+  api-docs:
+    path: /api-docs
+    show-actuator: true
 
 oauth2:
   google:
