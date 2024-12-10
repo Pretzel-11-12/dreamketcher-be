@@ -38,6 +38,14 @@ public class WebtoonController {
     }
 
     /**
+     * 웹툰 완결 목록 조회
+     */
+    @GetMapping("/finish")
+    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByFinish() {
+        return ResponseEntity.ok(webtoonService.getWebtoonsByFinish());
+    }
+
+    /**
      * 웹툰 등록
      */
     @PostMapping

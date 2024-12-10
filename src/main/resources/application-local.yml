@@ -3,25 +3,24 @@ server:
 
 spring:
   datasource:
-    driver-class-name: org.h2.Driver
-    url: ${H2_LOCAL_URL}
-    username: ${H2_USERNAME}
-    password: ${H2_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_DATASOURCE_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
 
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
         show_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
 
   cookie:
     max-age: 12345678
@@ -30,7 +29,11 @@ spring:
     http-only: true
     secure: false
 
-springdoc:
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS}
+    allowed-methods: ${ALLOWED_METHODS}
+
+  springdoc:
     swagger-ui:
       display-request-duration: true
     api-docs:
@@ -49,7 +52,19 @@ jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-exp: 12345678
   refresh-exp: 12345678
-  expiration: 12345678
+
+management:
+  endpoints:
+    web:
+      base-path: /api/v1
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework: trace
+    org.hibernate: trace
 
   cloud:
     aws:

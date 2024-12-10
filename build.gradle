@@ -47,6 +47,12 @@ dependencies {
     // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -65,6 +71,11 @@ dependencies {
     // AWS
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
     implementation 'software.amazon.awssdk:s3:2.25.13'
+    // AWS
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+    implementation 'software.amazon.awssdk:s3:2.25.13'
+
+	runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.76.Final:osx-aarch_64")
 }
 
 tasks.named('test') {
