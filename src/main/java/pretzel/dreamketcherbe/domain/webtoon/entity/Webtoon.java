@@ -34,10 +34,10 @@ public class Webtoon extends BaseTimeEntity {
     @Column(nullable = false)
     private String description;
 
-    @ColumnDefault("'not_approval'")
+    @ColumnDefault("'NOT_APPROVAL'")
     private String approval;
 
-    @ColumnDefault("'pre_series'")
+    @ColumnDefault("'PRE_SERIES'")
     private String status;
 
     @ManyToOne
