@@ -19,6 +19,7 @@ import pretzel.dreamketcherbe.domain.webtoon.repository.GenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,6 +59,18 @@ public class WebtoonService {
      */
     public List<WebtoonResDto> getWebtoonsByFinish() {
         return webtoonRepository.findAllByStatus(WebtoonStatus.FINISH.getStatus())
+            .stream()
+            .map(WebtoonResDto::of)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 웹툰 신작 목록 조회
+     */
+    public List<WebtoonResDto> getWebtoonsByNew() {
+        LocalDateTime cutoffDate = LocalDateTime.now().minusMonths(1);
+
+        return webtoonRepository.findAllByStatusAndCreatedAtAfter(WebtoonStatus.IN_SERIES.getStatus(), cutoffDate)
             .stream()
             .map(WebtoonResDto::of)
             .collect(Collectors.toList());
