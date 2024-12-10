@@ -8,6 +8,11 @@ spring:
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
   jpa:
     hibernate:
       ddl-auto: none
@@ -24,12 +29,16 @@ spring:
     http-only: true
     secure: false
 
-springdoc:
-  swagger-ui:
-    display-request-duration: true
-  api-docs:
-    path: /api-docs
-    show-actuator: true
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS}
+    allowed-methods: ${ALLOWED_METHODS}
+
+  springdoc:
+    swagger-ui:
+      display-request-duration: true
+    api-docs:
+      path: /api-docs
+      show-actuator: true
 
 oauth2:
   google:
@@ -43,7 +52,19 @@ jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-exp: 12345678
   refresh-exp: 12345678
-  expiration: 12345678
+
+management:
+  endpoints:
+    web:
+      base-path: /api/v1
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework: trace
+    org.hibernate: trace
 
   cloud:
     aws:
