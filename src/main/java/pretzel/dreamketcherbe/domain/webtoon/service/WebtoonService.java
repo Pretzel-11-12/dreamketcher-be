@@ -69,7 +69,7 @@ public class WebtoonService {
     public List<WebtoonResDto> getWebtoonsByNew() {
         LocalDateTime cutoffDate = LocalDateTime.now().minusMonths(1);
 
-        return webtoonRepository.findAllByCreatedAtAfter(cutoffDate)
+        return webtoonRepository.findAllByStatusAndCreatedAtAfter(WebtoonStatus.IN_SERIES.getStatus(), cutoffDate)
             .stream()
             .map(WebtoonResDto::of)
             .collect(Collectors.toList());
