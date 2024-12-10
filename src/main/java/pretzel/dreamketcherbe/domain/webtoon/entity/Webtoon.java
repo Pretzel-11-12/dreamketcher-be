@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
-import pretzel.dreamketcherbe.member.entity.Member;
+import pretzel.dreamketcherbe.domain.member.entity.Member;
 
 @Table(name = "webtoons")
 @Getter

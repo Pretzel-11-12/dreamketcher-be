@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import pretzel.dreamketcherbe.domain.member.entity.Member;
+import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
@@ -19,8 +21,6 @@ import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import pretzel.dreamketcherbe.member.entity.Member;
-import pretzel.dreamketcherbe.member.repository.MemberRepository;
 
 @Slf4j
 @Service
