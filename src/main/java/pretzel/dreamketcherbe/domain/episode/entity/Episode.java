@@ -59,13 +59,21 @@ public class Episode extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    public Episode(String title, String thumbnail, String content, String authorNote, Webtoon webtoon, Member member) {
+    public Episode(String title, String thumbnail, String content, String authorNote,
+        Webtoon webtoon, Member member) {
         this.title = title;
         this.thumbnail = thumbnail;
         this.content = content;
         this.authorNote = authorNote;
         this.webtoon = webtoon;
         this.member = member;
+    }
+
+    public void isAuthor(Long memberId) {
+        if (member.getId().equals(memberId)) {
+            return;
+        }
+        throw new IllegalStateException("작성자만 수정할 수 있습니다.");
     }
 
     public void updateTitle(String title) {

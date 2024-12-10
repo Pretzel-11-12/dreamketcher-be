@@ -1,5 +1,6 @@
 package pretzel.dreamketcherbe.domain.episode.service;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -46,24 +47,27 @@ public class EpisodeService {
     /**
      * 에피소드 수정
      */
+    @Transactional
     public void updateEpisode(Long memberId, Long episodeId, UpdateEpisodeReqDto request) {
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
+        findEpisode.isAuthor(memberId);
         findEpisode.updateTitle(request.title());
         findEpisode.updateThumbnail(request.thumbnail());
         findEpisode.updateContent(request.content());
         findEpisode.updateAuthorNote(request.authorNote());
-
-        episodeRepository.save(findEpisode);
     }
 
     /**
      * 에피소드 삭제
      */
+    @Transactional
     public void deleteEpisode(Long memberId, Long EpisodeId) {
         Episode findEpisode = episodeRepository.findById(EpisodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        findEpisode.isAuthor(memberId);
 
         episodeRepository.delete(findEpisode);
     }
