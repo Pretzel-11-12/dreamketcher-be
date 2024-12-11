@@ -1,6 +1,7 @@
 package pretzel.dreamketcherbe.domain.member.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
@@ -18,9 +19,15 @@ public class InterestedWebtoon extends BaseTimeEntity {
 
     @ManyToOne
     @JoinColumn(name = "member_id")
-    private Member memberId;
+    private Member member;
 
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
-    private Webtoon webtoonId;
+    private Webtoon webtoon;
+
+    @Builder
+    public InterestedWebtoon(Member member, Webtoon webtoon) {
+        this.member = member;
+        this.webtoon = webtoon;
+    }
 }
