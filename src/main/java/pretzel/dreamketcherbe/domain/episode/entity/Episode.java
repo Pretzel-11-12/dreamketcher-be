@@ -48,7 +48,7 @@ public class Episode extends BaseTimeEntity {
 
     @ColumnDefault("0")
     @Column(name = "view_count")
-    private Long viewCount;
+    private int viewCount;
 
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
