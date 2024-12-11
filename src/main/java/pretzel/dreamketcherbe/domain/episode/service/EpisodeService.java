@@ -12,8 +12,8 @@ import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeExceptionType;
 import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
-import pretzel.dreamketcherbe.member.entity.Member;
-import pretzel.dreamketcherbe.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.member.entity.Member;
+import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 
 @Slf4j
 @Service
