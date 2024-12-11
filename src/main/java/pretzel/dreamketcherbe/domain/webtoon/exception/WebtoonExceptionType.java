@@ -7,8 +7,8 @@ public enum WebtoonExceptionType implements ExceptionType {
 
     GENRE_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 장르입니다."),
     WEBTOON_GENRE_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 웹툰 장르입니다."),
-    WEBTOON_NOT_FOUND(HttpStatus.NOT_FOUND, "웹툰을 찾을 수 없습니다.");
-
+    WEBTOON_NOT_FOUND(HttpStatus.NOT_FOUND, "웹툰을 찾을 수 없습니다."),
+    SERIALIZTION_PERIOD_NOT_FOUND(HttpStatus.NOT_FOUND, "연재 기간을 찾을 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;
@@ -17,7 +17,6 @@ public enum WebtoonExceptionType implements ExceptionType {
         this.status = status;
         this.message = message;
     }
-
 
     @Override
     public String message() {
