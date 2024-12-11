@@ -34,10 +34,10 @@ public class Webtoon extends BaseTimeEntity {
     @Column(nullable = false)
     private String description;
 
-    @ColumnDefault("'not_approval'")
+    @ColumnDefault("'NOT_APPROVAL'")
     private String approval;
 
-    @ColumnDefault("'pre_series'")
+    @ColumnDefault("'PRE_SERIES'")
     private String status;
 
     @ManyToOne
@@ -55,5 +55,25 @@ public class Webtoon extends BaseTimeEntity {
         this.approval = approval;
         this.status = status;
         this.member = member;
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public void updatePrologue(String prologue) {
+        this.prologue = prologue;
+    }
+
+    public void updateStory(String story) {
+        this.story = story;
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
     }
 }

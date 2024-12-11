@@ -2,7 +2,6 @@ package pretzel.dreamketcherbe.domain.webtoon.service;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
@@ -13,6 +12,7 @@ import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonReposito
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Genre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
@@ -23,11 +23,10 @@ import pretzel.dreamketcherbe.domain.webtoon.repository.GenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-@Slf4j
 @Service
 @AllArgsConstructor
 public class WebtoonService {
@@ -65,6 +64,18 @@ public class WebtoonService {
      */
     public List<WebtoonResDto> getWebtoonsByFinish() {
         return webtoonRepository.findAllByStatus(WebtoonStatus.FINISH.getStatus())
+            .stream()
+            .map(WebtoonResDto::of)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 웹툰 신작 목록 조회
+     */
+    public List<WebtoonResDto> getWebtoonsByNew() {
+        LocalDateTime cutoffDate = LocalDateTime.now().minusMonths(1);
+
+        return webtoonRepository.findAllByStatusAndCreatedAtAfter(WebtoonStatus.IN_SERIES.getStatus(), cutoffDate)
             .stream()
             .map(WebtoonResDto::of)
             .collect(Collectors.toList());
@@ -115,5 +126,31 @@ public class WebtoonService {
             .build();
 
         interestedWebtoonRepository.save(interestedWebtoon);
+
+    /**
+     * 웹툰 수정
+     */
+    public void updateWebtoon(Long memberId, Long webtoonId, UpdateWebtoonReqDto request) {
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        findWebtoon.getId();
+        findWebtoon.updateTitle(request.title());
+        findWebtoon.updateThumbnail(request.thumbnail());
+        findWebtoon.updatePrologue(request.prologue());
+        findWebtoon.updateStory(request.story());
+        findWebtoon.updateDescription(request.description());
+
+        webtoonRepository.save(findWebtoon);
+    }
+
+    /**
+     * 웹툰 삭제
+     */
+    public void deleteWebtoon(Long memberId, Long webtoonId) {
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        webtoonRepository.delete(findWebtoon);
     }
 }
