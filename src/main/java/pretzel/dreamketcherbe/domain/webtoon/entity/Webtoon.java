@@ -40,6 +40,10 @@ public class Webtoon extends BaseTimeEntity {
     @ColumnDefault("'PRE_SERIES'")
     private String status;
 
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private int episodeCount;
+
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
