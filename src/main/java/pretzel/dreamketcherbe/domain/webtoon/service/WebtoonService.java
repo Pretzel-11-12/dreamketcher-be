@@ -1,7 +1,6 @@
 package pretzel.dreamketcherbe.domain.webtoon.service;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
@@ -23,7 +22,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @AllArgsConstructor
 public class WebtoonService {
