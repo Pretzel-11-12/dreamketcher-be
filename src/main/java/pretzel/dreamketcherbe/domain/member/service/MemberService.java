@@ -40,7 +40,7 @@ public class MemberService {
             throw new MemberException(MemberExceptionType.NICKNAME_ALREADY_EXISTS);
         }
 
-        member.updateProfile(nicknameRequest.nickname());
+        member.updateNickname(nicknameRequest.nickname());
 
         return memberRepository.save(member);
     }
