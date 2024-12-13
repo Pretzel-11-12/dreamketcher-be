@@ -1,7 +1,6 @@
 package pretzel.dreamketcherbe.domain.member.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.member.dto.FavoriteWebtoonResponse;
@@ -40,7 +39,7 @@ public class MemberService {
             throw new MemberException(MemberExceptionType.NICKNAME_ALREADY_EXISTS);
         }
 
-        member.updateProfile(nicknameRequest.nickname());
+        member.updateNickname(nicknameRequest.nickname());
 
         return memberRepository.save(member);
     }
