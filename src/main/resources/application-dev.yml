@@ -1,0 +1,82 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_DATASOURCE_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  cookie:
+    max-age: 12345678
+    path: /
+    same-site: none
+    http-only: true
+    secure: false
+
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS}
+    allowed-methods: ${ALLOWED_METHODS}
+
+  springdoc:
+    swagger-ui:
+      display-request-duration: true
+    api-docs:
+      path: /api-docs
+      show-actuator: true
+
+oauth2:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
+    redirect-uri: ${GOOGLE_REDIRECT_URI}
+    grant-type: authorization_code
+    scope: email
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+  access-exp: 12345678
+  refresh-exp: 12345678
+
+management:
+  endpoints:
+    web:
+      base-path: /api/v1
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework: info
+    org.hibernate: info
+
+  cloud:
+    aws:
+      s3:
+        bucket: ${AWS_S3_BUCKET_NAME}
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      region:
+        static: ${AWS_REGION}
+      stack:
+        auto: false
