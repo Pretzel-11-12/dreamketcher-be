@@ -3,7 +3,7 @@ package pretzel.dreamketcherbe.domain.member.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pretzel.dreamketcherbe.domain.member.dto.FavoriteWebtoonResponse;
+import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
 import pretzel.dreamketcherbe.domain.member.dto.NicknameRequest;
 import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
@@ -44,14 +44,14 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
-    public List<FavoriteWebtoonResponse> getFavoriteWebtoon(Long memberId) {
+    public List<InterestedWebtoonResponse> getFavoriteWebtoon(Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
         List<InterestedWebtoon> favoriteWebtoons = interestedWebtoonRepository.findAllByMemberId(member);
 
         return favoriteWebtoons.stream()
-                    .map(FavoriteWebtoonResponse::from)
+                    .map(InterestedWebtoonResponse::from)
                     .toList();
     }
 
@@ -67,7 +67,7 @@ public class MemberService {
         InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findById(interestedWebtoonId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.INTERESTED_WEBTOON_NOT_FOUND));
 
-        if (!interestedWebtoon.getMemberId().equals(member)) {
+        if (!interestedWebtoon.getMember().equals(member)) {
             throw new MemberException(MemberExceptionType.MEMBER_NOT_AUTHORIZED);
         }
 
