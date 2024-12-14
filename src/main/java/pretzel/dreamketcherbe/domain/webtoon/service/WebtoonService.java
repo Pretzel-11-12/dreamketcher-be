@@ -112,22 +112,22 @@ public class WebtoonService {
     @Transactional
     public void addFavoriteWebtoon(Long memberId, Long webtoonId) {
         Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new WebtoonException(MemberExceptionType.MEMBER_NOT_FOUND));
+                            .orElseThrow(() -> new WebtoonException(MemberExceptionType.MEMBER_NOT_FOUND));
 
         Webtoon webtoon = webtoonRepository.findById(webtoonId)
-            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+                              .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         if (interestedWebtoonRepository.findByMemberAndWebtoon(member, webtoon).isPresent()) {
             throw new MemberException(MemberExceptionType.ALREADY_FAVORITED);
         }
 
         InterestedWebtoon interestedWebtoon = InterestedWebtoon.builder()
-            .member(member)
-            .webtoon(webtoon)
-            .build();
+                                                  .member(member)
+                                                  .webtoon(webtoon)
+                                                  .build();
 
         interestedWebtoonRepository.save(interestedWebtoon);
-
+    }
     /**
      * 웹툰 수정
      */

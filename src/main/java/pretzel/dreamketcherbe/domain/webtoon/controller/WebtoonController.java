@@ -65,7 +65,7 @@ public class WebtoonController {
                                                    @PathVariable Long webtoonId) {
         webtoonService.addFavoriteWebtoon(memberId, webtoonId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
-      
+    }
     /**
      * 웹툰 수정
      */
