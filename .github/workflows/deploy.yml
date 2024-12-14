@@ -1,8 +1,5 @@
 name: Deploy To EC2
 
-env:
-
-
 on:
   push:
     branches:
