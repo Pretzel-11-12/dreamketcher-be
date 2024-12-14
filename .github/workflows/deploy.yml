@@ -40,7 +40,7 @@ jobs:
         run: docker build -t dreamketcher-dev-server .
 
       - name: Docker 이미지에 Tag 붙이기
-        run: docker tag dreamketcher-server ${{ steps.login-ecr.outputs.registry }}/dreamketcher-dev-server:latest
+        run: docker tag dreamketcher-dev-server ${{ steps.login-ecr.outputs.registry }}/dreamketcher-dev-server:latest
 
       - name: ECR에 Docker 이미지 Push하기
         run: docker push ${{ steps.login-ecr.outputs.registry }}/dreamketcher-dev-server:latest
