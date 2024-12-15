@@ -67,8 +67,8 @@ public class EpisodeService {
      * 에피소드 삭제
      */
     @Transactional
-    public void deleteEpisode(Long memberId, Long EpisodeId) {
-        Episode findEpisode = episodeRepository.findById(EpisodeId)
+    public void deleteEpisode(Long memberId, Long episodeId) {
+        Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
         findEpisode.isAuthor(memberId);
@@ -79,6 +79,7 @@ public class EpisodeService {
     /**
      * 에피소드 조회
      */
+    @Transactional
     public EpisodeResDto getEpisode(Long episodeId, HttpServletRequest request,
         HttpServletResponse response) {
         Episode findEpisode = episodeRepository.findById(episodeId)
