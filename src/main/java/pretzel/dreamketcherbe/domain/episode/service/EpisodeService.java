@@ -3,10 +3,10 @@ package pretzel.dreamketcherbe.domain.episode.service;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
@@ -80,8 +80,9 @@ public class EpisodeService {
 
     /**
      * 에피소드 조회
+     * TODO: 조회수 중복 관리 부분 리팩토링
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public EpisodeResDto getEpisode(Long episodeId, HttpServletRequest request,
         HttpServletResponse response) {
         Episode findEpisode = episodeRepository.findById(episodeId)
