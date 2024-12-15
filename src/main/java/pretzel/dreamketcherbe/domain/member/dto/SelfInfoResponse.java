@@ -7,7 +7,7 @@ public record SelfInfoResponse(
     Long id,
     String email,
     String name,
-    String imageUri,
+    String imageUrl,
     Role role
 ) {
 
@@ -16,7 +16,7 @@ public record SelfInfoResponse(
             member.getId(),
             member.getEmail(),
             member.getName(),
-            member.getImageUri(),
+            member.getImageUrl(),
             member.getRole()
             );
     }

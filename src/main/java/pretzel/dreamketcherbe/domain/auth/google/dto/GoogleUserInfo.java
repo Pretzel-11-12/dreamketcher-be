@@ -9,7 +9,7 @@ public record GoogleUserInfo(
     @JsonProperty("sub") String socialId,
     @JsonProperty("email") String email,
     @JsonProperty("name") String name,
-    @JsonProperty("picture") String imageUri
+    @JsonProperty("picture") String imageUrl
 ) {
     public Member toMember(String nickname) {
         return Member.builder()
@@ -18,7 +18,7 @@ public record GoogleUserInfo(
                    .email(email)
                    .name(name)
                    .nickname(nickname)
-                   .imageUri(imageUri)
+                   .imageUrl(imageUrl)
                    .role(Role.MEMBER)
                    .build();
     }
