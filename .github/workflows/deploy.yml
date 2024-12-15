@@ -20,7 +20,7 @@ jobs:
           java-version: 17
 
       - name: 테스트 및 빌드하기
-        run: ./gradlew build -Pjasypt.encryptor.password=${{secrets.JASYPT_ENCRYPTOR_PASSWORD}} -Pprofile=dev
+        run: ./gradlew build -Pjasypt.encryptor.password=${{secrets.JASYPT_ENCRYPTOR_PASSWORD}}
 
       - name: AWS Resource에 접근할 수 있게 AWS credentials 설정
         uses: aws-actions/configure-aws-credentials@v4
@@ -53,4 +53,4 @@ jobs:
             docker stop dreamketcher-dev-server || true
             docker rm dreamketcher-dev-server || true
             docker pull ${{ steps.login-ecr.outputs.registry }}/dreamketcher-dev-server:latest
-            docker run -d --name dreamketcher-dev-server -p 8080:8080 ${{ steps.login-ecr.outputs.registry }}/dreamketcher-dev-server:latest
+            docker run -d --name dreamketcher-dev-server -p 8080:8080 -e SPRING_PROFILES_ACTIVE=dev ${{ steps.login-ecr.outputs.registry }}/dreamketcher-dev-server:latest
