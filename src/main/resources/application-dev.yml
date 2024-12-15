@@ -80,3 +80,7 @@ logging:
         static: ${AWS_REGION}
       stack:
         auto: false
+
+jasypt:
+  encryptor:
+    password: ${jasypt.encryptor.password}
