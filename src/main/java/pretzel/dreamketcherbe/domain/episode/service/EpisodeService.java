@@ -123,7 +123,7 @@ public class EpisodeService {
      * 조회수 증가
      */
     @Transactional
-    public int increaseViewCount(Long episodeId) {
-        return episodeRepository.increaseViewCount(episodeId);
+    public void increaseViewCount(Long episodeId) {
+        episodeRepository.increaseViewCount(episodeId);
     }
 }
