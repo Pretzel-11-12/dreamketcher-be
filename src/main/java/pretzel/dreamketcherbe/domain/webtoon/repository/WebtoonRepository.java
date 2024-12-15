@@ -13,7 +13,7 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
 
     List<Webtoon> findAllByStatusAndCreatedAtAfter(String status, LocalDateTime createdAt);
 
-    @Query("SELECT w FROM Webtoon w WHERE w.title LIKE %:title% OR REPLACE(w.title, ' ', '') LIKE %:title%")
+    @Query("SELECT w FROM Webtoon w WHERE (w.title LIKE %:title% OR REPLACE(w.title, ' ', '') LIKE %:title%) AND w.approval = 'approved'")
     List<Webtoon> findByTitleContaining(@Param("title") String title);
 
     @Query("SELECT w FROM Webtoon w JOIN w.member m WHERE m.nickname LIKE %:nickname% OR REPLACE(m.nickname, ' ', '') LIKE %:nickname%")
