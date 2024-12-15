@@ -1,16 +1,13 @@
 package pretzel.dreamketcherbe.domain.member.controller;
 
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pretzel.dreamketcherbe.common.annotation.Auth;
-import pretzel.dreamketcherbe.domain.member.dto.FavoriteWebtoonResponse;
+import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
 import pretzel.dreamketcherbe.domain.member.dto.NicknameRequest;
 import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
-import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.service.MemberService;
 
@@ -42,13 +39,13 @@ public class MemberController {
     }
 
     @GetMapping("/favorite")
-    public ResponseEntity<List<FavoriteWebtoonResponse>> getFavoriteWebtoon(
+    public ResponseEntity<List<InterestedWebtoonResponse>> getFavoriteWebtoon(
                                                 @Auth Long memberId) {
         return ResponseEntity.ok(memberService.getFavoriteWebtoon(memberId));
     }
 
     @DeleteMapping("/favorite/{InterestedWebtoonId}")
-    public ResponseEntity<Void> deleteFavoriteWebtoon(@RequestParam Long memberId,
+    public ResponseEntity<Void> deleteFavoriteWebtoon(@Auth Long memberId,
                                                       @PathVariable Long InterestedWebtoonId) {
         memberService.deleteFavoriteWebtoon(memberId, InterestedWebtoonId);
         return ResponseEntity.ok().build();
