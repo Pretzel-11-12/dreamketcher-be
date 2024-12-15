@@ -33,17 +33,14 @@ public class EpisodeService {
     /**
      * 에피소드 등록
      */
+    @Transactional
     public CreateEpisodeResDto createEpisode(Long memberId, CreateEpisodeReqDto request) {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        Episode newEpisode = Episode.builder()
-            .member(findMember)
-            .title(request.title())
-            .thumbnail(request.thumbnail())
-            .content(request.content())
-            .authorNote(request.authorNote())
-            .build();
+        Episode newEpisode = Episode.builder().member(findMember).title(request.title())
+            .thumbnail(request.thumbnail()).content(request.content())
+            .authorNote(request.authorNote()).build();
 
         episodeRepository.save(newEpisode);
 
@@ -82,7 +79,7 @@ public class EpisodeService {
      * 에피소드 조회
      * TODO: 조회수 중복 관리 부분 리팩토링
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public EpisodeResDto getEpisode(Long episodeId, HttpServletRequest request,
         HttpServletResponse response) {
         Episode findEpisode = episodeRepository.findById(episodeId)
