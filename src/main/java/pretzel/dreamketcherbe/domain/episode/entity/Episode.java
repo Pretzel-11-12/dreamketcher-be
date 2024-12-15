@@ -70,10 +70,9 @@ public class Episode extends BaseTimeEntity {
     }
 
     public void isAuthor(Long memberId) {
-        if (member.getId().equals(memberId)) {
-            return;
+        if (!member.getId().equals(memberId)) {
+            throw new IllegalStateException(memberId + ", 작성자가 아닙니다.");
         }
-        throw new IllegalStateException("작성자만 수정할 수 있습니다.");
     }
 
     public void updateTitle(String title) {
