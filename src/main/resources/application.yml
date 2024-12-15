@@ -2,7 +2,7 @@ spring:
   application:
     name: dreamketcherbe
   profiles:
-    active: dev
+    active: ${profile}
   servlet:
     multipart:
       max-file-size: 5MB
