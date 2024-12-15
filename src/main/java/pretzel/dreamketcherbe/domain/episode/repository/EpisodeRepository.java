@@ -9,6 +9,6 @@ public interface EpisodeRepository extends JpaRepository<Episode, Long> {
 
     @Modifying
     @Query("UPDATE Episode e SET e.viewCount = e.viewCount + 1 WHERE e.id = :episodeId")
-    int increaseViewCount(Long episodeId);
+    void increaseViewCount(Long episodeId);
 
 }
