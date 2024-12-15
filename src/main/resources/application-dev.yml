@@ -6,7 +6,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ENC(97yyeOvTkGlNTYeuhxP3HZezgqxFnsvcWHKUBR5epVh0k37fcRaIzfWxbQTf+nJBYisE8jEEQ609nCTVo5xrCFK1snZQb1zyL4bhap+Xrg+Lvn+SYGlYPA6OZwO0X+hxsS+l5ij0ToVtFFd73kXsdtKQCudD4iwDNuRl81Hx+N58raK3BNtDC+bJNzJXk+QxqjWqCxd2ots=)
     username: ENC(j+I4F16YPr8QNDHP6wUxvQ==)
-    password: ENC(1wX/fEQGrivgX/rogUlOIm5q0r4JS1+LNRpYtiM1B3E=)
+    password: ENC(S1G8zl8N5/mt0jRQVw00dAE4J0IKUJSqPjZ8CYB/z+4=)
 
   data:
     redis:
@@ -80,7 +80,3 @@ logging:
         static: ${AWS_REGION}
       stack:
         auto: false
-
-jasypt:
-  encryptor:
-    password: ${jasypt.encryptor.password}
