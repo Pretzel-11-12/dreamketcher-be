@@ -7,10 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import pretzel.dreamketcherbe.common.annotation.Auth;
-import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
-import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
-import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
-import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.*;
 import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
 
 import java.util.List;
@@ -85,5 +82,13 @@ public class WebtoonController {
         @PathVariable("webtoonId") Long webtoonId) {
         webtoonService.deleteWebtoon(memberId, webtoonId);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 웹툰, 작가 검색
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<SearchedWebtoonResDto>> searchWebtoon(@RequestParam String keyword) {
+        return ResponseEntity.ok(webtoonService.searchWebtoon(keyword));
     }
 }
