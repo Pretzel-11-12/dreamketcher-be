@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 @Component
 public class JwtExtractor implements TokenExtractor {
 
-    private static final String MEMBER_ID = "member_Id";
+    private static final String MEMBER_ID = "member_id";
     private static final String TOKEN_ID = "token_id";
     private static final String ACCESS_TOKEN = "access_token";
     private static final String REFRESH_TOKEN = "refresh_token";
