@@ -84,11 +84,10 @@ public class WebtoonService {
 
     /*
      * 웹툰 등록
-     * Todo : 예외 처리, 추후 MemberExceptionType 생성시 수정
      */
     public CreateWebtoonResDto createWebtoon(Long memberId, CreateWebtoonReqDto request) {
         Member findMember = memberRepository.findById(memberId)
-            .orElseThrow(() -> new OptimisticLockingFailureException("회원을 찾을 수 없습니다."));
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
         Webtoon newWebtoon = Webtoon.builder()
             .title(request.title())

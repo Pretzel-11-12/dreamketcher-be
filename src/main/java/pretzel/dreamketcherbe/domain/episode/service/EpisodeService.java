@@ -17,6 +17,8 @@ import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeExceptionType;
 import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
+import pretzel.dreamketcherbe.domain.member.exception.MemberException;
+import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 
 @Slf4j
@@ -33,7 +35,7 @@ public class EpisodeService {
      */
     public CreateEpisodeResDto createEpisode(Long memberId, CreateEpisodeReqDto request) {
         Member findMember = memberRepository.findById(memberId)
-            .orElseThrow(() -> new OptimisticLockingFailureException("존재하지 않는 회원입니다."));
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_AUTHORIZED));
 
         Episode newEpisode = Episode.builder()
             .member(findMember)
