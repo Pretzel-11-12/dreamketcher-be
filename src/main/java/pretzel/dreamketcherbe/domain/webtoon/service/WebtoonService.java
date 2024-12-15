@@ -2,7 +2,6 @@ package pretzel.dreamketcherbe.domain.webtoon.service;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
