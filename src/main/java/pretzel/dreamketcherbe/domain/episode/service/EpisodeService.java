@@ -35,7 +35,7 @@ public class EpisodeService {
      */
     public CreateEpisodeResDto createEpisode(Long memberId, CreateEpisodeReqDto request) {
         Member findMember = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_AUTHORIZED));
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
         Episode newEpisode = Episode.builder()
             .member(findMember)
