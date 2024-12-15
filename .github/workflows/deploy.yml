@@ -19,13 +19,8 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: env 파일 만들기
-        run: |
-          touch .env
-          echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
-
       - name: 테스트 및 빌드하기
-        run: ./gradlew clean build
+        run: ./gradlew build -Pjasypt.encryptor.password=${{secrets.JASYPT_ENCRYPTOR_PASSWORD}}
 
       - name: AWS Resource에 접근할 수 있게 AWS credentials 설정
         uses: aws-actions/configure-aws-credentials@v4
@@ -58,4 +53,4 @@ jobs:
             docker stop dreamketcher-dev-server || true
             docker rm dreamketcher-dev-server || true
             docker pull ${{ steps.login-ecr.outputs.registry }}/dreamketcher-dev-server:latest
-            docker run -d --name dreamketcher-dev-server -p 8080:8080 --env-file .env ${{ steps.login-ecr.outputs.registry }}/dreamketcher-dev-server:latest -e SPRING_APPLICATION_JSON='{"spring.profiles.active":"dev"}'
+            docker run -d --name dreamketcher-dev-server -p 8080:8080 ${{ steps.login-ecr.outputs.registry }}/dreamketcher-dev-server:latest
