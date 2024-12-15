@@ -25,7 +25,7 @@ import pretzel.dreamketcherbe.domain.episode.service.EpisodeService;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/episode")
+@RequestMapping("/api/v1/webtoons/{webtoonId}/episode")
 @AllArgsConstructor
 public class EpisodeController {
 
@@ -34,7 +34,7 @@ public class EpisodeController {
     /**
      * 에피소드 등록
      */
-    @PostMapping
+    @PostMapping("/uploads")
     public ResponseEntity<CreateEpisodeResDto> createEpisode(@Auth Long memberId,
         @RequestBody @Valid CreateEpisodeReqDto request) {
         
