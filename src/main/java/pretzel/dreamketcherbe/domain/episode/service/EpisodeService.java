@@ -110,7 +110,6 @@ public class EpisodeService {
             newCookie.setPath("/");
             newCookie.setMaxAge(60 * 60 * 24);
             response.addCookie(newCookie);
-            System.out.println(newCookie);
         }
 
         return EpisodeResDto.of(findEpisode);
