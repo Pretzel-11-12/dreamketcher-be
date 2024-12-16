@@ -1,10 +1,14 @@
 package pretzel.dreamketcherbe.domain.webtoon.service;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+
+import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
+import pretzel.dreamketcherbe.domain.member.exception.MemberException;
+import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
+import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
@@ -23,7 +27,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @AllArgsConstructor
 public class WebtoonService {
@@ -35,6 +38,8 @@ public class WebtoonService {
     private final GenreRepository GenreRepository;
 
     private final MemberRepository memberRepository;
+
+    private final InterestedWebtoonRepository interestedWebtoonRepository;
 
     /**
      * 웹툰 장르별 목록 조회
@@ -78,11 +83,10 @@ public class WebtoonService {
 
     /*
      * 웹툰 등록
-     * Todo : 예외 처리, 추후 MemberExceptionType 생성시 수정
      */
     public CreateWebtoonResDto createWebtoon(Long memberId, CreateWebtoonReqDto request) {
         Member findMember = memberRepository.findById(memberId)
-            .orElseThrow(() -> new OptimisticLockingFailureException("회원을 찾을 수 없습니다."));
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
         Webtoon newWebtoon = Webtoon.builder()
             .title(request.title())
@@ -100,6 +104,28 @@ public class WebtoonService {
         return CreateWebtoonResDto.of(newWebtoon);
     }
 
+    /*
+     * 관심 웹툰 추가
+     */
+    @Transactional
+    public void addFavoriteWebtoon(Long memberId, Long webtoonId) {
+        Member member = memberRepository.findById(memberId)
+                            .orElseThrow(() -> new WebtoonException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Webtoon webtoon = webtoonRepository.findById(webtoonId)
+                              .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        if (interestedWebtoonRepository.findByMemberAndWebtoon(member, webtoon).isPresent()) {
+            throw new MemberException(MemberExceptionType.ALREADY_FAVORITED);
+        }
+
+        InterestedWebtoon interestedWebtoon = InterestedWebtoon.builder()
+                                                  .member(member)
+                                                  .webtoon(webtoon)
+                                                  .build();
+
+        interestedWebtoonRepository.save(interestedWebtoon);
+    }
     /**
      * 웹툰 수정
      */
