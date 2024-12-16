@@ -80,4 +80,8 @@ public class Webtoon extends BaseTimeEntity {
     public void updateDescription(String description) {
         this.description = description;
     }
+
+    public void updateStatus(String status) {
+        this.status = status;
+    }
 }

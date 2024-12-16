@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.admin.dto.ManageWebtoonResDto;
+import pretzel.dreamketcherbe.domain.admin.dto.UpdateWebtoonStatusReqDto;
 import pretzel.dreamketcherbe.domain.admin.entity.ManagementWebtoon;
 import pretzel.dreamketcherbe.domain.admin.exception.ManageWebtoonException;
 import pretzel.dreamketcherbe.domain.admin.exception.ManageWebtoonExceptionType;
@@ -12,6 +14,7 @@ import pretzel.dreamketcherbe.domain.admin.repository.ManagementWebtoonResposito
 import pretzel.dreamketcherbe.domain.webtoon.entity.Genre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonGenre;
+import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.GenreRepository;
@@ -48,5 +51,22 @@ public class ManageWebtoonService {
 
                 return ManageWebtoonResDto.of(webtoon, genre, manangeWebtoon);
             });
+    }
+
+    /**
+     * 작품 상태 변경
+     */
+    @Transactional
+    public void updateWebtoonStatus(UpdateWebtoonStatusReqDto updateWebtoonStatusReqDto) {
+        if (!WebtoonStatus.isValidStatus(updateWebtoonStatusReqDto.status())) {
+            throw new WebtoonException(WebtoonExceptionType.WEBTOON_STATUS_NOT_FOUND);
+        }
+
+        for (Long id : updateWebtoonStatusReqDto.webtoonIds()) {
+            Webtoon webtoon = webtoonRepository.findById(id)
+                    .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+            webtoon.updateStatus(updateWebtoonStatusReqDto.status());
+            webtoonRepository.save(webtoon);
+        }
     }
 }
