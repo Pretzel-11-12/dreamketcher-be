@@ -13,10 +13,10 @@ public record SearchedWebtoonResDto(
 
     public static SearchedWebtoonResDto of(Webtoon webtoon) {
         return SearchedWebtoonResDto.builder()
-                   .thumbnail(webtoon.getThumbnail())
-                   .member(webtoon.getMember().getNickname())
-                   .title(webtoon.getTitle())
-                   .description(webtoon.getDescription())
-                   .build();
+            .thumbnail(webtoon.getThumbnail())
+            .member(webtoon.getMember().getNickname())
+            .title(webtoon.getTitle())
+            .description(webtoon.getDescription())
+            .build();
     }
 }

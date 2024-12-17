@@ -27,8 +27,9 @@ public class ManageEpisodeService {
         Page<Episode> episodes = episodeRepository.findAllByWebtoonId(webtoonId, pageable);
 
         return episodes.map(episode -> {
-            ManagementEpisode managementEpisode = managementEpisodeRepository.findByEpisodeId(episode.getId())
-                    .orElseThrow(() -> new AdminException(AdminExceptionType.MANAGE_EPISODE_NOT_FOUND));
+            ManagementEpisode managementEpisode = managementEpisodeRepository.findByEpisodeId(
+                    episode.getId())
+                .orElseThrow(() -> new AdminException(AdminExceptionType.MANAGE_EPISODE_NOT_FOUND));
 
             return ManageEpisodeResDto.of(episode, managementEpisode);
         });

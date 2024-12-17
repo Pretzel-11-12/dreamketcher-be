@@ -19,6 +19,7 @@ public enum WebtoonExceptionType implements ExceptionType {
         this.message = message;
     }
 
+
     @Override
     public String message() {
         return message;

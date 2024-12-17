@@ -18,7 +18,8 @@ public class GoogleOAuthClient {
 
     public GoogleUserInfo getOAuthInfo(String code) {
         GoogleToken googleToken = googleApiClient.fetchToken(params(code));
-        GoogleUserInfo googleUserInfo = googleApiClient.fetchUserInfo("Bearer " + googleToken.accessToken());
+        GoogleUserInfo googleUserInfo = googleApiClient.fetchUserInfo(
+            "Bearer " + googleToken.accessToken());
         return googleUserInfo;
     }
 

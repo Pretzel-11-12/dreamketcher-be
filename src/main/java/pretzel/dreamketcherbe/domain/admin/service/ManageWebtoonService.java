@@ -40,17 +40,19 @@ public class ManageWebtoonService {
         Page<Webtoon> webtoons = webtoonRepository.findAllByOrderByCreatedAtDesc(pageable);
 
         return webtoons.map(webtoon -> {
-                WebtoonGenre webtoonGenre = webtoonGenreRepository.findByWebtoonId(webtoon.getId())
-                        .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_GENRE_NOT_FOUND));
+            WebtoonGenre webtoonGenre = webtoonGenreRepository.findByWebtoonId(webtoon.getId())
+                .orElseThrow(
+                    () -> new WebtoonException(WebtoonExceptionType.WEBTOON_GENRE_NOT_FOUND));
 
-                Genre genre = genreRepository.findById(webtoonGenre.getGenre().getId())
-                        .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
+            Genre genre = genreRepository.findById(webtoonGenre.getGenre().getId())
+                .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
 
-                ManagementWebtoon manangeWebtoon = managementWebtoonRespository.findByWebtoonId(webtoon.getId())
-                        .orElseThrow(() -> new AdminException(AdminExceptionType.MANAGE_WEBTOON_NOT_FOUND));
+            ManagementWebtoon manangeWebtoon = managementWebtoonRespository.findByWebtoonId(
+                    webtoon.getId())
+                .orElseThrow(() -> new AdminException(AdminExceptionType.MANAGE_WEBTOON_NOT_FOUND));
 
-                return ManageWebtoonResDto.of(webtoon, genre, manangeWebtoon);
-            });
+            return ManageWebtoonResDto.of(webtoon, genre, manangeWebtoon);
+        });
     }
 
     /**
@@ -64,7 +66,7 @@ public class ManageWebtoonService {
 
         for (Long id : updateWebtoonStatusReqDto.webtoonIds()) {
             Webtoon webtoon = webtoonRepository.findById(id)
-                    .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+                .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
             webtoon.updateStatus(updateWebtoonStatusReqDto.status());
             webtoonRepository.save(webtoon);
         }

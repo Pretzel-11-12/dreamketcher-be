@@ -18,6 +18,6 @@ public record SelfInfoResponse(
             member.getName(),
             member.getImageUri(),
             member.getRole()
-            );
+        );
     }
 }

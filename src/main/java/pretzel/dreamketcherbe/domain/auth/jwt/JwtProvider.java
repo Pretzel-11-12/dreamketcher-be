@@ -3,15 +3,13 @@ package pretzel.dreamketcherbe.domain.auth.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import io.jsonwebtoken.security.Keys;
-import pretzel.dreamketcherbe.domain.auth.repository.TokenProvider;
-
-import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import javax.crypto.SecretKey;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import pretzel.dreamketcherbe.domain.auth.repository.TokenProvider;
 
 @Component
 public class JwtProvider implements TokenProvider {
@@ -57,11 +55,11 @@ public class JwtProvider implements TokenProvider {
         long now = System.currentTimeMillis();
 
         return Jwts.builder()
-                    .setClaims(claims)
-                    .setSubject(subject)
-                    .setIssuedAt(new Date(now))
-                    .setExpiration(new Date(now + expired))
-                    .signWith(key, SignatureAlgorithm.HS256)
-                    .compact();
+            .setClaims(claims)
+            .setSubject(subject)
+            .setIssuedAt(new Date(now))
+            .setExpiration(new Date(now + expired))
+            .signWith(key, SignatureAlgorithm.HS256)
+            .compact();
     }
 }

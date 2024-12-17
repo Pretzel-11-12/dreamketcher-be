@@ -1,5 +1,6 @@
 package pretzel.dreamketcherbe.domain.member.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,8 +13,6 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
-
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,7 +32,7 @@ public class MemberService {
     @Transactional
     public Object updateProfile(Long memberId, NicknameRequest nicknameRequest) {
         Member member = memberRepository.findById(memberId)
-                            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
         if (memberRepository.existsByNickname(nicknameRequest.nickname())) {
             throw new MemberException(MemberExceptionType.NICKNAME_ALREADY_EXISTS);
@@ -48,11 +47,12 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        List<InterestedWebtoon> favoriteWebtoons = interestedWebtoonRepository.findAllByMemberId(member);
+        List<InterestedWebtoon> favoriteWebtoons = interestedWebtoonRepository.findAllByMemberId(
+            member);
 
         return favoriteWebtoons.stream()
-                    .map(InterestedWebtoonResponse::from)
-                    .toList();
+            .map(InterestedWebtoonResponse::from)
+            .toList();
     }
 
     public List<Member> getAllMembers() {
@@ -64,8 +64,10 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findById(interestedWebtoonId)
-            .orElseThrow(() -> new MemberException(MemberExceptionType.INTERESTED_WEBTOON_NOT_FOUND));
+        InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findById(
+                interestedWebtoonId)
+            .orElseThrow(
+                () -> new MemberException(MemberExceptionType.INTERESTED_WEBTOON_NOT_FOUND));
 
         if (!interestedWebtoon.getMember().equals(member)) {
             throw new MemberException(MemberExceptionType.MEMBER_NOT_AUTHORIZED);

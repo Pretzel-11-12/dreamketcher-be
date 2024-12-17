@@ -1,9 +1,8 @@
 package pretzel.dreamketcherbe.domain.auth.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.util.StringUtils;
-
 import java.util.Optional;
+import org.springframework.util.StringUtils;
 
 public class AuthHeaderExtractor {
 

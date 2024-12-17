@@ -1,6 +1,10 @@
 package pretzel.dreamketcherbe.domain.webtoon.service;
 
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
@@ -9,7 +13,11 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
-import pretzel.dreamketcherbe.domain.webtoon.dto.*;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Genre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
@@ -18,11 +26,6 @@ import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.GenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -43,17 +46,17 @@ public class WebtoonService {
      */
     public List<WebtoonResDto> getWebtoonsByGenre(final String genreName) {
         Genre genre = GenreRepository.findByName(genreName)
-                          .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
 
         List<Long> webtoonIds = webtoonGenreRepository.findByGenreId(genre.getId())
-                                    .stream()
-                                    .map(webtoonGenre -> webtoonGenre.getWebtoon().getId())
-                                    .collect(Collectors.toList());
+            .stream()
+            .map(webtoonGenre -> webtoonGenre.getWebtoon().getId())
+            .collect(Collectors.toList());
 
         return webtoonRepository.findAllById(webtoonIds)
-                   .stream()
-                   .map(WebtoonResDto::of)
-                   .collect(Collectors.toList());
+            .stream()
+            .map(WebtoonResDto::of)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -61,9 +64,9 @@ public class WebtoonService {
      */
     public List<WebtoonResDto> getWebtoonsByFinish() {
         return webtoonRepository.findAllByStatus(WebtoonStatus.FINISH.getStatus())
-                   .stream()
-                   .map(WebtoonResDto::of)
-                   .collect(Collectors.toList());
+            .stream()
+            .map(WebtoonResDto::of)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -72,10 +75,11 @@ public class WebtoonService {
     public List<WebtoonResDto> getWebtoonsByNew() {
         LocalDateTime cutoffDate = LocalDateTime.now().minusMonths(1);
 
-        return webtoonRepository.findAllByStatusAndCreatedAtAfter(WebtoonStatus.IN_SERIES.getStatus(), cutoffDate)
-                   .stream()
-                   .map(WebtoonResDto::of)
-                   .collect(Collectors.toList());
+        return webtoonRepository.findAllByStatusAndCreatedAtAfter(
+                WebtoonStatus.IN_SERIES.getStatus(), cutoffDate)
+            .stream()
+            .map(WebtoonResDto::of)
+            .collect(Collectors.toList());
     }
 
     /*
@@ -86,15 +90,15 @@ public class WebtoonService {
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
         Webtoon newWebtoon = Webtoon.builder()
-                                 .title(request.title())
-                                 .thumbnail(request.thumbnail())
-                                 .prologue(request.prologue())
-                                 .story(request.story())
-                                 .description(request.description())
-                                 .approval("not_approval")
-                                 .status("pre_series")
-                                 .member(findMember)
-                                 .build();
+            .title(request.title())
+            .thumbnail(request.thumbnail())
+            .prologue(request.prologue())
+            .story(request.story())
+            .description(request.description())
+            .approval("not_approval")
+            .status("pre_series")
+            .member(findMember)
+            .build();
 
         webtoonRepository.save(newWebtoon);
 
@@ -107,19 +111,19 @@ public class WebtoonService {
     @Transactional
     public void addFavoriteWebtoon(Long memberId, Long webtoonId) {
         Member member = memberRepository.findById(memberId)
-                            .orElseThrow(() -> new WebtoonException(MemberExceptionType.MEMBER_NOT_FOUND));
+            .orElseThrow(() -> new WebtoonException(MemberExceptionType.MEMBER_NOT_FOUND));
 
         Webtoon webtoon = webtoonRepository.findById(webtoonId)
-                              .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         if (interestedWebtoonRepository.findByMemberAndWebtoon(member, webtoon).isPresent()) {
             throw new MemberException(MemberExceptionType.ALREADY_FAVORITED);
         }
 
         InterestedWebtoon interestedWebtoon = InterestedWebtoon.builder()
-                                                  .member(member)
-                                                  .webtoon(webtoon)
-                                                  .build();
+            .member(member)
+            .webtoon(webtoon)
+            .build();
 
         interestedWebtoonRepository.save(interestedWebtoon);
     }
@@ -129,7 +133,7 @@ public class WebtoonService {
      */
     public void updateWebtoon(Long memberId, Long webtoonId, UpdateWebtoonReqDto request) {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
-                                  .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         findWebtoon.getId();
         findWebtoon.updateTitle(request.title());
@@ -146,7 +150,7 @@ public class WebtoonService {
      */
     public void deleteWebtoon(Long memberId, Long webtoonId) {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
-                                  .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         webtoonRepository.delete(findWebtoon);
     }
@@ -164,8 +168,8 @@ public class WebtoonService {
         List<Webtoon> byMemberNickname = webtoonRepository.findByMemberNickname(normalizedKeyword);
 
         return Stream.concat(byTitle.stream(), byMemberNickname.stream())
-                   .distinct()
-                   .map(SearchedWebtoonResDto::of)
-                   .collect(Collectors.toList());
+            .distinct()
+            .map(SearchedWebtoonResDto::of)
+            .collect(Collectors.toList());
     }
 }

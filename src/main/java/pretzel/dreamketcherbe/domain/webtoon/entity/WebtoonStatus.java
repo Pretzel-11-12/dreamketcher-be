@@ -5,8 +5,7 @@ import java.util.Arrays;
 public enum WebtoonStatus {
     FINISH("FINISH", "완결"),
     IN_SERIES("IN_SERIES", "연재중"),
-    REST("REST", "휴재")
-    ;
+    REST("REST", "휴재");
 
     private String status;
     private String value;
