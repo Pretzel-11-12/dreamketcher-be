@@ -102,6 +102,8 @@ public class EpisodeController {
         @PathVariable("episodeId") Long episodeId) {
         int likeCount = episodeService.likeEpisode(memberId, episodeId);
 
-        return ResponseEntity.ok(CreateEpisodeLikeResDto.of(episodeId, likeCount));
+        return ResponseEntity
+            .status(HttpStatus.CREATED)  // 상태 코드 변경
+            .body(CreateEpisodeLikeResDto.of(episodeId, likeCount));
     }
 }
