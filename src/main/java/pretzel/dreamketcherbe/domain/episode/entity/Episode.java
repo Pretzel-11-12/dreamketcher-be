@@ -100,4 +100,16 @@ public class Episode extends BaseTimeEntity {
     public void updateAuthorNote(String authorNote) {
         this.authorNote = authorNote;
     }
+
+    // 좋아요
+    public void incrementLikeCount() {
+        this.likeCount++;
+    }
+
+    // 좋아요 해제
+    public void decrementLikeCount() {
+        if (likeCount > 0) {
+            this.likeCount--;
+        }
+    }
 }
