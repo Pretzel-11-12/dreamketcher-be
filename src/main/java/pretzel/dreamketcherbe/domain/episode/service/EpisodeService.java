@@ -57,16 +57,19 @@ public class EpisodeService {
                                         ? episodeRepository.findByWebtoonIdOrderByPublishedAtAsc(webtoonId, pageable)
                                         : episodeRepository.findByWebtoonIdOrderByPublishedAtDesc(webtoonId, pageable);
 
-        List<WebtoonEpisodeListResDto.EpisodeInfo> episodes = episodePage.getContent().stream()
+        List<WebtoonEpisodeListResDto.EpisodeInfo> episodes = episodePage.getContent()
+                                                                  .stream()
                                                                   .map(this::toEpisodeInfo)
                                                                   .toList();
 
-        return new WebtoonEpisodeListResDto(
+        int episodeCount = (int) episodePage.getTotalElements();
+
+        return WebtoonEpisodeListResDto.of(
             webtoon.getId(),
             webtoon.getTitle(),
             webtoon.getThumbnail(),
             webtoon.getStory(),
-            episodePage.getTotalPages(),
+            episodeCount,
             genreNames,
             episodePage.getNumber(),
             episodePage.getTotalPages(),
@@ -78,15 +81,7 @@ public class EpisodeService {
         long likeCount = episodeLikeRepository.countByEpisodeId(episode.getId());
         float averageStar = calculateAverageStar(episode.getId());
 
-        return new WebtoonEpisodeListResDto.EpisodeInfo(
-            episode.getId(),
-            episode.getTitle(),
-            episode.getThumbnail(),
-            episode.getPublishedAt(),
-            episode.getViewCount(),
-            likeCount,
-            averageStar
-        );
+        return WebtoonEpisodeListResDto.EpisodeInfo.of(episode, likeCount, averageStar);
     }
 
     private float calculateAverageStar(Long episodeId) {
