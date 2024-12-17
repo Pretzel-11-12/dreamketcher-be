@@ -55,6 +55,7 @@ public class EpisodeService {
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         List<WebtoonGenre> webtoonGenres = webtoonGenreRepository.findByWebtoonId(webtoonId);
+
         List<String> genreNames = webtoonGenres.stream()
             .map(wg -> wg.getGenre().getName())
             .toList();

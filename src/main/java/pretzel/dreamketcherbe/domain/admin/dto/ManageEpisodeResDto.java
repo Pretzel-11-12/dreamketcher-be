@@ -17,7 +17,6 @@ public record ManageEpisodeResDto(
     String publishedAt,
     String createdAt,
     String updatedAt,
-    String status,
     String reason
 ) {
 
@@ -37,7 +36,6 @@ public record ManageEpisodeResDto(
             .publishedAt(episode.getPublishedAt().format(formatter))
             .createdAt(episode.getCreatedAt().format(formatter))
             .updatedAt(episode.getUpdatedAt().format(formatter))
-            .status(episode.getStatus())
             .reason(reasonContent)
             .build();
     }
