@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -205,12 +206,16 @@ public class EpisodeService {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        if (!episodeLikeRepository.existsByEpisodeIdAndMemberId(memberId, episodeId)) {
+        Optional<EpisodeLike> episodeLike = episodeLikeRepository.findByEpisodeIdAndMemberId(
+            episodeId,
+            memberId);
+        
+        if (episodeLike.isEmpty()) {  // 좋아요 추가
             episode.incrementLikeCount();
             episodeLikeRepository.save(new EpisodeLike(episode, member));
-        } else {
+        } else {  // 좋아요 해제
             episode.decrementLikeCount();
-            episodeLikeRepository.deleteByEpisodeIdAndMemberId(episodeId, memberId);
+            episodeLikeRepository.delete(episodeLike.get());
         }
 
         return episode.getLikeCount();
