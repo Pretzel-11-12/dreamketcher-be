@@ -53,6 +53,10 @@ public class Episode extends BaseTimeEntity {
     @Column(name = "view_count")
     private int viewCount;
 
+    @ColumnDefault("0")
+    @Column(name = "like_count")
+    private int likeCount;
+
     @ColumnDefault("'NOT_APPROVAL'")
     private String status;
 

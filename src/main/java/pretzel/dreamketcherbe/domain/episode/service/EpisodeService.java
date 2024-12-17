@@ -16,6 +16,7 @@ import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
+import pretzel.dreamketcherbe.domain.episode.entity.EpisodeLike;
 import pretzel.dreamketcherbe.domain.episode.entity.EpisodeStar;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeExceptionType;
@@ -191,5 +192,14 @@ public class EpisodeService {
     @Transactional
     public void increaseViewCount(Long episodeId) {
         episodeRepository.increaseViewCount(episodeId);
+    }
+
+    /**
+     * 좋아요
+     */
+    public void likeEpisode(Long episodeId, Long memberId) {
+        Episode episode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+        
     }
 }
