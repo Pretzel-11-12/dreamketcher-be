@@ -198,7 +198,7 @@ public class EpisodeService {
      * 좋아요
      */
     @Transactional
-    public void likeEpisode(Long episodeId, Long memberId) {
+    public int likeEpisode(Long episodeId, Long memberId) {
         Episode episode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
@@ -212,5 +212,7 @@ public class EpisodeService {
             episode.decrementLikeCount();
             episodeLikeRepository.deleteByEpisodeIdAndMemberId(episodeId, memberId);
         }
+
+        return episode.getLikeCount();
     }
 }

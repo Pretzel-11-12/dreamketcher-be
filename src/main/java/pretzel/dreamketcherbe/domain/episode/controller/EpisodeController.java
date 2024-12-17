@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Auth;
+import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeLikeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
@@ -97,10 +98,10 @@ public class EpisodeController {
      * 에피소드 좋아요
      */
     @PostMapping("/{episodeId}/like")
-    public ResponseEntity<Void> likeEpisode(@Auth Long memberId,
+    public ResponseEntity<CreateEpisodeLikeResDto> likeEpisode(@Auth Long memberId,
         @PathVariable("episodeId") Long episodeId) {
-        episodeService.likeEpisode(memberId, episodeId);
+        int likeCount = episodeService.likeEpisode(memberId, episodeId);
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.ok(CreateEpisodeLikeResDto.of(episodeId, likeCount));
     }
 }
