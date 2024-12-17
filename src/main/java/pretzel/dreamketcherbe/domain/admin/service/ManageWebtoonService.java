@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.admin.dto.ManageWebtoonResDto;
 import pretzel.dreamketcherbe.domain.admin.dto.UpdateWebtoonStatusReqDto;
 import pretzel.dreamketcherbe.domain.admin.entity.ManagementWebtoon;
-import pretzel.dreamketcherbe.domain.admin.exception.ManageWebtoonException;
-import pretzel.dreamketcherbe.domain.admin.exception.ManageWebtoonExceptionType;
+import pretzel.dreamketcherbe.domain.admin.exception.AdminException;
+import pretzel.dreamketcherbe.domain.admin.exception.AdminExceptionType;
 import pretzel.dreamketcherbe.domain.admin.repository.ManagementWebtoonRespository;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Genre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
@@ -47,7 +47,7 @@ public class ManageWebtoonService {
                         .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
 
                 ManagementWebtoon manangeWebtoon = managementWebtoonRespository.findByWebtoonId(webtoon.getId())
-                        .orElseThrow(() -> new ManageWebtoonException(ManageWebtoonExceptionType.MANAGE_WEBTOON_NOT_FOUND));
+                        .orElseThrow(() -> new AdminException(AdminExceptionType.MANAGE_WEBTOON_NOT_FOUND));
 
                 return ManageWebtoonResDto.of(webtoon, genre, manangeWebtoon);
             });
