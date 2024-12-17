@@ -5,7 +5,7 @@ import pretzel.dreamketcherbe.common.exception.ExceptionType;
 
 public class MemberException extends BaseException {
 
-  public MemberException(ExceptionType exceptionType) {
-    super(exceptionType);
-  }
+    public MemberException(ExceptionType exceptionType) {
+        super(exceptionType);
+    }
 }

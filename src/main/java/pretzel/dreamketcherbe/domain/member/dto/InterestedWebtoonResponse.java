@@ -11,13 +11,13 @@ public record InterestedWebtoonResponse(
     String description
 ) {
 
-  public static InterestedWebtoonResponse from(InterestedWebtoon interestedWebtoon) {
-    return new InterestedWebtoonResponse(
-        interestedWebtoon.getId(),
-        interestedWebtoon.getWebtoon().getId(),
-        interestedWebtoon.getWebtoon().getTitle(),
-        interestedWebtoon.getWebtoon().getThumbnail(),
-        interestedWebtoon.getWebtoon().getDescription()
-    );
-  }
+    public static InterestedWebtoonResponse from(InterestedWebtoon interestedWebtoon) {
+        return new InterestedWebtoonResponse(
+            interestedWebtoon.getId(),
+            interestedWebtoon.getWebtoon().getId(),
+            interestedWebtoon.getWebtoon().getTitle(),
+            interestedWebtoon.getWebtoon().getThumbnail(),
+            interestedWebtoon.getWebtoon().getDescription()
+        );
+    }
 }

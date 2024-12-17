@@ -24,70 +24,79 @@ import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Episode extends BaseTimeEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false)
-  private String title;
+    @Column(nullable = false)
+    private int no;
 
-  @Column(nullable = false)
-  private String thumbnail;
+    @Column(nullable = false)
+    private String title;
 
-  @Column(nullable = false)
-  private String content;
+    @Column(nullable = false)
+    private String thumbnail;
 
-  @Column(nullable = false, name = "author_note")
-  private String authorNote;
+    @Column(nullable = false)
+    private String content;
 
-  @Column(nullable = false, name = "published_at")
-  private LocalDate publishedAt;
+    @Column(nullable = false, name = "author_note")
+    private String authorNote;
 
-  @ColumnDefault("false")
-  private boolean published;
+    @Column(nullable = false, name = "published_at")
+    private LocalDate publishedAt;
 
-  @ColumnDefault("0")
-  @Column(name = "view_count")
-  private int viewCount;
+    @ColumnDefault("false")
+    private boolean published;
 
-  @ManyToOne
-  @JoinColumn(name = "webtoon_id")
-  private Webtoon webtoon;
+    @ColumnDefault("0")
+    @Column(name = "view_count")
+    private int viewCount;
+    @ColumnDefault("'NOT_APPROVAL'")
+    private String status;
 
-  @ManyToOne
-  @JoinColumn(name = "member_id")
-  private Member member;
+    @ColumnDefault("0")
+    @Column(name = "view_count")
+    private int viewCount;
 
-  @Builder
-  public Episode(String title, String thumbnail, String content, String authorNote,
-      Webtoon webtoon, Member member) {
-    this.title = title;
-    this.thumbnail = thumbnail;
-    this.content = content;
-    this.authorNote = authorNote;
-    this.webtoon = webtoon;
-    this.member = member;
-  }
+    @ManyToOne
+    @JoinColumn(name = "webtoon_id")
+    private Webtoon webtoon;
 
-  public void isAuthor(Long memberId) {
-    if (!member.getId().equals(memberId)) {
-      throw new IllegalStateException(memberId + ", 작성자가 아닙니다.");
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @Builder
+    public Episode(String title, String thumbnail, String content, String authorNote,
+        Webtoon webtoon, Member member) {
+        this.title = title;
+        this.thumbnail = thumbnail;
+        this.content = content;
+        this.authorNote = authorNote;
+        this.webtoon = webtoon;
+        this.member = member;
     }
-  }
 
-  public void updateTitle(String title) {
-    this.title = title;
-  }
+    public void isAuthor(Long memberId) {
+        if (!member.getId().equals(memberId)) {
+            throw new IllegalStateException(memberId + ", 작성자가 아닙니다.");
+        }
+    }
 
-  public void updateThumbnail(String thumbnail) {
-    this.thumbnail = thumbnail;
-  }
+    public void updateTitle(String title) {
+        this.title = title;
+    }
 
-  public void updateContent(String content) {
-    this.content = content;
-  }
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
 
-  public void updateAuthorNote(String authorNote) {
-    this.authorNote = authorNote;
-  }
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public void updateAuthorNote(String authorNote) {
+        this.authorNote = authorNote;
+    }
 }

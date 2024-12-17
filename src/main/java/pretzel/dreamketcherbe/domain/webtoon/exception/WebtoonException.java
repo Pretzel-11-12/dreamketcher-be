@@ -5,7 +5,7 @@ import pretzel.dreamketcherbe.common.exception.ExceptionType;
 
 public class WebtoonException extends BaseException {
 
-  public WebtoonException(ExceptionType exceptionType) {
-    super(exceptionType);
-  }
+    public WebtoonException(ExceptionType exceptionType) {
+        super(exceptionType);
+    }
 }

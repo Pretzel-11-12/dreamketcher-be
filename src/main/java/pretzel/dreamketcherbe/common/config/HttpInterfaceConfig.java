@@ -10,16 +10,16 @@ import pretzel.dreamketcherbe.domain.auth.google.GoogleApiClient;
 @Configuration
 public class HttpInterfaceConfig {
 
-  @Bean
-  public GoogleApiClient googleApiClient() {
-    return createHttpInterface(GoogleApiClient.class);
-  }
+    @Bean
+    public GoogleApiClient googleApiClient() {
+        return createHttpInterface(GoogleApiClient.class);
+    }
 
-  private <T> T createHttpInterface(Class<T> proxyTpye) {
-    WebClient webClient = WebClient.builder().build();
-    return HttpServiceProxyFactory
-        .builderFor(WebClientAdapter.create(webClient))
-        .build()
-        .createClient(proxyTpye);
-  }
+    private <T> T createHttpInterface(Class<T> proxyTpye) {
+        WebClient webClient = WebClient.builder().build();
+        return HttpServiceProxyFactory
+            .builderFor(WebClientAdapter.create(webClient))
+            .build()
+            .createClient(proxyTpye);
+    }
 }

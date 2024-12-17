@@ -9,11 +9,13 @@ import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 
 public interface EpisodeRepository extends JpaRepository<Episode, Long> {
 
-  @Modifying
-  @Query("UPDATE Episode e SET e.viewCount = e.viewCount + 1 WHERE e.id = :episodeId")
-  void increaseViewCount(Long episodeId);
+    @Modifying
+    @Query("UPDATE Episode e SET e.viewCount = e.viewCount + 1 WHERE e.id = :episodeId")
+    void increaseViewCount(Long episodeId);
 
-  Page<Episode> findByWebtoonIdOrderByPublishedAtDesc(Long webtoonId, Pageable pageable);
+    Page<Episode> findByWebtoonIdOrderByPublishedAtDesc(Long webtoonId, Pageable pageable);
 
-  Page<Episode> findByWebtoonIdOrderByPublishedAtAsc(Long webtoonId, Pageable pageable);
+    Page<Episode> findByWebtoonIdOrderByPublishedAtAsc(Long webtoonId, Pageable pageable);
+
+    Page<Episode> findAllByWebtoonId(Long webtoonId, Pageable pageable);
 }

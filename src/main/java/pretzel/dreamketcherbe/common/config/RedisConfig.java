@@ -13,26 +13,26 @@ import pretzel.dreamketcherbe.domain.auth.entity.Token;
 @EnableRedisRepositories
 public class RedisConfig {
 
-  private final String host;
-  private final int port;
+    private final String host;
+    private final int port;
 
-  public RedisConfig(
-      @Value("${spring.data.redis.host}") String host,
-      @Value("${spring.data.redis.port}") int port
-  ) {
-    this.host = host;
-    this.port = port;
-  }
+    public RedisConfig(
+        @Value("${spring.data.redis.host}") String host,
+        @Value("${spring.data.redis.port}") int port
+    ) {
+        this.host = host;
+        this.port = port;
+    }
 
-  @Bean
-  public RedisConnectionFactory redisConnectionFactory() {
-    return new LettuceConnectionFactory(host, port);
-  }
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        return new LettuceConnectionFactory(host, port);
+    }
 
-  @Bean
-  public RedisTemplate<String, Token> reedisTemplate() {
-    RedisTemplate<String, Token> redisTemplate = new RedisTemplate<>();
-    redisTemplate.setConnectionFactory(redisConnectionFactory());
-    return redisTemplate;
-  }
+    @Bean
+    public RedisTemplate<String, Token> reedisTemplate() {
+        RedisTemplate<String, Token> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
+        return redisTemplate;
+    }
 }

@@ -1,14 +1,13 @@
 package pretzel.dreamketcherbe.domain.auth.repository;
 
-import pretzel.dreamketcherbe.domain.auth.entity.Token;
-
 import java.util.Optional;
+import pretzel.dreamketcherbe.domain.auth.entity.Token;
 
 public interface TokenRepository {
 
-  Optional<Token> findByTokenId(String tokenId);
+    Optional<Token> findByTokenId(String tokenId);
 
-  void deleteByTokenId(String tokenId);
+    void deleteByTokenId(String tokenId);
 
-  void save(Token token);
+    void save(Token token);
 }

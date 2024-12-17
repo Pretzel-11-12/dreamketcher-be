@@ -11,22 +11,22 @@ import pretzel.dreamketcherbe.domain.auth.repository.TokenExtractor;
 @RequiredArgsConstructor
 public class AuthFacadeService {
 
-  private final AuthService authService;
-  private final TokenExtractor tokenExtractor;
-  private final GoogleOAuthClient googleOAuthClient;
+    private final AuthService authService;
+    private final TokenExtractor tokenExtractor;
+    private final GoogleOAuthClient googleOAuthClient;
 
-  public TokenResponse loginOrRegister(String code) {
-    GoogleUserInfo googleUserInfo = googleOAuthClient.getOAuthInfo(code);
-    return authService.loginOrRegister(googleUserInfo);
-  }
+    public TokenResponse loginOrRegister(String code) {
+        GoogleUserInfo googleUserInfo = googleOAuthClient.getOAuthInfo(code);
+        return authService.loginOrRegister(googleUserInfo);
+    }
 
-  public TokenResponse renewAccessToken(String refreshToken) {
-    String tokenId = tokenExtractor.extractRefreshToken(refreshToken);
-    return authService.refreshTokenById(tokenId);
-  }
+    public TokenResponse renewAccessToken(String refreshToken) {
+        String tokenId = tokenExtractor.extractRefreshToken(refreshToken);
+        return authService.refreshTokenById(tokenId);
+    }
 
-  public void logout(Long memberId, String refreshToken) {
-    String tokenId = tokenExtractor.extractRefreshToken(refreshToken);
-    authService.logout(memberId, tokenId);
-  }
+    public void logout(Long memberId, String refreshToken) {
+        String tokenId = tokenExtractor.extractRefreshToken(refreshToken);
+        authService.logout(memberId, tokenId);
+    }
 }

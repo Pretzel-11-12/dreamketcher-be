@@ -1,6 +1,13 @@
 package pretzel.dreamketcherbe.domain.webtoon.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,65 +22,73 @@ import pretzel.dreamketcherbe.domain.member.entity.Member;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Webtoon extends BaseTimeEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false)
-  private String title;
+    @Column(nullable = false)
+    private String title;
 
-  @Column(nullable = false)
-  private String thumbnail;
+    @Column(nullable = false)
+    private String thumbnail;
 
-  @Column(nullable = false)
-  private String prologue;
+    @Column(nullable = false)
+    private String prologue;
 
-  @Column(nullable = false)
-  private String story;
+    @Column(nullable = false)
+    private String story;
 
-  @Column(nullable = false)
-  private String description;
+    @Column(nullable = false)
+    private String description;
 
-  @ColumnDefault("'NOT_APPROVAL'")
-  private String approval;
+    @ColumnDefault("'NOT_APPROVAL'")
+    private String approval;
 
-  @ColumnDefault("'PRE_SERIES'")
-  private String status;
+    @ColumnDefault("'PRE_SERIES'")
+    private String status;
 
-  @ManyToOne
-  @JoinColumn(name = "member_id")
-  private Member member;
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private int episodeCount;
 
-  @Builder
-  public Webtoon(String title, String thumbnail, String prologue, String story,
-      String description, String approval, String status, Member member) {
-    this.title = title;
-    this.thumbnail = thumbnail;
-    this.prologue = prologue;
-    this.story = story;
-    this.description = description;
-    this.approval = approval;
-    this.status = status;
-    this.member = member;
-  }
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
 
-  public void updateTitle(String title) {
-    this.title = title;
-  }
+    @Builder
+    public Webtoon(String title, String thumbnail, String prologue, String story,
+        String description, String approval, String status, Member member) {
+        this.title = title;
+        this.thumbnail = thumbnail;
+        this.prologue = prologue;
+        this.story = story;
+        this.description = description;
+        this.approval = approval;
+        this.status = status;
+        this.member = member;
+    }
 
-  public void updateThumbnail(String thumbnail) {
-    this.thumbnail = thumbnail;
-  }
+    public void updateTitle(String title) {
+        this.title = title;
+    }
 
-  public void updatePrologue(String prologue) {
-    this.prologue = prologue;
-  }
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
 
-  public void updateStory(String story) {
-    this.story = story;
-  }
+    public void updatePrologue(String prologue) {
+        this.prologue = prologue;
+    }
 
-  public void updateDescription(String description) {
-    this.description = description;
-  }
+    public void updateStory(String story) {
+        this.story = story;
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public void updateStatus(String status) {
+        this.status = status;
+    }
 }

@@ -13,14 +13,14 @@ public record EpisodeResDto(
     int viewCount
 ) {
 
-  public static EpisodeResDto of(Episode episode) {
-    return EpisodeResDto.builder()
-        .id(episode.getId())
-        .title(episode.getTitle())
-        .thumbnail(episode.getThumbnail())
-        .content(episode.getContent())
-        .authorNote(episode.getAuthorNote())
-        .viewCount(episode.getViewCount())
-        .build();
-  }
+    public static EpisodeResDto of(Episode episode) {
+        return EpisodeResDto.builder()
+            .id(episode.getId())
+            .title(episode.getTitle())
+            .thumbnail(episode.getThumbnail())
+            .content(episode.getContent())
+            .authorNote(episode.getAuthorNote())
+            .viewCount(episode.getViewCount())
+            .build();
+    }
 }
