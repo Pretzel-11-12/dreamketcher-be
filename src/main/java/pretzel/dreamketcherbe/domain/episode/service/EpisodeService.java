@@ -42,6 +42,9 @@ public class EpisodeService {
     private final EpisodeLikeRepository episodeLikeRepository;
     private final EpisodeStarRepository episodeStarRepository;
 
+    /**
+     * 에피소드 목록 조회
+     */
     public WebtoonEpisodeListResDto getWebtoonEpisodes(Long webtoonId, boolean fromFirst, int page, int size) {
 
         Webtoon webtoon = webtoonRepositoy.findById(webtoonId)
