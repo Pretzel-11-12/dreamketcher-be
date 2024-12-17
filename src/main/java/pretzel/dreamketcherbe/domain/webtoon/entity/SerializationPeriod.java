@@ -4,18 +4,26 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 
-@Table(name = "authors")
-@Entity
+import java.time.LocalDate;
+
+@Table(name = "serialization_period")
 @Getter
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Author extends BaseTimeEntity {
+public class SerializationPeriod {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private LocalDate startDate;
+
+    @Column(nullable = false)
+    private LocalDate endDate;
+
+    @OneToOne
+    @JoinColumn(name = "webtoon_id")
+    private Webtoon webtoon;
 }
