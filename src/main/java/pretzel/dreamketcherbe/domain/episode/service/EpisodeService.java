@@ -197,9 +197,20 @@ public class EpisodeService {
     /**
      * 좋아요
      */
+    @Transactional
     public void likeEpisode(Long episodeId, Long memberId) {
         Episode episode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
-        
+
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        if (!episodeLikeRepository.existsByEpisodeIdAndMemberId(memberId, episodeId)) {
+            episode.incrementLikeCount();
+            episodeLikeRepository.save(new EpisodeLike(episode, member));
+        } else {
+            episode.decrementLikeCount();
+            episodeLikeRepository.deleteByEpisodeIdAndMemberId(episodeId, memberId);
+        }
     }
 }

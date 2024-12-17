@@ -38,14 +38,11 @@ public class EpisodeController {
      * 에피소드 목록 조회
      */
     @GetMapping
-    public ResponseEntity<WebtoonEpisodeListResDto> getEpisodes(
-        @PathVariable Long webtoonId,
+    public ResponseEntity<WebtoonEpisodeListResDto> getEpisodes(@PathVariable Long webtoonId,
         @RequestParam(defaultValue = "false") boolean fromFirst,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "20") int size
-    ) {
-        WebtoonEpisodeListResDto result = episodeService.getWebtoonEpisodes(
-            webtoonId, fromFirst, page, size);
+        @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+        WebtoonEpisodeListResDto result = episodeService.getWebtoonEpisodes(webtoonId, fromFirst,
+            page, size);
         return ResponseEntity.ok(result);
     }
 
@@ -94,5 +91,16 @@ public class EpisodeController {
         model.addAttribute("episode", episode);
 
         return "episode-view";
+    }
+
+    /**
+     * 에피소드 좋아요
+     */
+    @PostMapping("/{episodeId}/like")
+    public ResponseEntity<Void> likeEpisode(@Auth Long memberId,
+        @PathVariable("episodeId") Long episodeId) {
+        episodeService.likeEpisode(memberId, episodeId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
