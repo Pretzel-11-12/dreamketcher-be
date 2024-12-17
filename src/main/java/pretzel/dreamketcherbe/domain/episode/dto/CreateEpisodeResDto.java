@@ -8,9 +8,9 @@ public record CreateEpisodeResDto(
     Long id
 ) {
 
-    public static CreateEpisodeResDto of(Episode episode) {
-        return CreateEpisodeResDto.builder()
-            .id(episode.getId())
-            .build();
-    }
+  public static CreateEpisodeResDto of(Episode episode) {
+    return CreateEpisodeResDto.builder()
+        .id(episode.getId())
+        .build();
+  }
 }

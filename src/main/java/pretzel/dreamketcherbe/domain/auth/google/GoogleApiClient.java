@@ -11,9 +11,9 @@ import pretzel.dreamketcherbe.domain.auth.google.dto.GoogleUserInfo;
 
 public interface GoogleApiClient {
 
-    @PostExchange(url = "https://oauth2.googleapis.com/token")
-    GoogleToken fetchToken(@RequestParam MultiValueMap<String, String> params);
+  @PostExchange(url = "https://oauth2.googleapis.com/token")
+  GoogleToken fetchToken(@RequestParam MultiValueMap<String, String> params);
 
-    @GetExchange(url = "https://www.googleapis.com/oauth2/v3/userinfo")
-    GoogleUserInfo fetchUserInfo(@RequestHeader(HttpHeaders.AUTHORIZATION) String accessToken);
+  @GetExchange(url = "https://www.googleapis.com/oauth2/v3/userinfo")
+  GoogleUserInfo fetchUserInfo(@RequestHeader(HttpHeaders.AUTHORIZATION) String accessToken);
 }

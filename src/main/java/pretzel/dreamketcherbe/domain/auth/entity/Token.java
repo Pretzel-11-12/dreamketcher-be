@@ -9,20 +9,20 @@ import java.util.UUID;
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 public class Token {
 
-        private String tokenId;
+  private String tokenId;
 
-        private Long memberId;
+  private Long memberId;
 
-        public Token(Long memberId) {
-            this.tokenId = generatedTokenId();
-            this.memberId = memberId;
-        }
+  public Token(Long memberId) {
+    this.tokenId = generatedTokenId();
+    this.memberId = memberId;
+  }
 
-        private String generatedTokenId() {
-            return UUID.randomUUID().toString();
-        }
+  private String generatedTokenId() {
+    return UUID.randomUUID().toString();
+  }
 
-    public boolean isMatchedMemberId(Long memberId) {
-        return this.memberId.equals(memberId);
-    }
+  public boolean isMatchedMemberId(Long memberId) {
+    return this.memberId.equals(memberId);
+  }
 }

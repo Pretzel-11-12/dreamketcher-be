@@ -14,19 +14,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private final AuthInterceptor authInterceptor;
-    private final AuthArgumentResolver authArgumentResolver;
+  private final AuthInterceptor authInterceptor;
+  private final AuthArgumentResolver authArgumentResolver;
 
-    @Override
-    public void addArgumentResolvers(
-        List<HandlerMethodArgumentResolver> resolvers
-    ) {
-        resolvers.add(authArgumentResolver);
-    }
+  @Override
+  public void addArgumentResolvers(
+      List<HandlerMethodArgumentResolver> resolvers
+  ) {
+    resolvers.add(authArgumentResolver);
+  }
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(authInterceptor)
-            .addPathPatterns("/api/v1/**");
-    }
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(authInterceptor)
+        .addPathPatterns("/api/v1/**");
+  }
 }

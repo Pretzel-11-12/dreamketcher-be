@@ -10,16 +10,16 @@ import pretzel.dreamketcherbe.domain.auth.exception.AuthExceptionType;
 @RequestScope
 public class AuthContext {
 
-    private Long memberId;
+  private Long memberId;
 
-    public Long getMemberId() {
-        if (this.memberId == null) {
-            throw new AuthException(AuthExceptionType.UNAUTHORIZED);
-        }
-        return memberId;
+  public Long getMemberId() {
+    if (this.memberId == null) {
+      throw new AuthException(AuthExceptionType.UNAUTHORIZED);
     }
+    return memberId;
+  }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
-    }
+  public void setMemberId(Long memberId) {
+    this.memberId = memberId;
+  }
 }

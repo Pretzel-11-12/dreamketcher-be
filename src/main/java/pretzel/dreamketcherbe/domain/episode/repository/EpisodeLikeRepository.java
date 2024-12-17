@@ -5,5 +5,5 @@ import pretzel.dreamketcherbe.domain.episode.entity.EpisodeLike;
 
 public interface EpisodeLikeRepository extends JpaRepository<EpisodeLike, Long> {
 
-    long countByEpisodeId(Long episodeId);
+  long countByEpisodeId(Long episodeId);
 }

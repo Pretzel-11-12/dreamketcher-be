@@ -19,15 +19,15 @@ import pretzel.dreamketcherbe.domain.member.entity.Member;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EpisodeLike extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "episode_id")
-    private Episode episode;
+  @ManyToOne
+  @JoinColumn(name = "episode_id")
+  private Episode episode;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
+  @ManyToOne
+  @JoinColumn(name = "member_id")
+  private Member member;
 }

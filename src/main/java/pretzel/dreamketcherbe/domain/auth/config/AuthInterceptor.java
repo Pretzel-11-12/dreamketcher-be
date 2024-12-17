@@ -19,32 +19,32 @@ import static java.util.Arrays.stream;
 @RequiredArgsConstructor
 public class AuthInterceptor implements HandlerInterceptor {
 
-    private final TokenExtractor tokenExtractor;
-    private final AuthContext authContext;
+  private final TokenExtractor tokenExtractor;
+  private final AuthContext authContext;
 
-    @Override
-    public boolean preHandle(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        Object handler
-    ) throws Exception {
+  @Override
+  public boolean preHandle(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Object handler
+  ) throws Exception {
 
-        if (handler instanceof HandlerMethod) {
-            HandlerMethod hm = (HandlerMethod) handler;
+    if (handler instanceof HandlerMethod) {
+      HandlerMethod hm = (HandlerMethod) handler;
 
-            boolean hasAuthAnnotation = stream(hm.getMethodParameters())
-                .anyMatch(p -> p.hasParameterAnnotation(Auth.class));
+      boolean hasAuthAnnotation = stream(hm.getMethodParameters())
+          .anyMatch(p -> p.hasParameterAnnotation(Auth.class));
 
-            if (!hasAuthAnnotation) {
-                return true;
-            }
-        }
-
-        String token = AuthHeaderExtractor.extract(request)
-            .orElseThrow(() -> new AuthException(AuthExceptionType.UNAUTHORIZED));
-        Long memberId = tokenExtractor.extractAccessToken(token);
-
-        authContext.setMemberId(memberId);
+      if (!hasAuthAnnotation) {
         return true;
+      }
     }
+
+    String token = AuthHeaderExtractor.extract(request)
+        .orElseThrow(() -> new AuthException(AuthExceptionType.UNAUTHORIZED));
+    Long memberId = tokenExtractor.extractAccessToken(token);
+
+    authContext.setMemberId(memberId);
+    return true;
+  }
 }

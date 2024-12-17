@@ -20,57 +20,58 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberService {
 
-    private final MemberRepository memberRepository;
-    private final InterestedWebtoonRepository interestedWebtoonRepository;
+  private final MemberRepository memberRepository;
+  private final InterestedWebtoonRepository interestedWebtoonRepository;
 
-    public SelfInfoResponse getSelfInfo(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+  public SelfInfoResponse getSelfInfo(Long memberId) {
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        return SelfInfoResponse.of(member);
+    return SelfInfoResponse.of(member);
+  }
+
+  @Transactional
+  public Object updateProfile(Long memberId, NicknameRequest nicknameRequest) {
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+    if (memberRepository.existsByNickname(nicknameRequest.nickname())) {
+      throw new MemberException(MemberExceptionType.NICKNAME_ALREADY_EXISTS);
     }
 
-    @Transactional
-    public Object updateProfile(Long memberId, NicknameRequest nicknameRequest) {
-        Member member = memberRepository.findById(memberId)
-                            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+    member.updateNickname(nicknameRequest.nickname());
 
-        if (memberRepository.existsByNickname(nicknameRequest.nickname())) {
-            throw new MemberException(MemberExceptionType.NICKNAME_ALREADY_EXISTS);
-        }
+    return memberRepository.save(member);
+  }
 
-        member.updateNickname(nicknameRequest.nickname());
+  public List<InterestedWebtoonResponse> getFavoriteWebtoon(Long memberId) {
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        return memberRepository.save(member);
+    List<InterestedWebtoon> favoriteWebtoons = interestedWebtoonRepository.findAllByMemberId(
+        member);
+
+    return favoriteWebtoons.stream()
+        .map(InterestedWebtoonResponse::from)
+        .toList();
+  }
+
+  public List<Member> getAllMembers() {
+    return memberRepository.findAll();
+  }
+
+  @Transactional
+  public void deleteFavoriteWebtoon(Long memberId, Long interestedWebtoonId) {
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+    InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findById(interestedWebtoonId)
+        .orElseThrow(() -> new MemberException(MemberExceptionType.INTERESTED_WEBTOON_NOT_FOUND));
+
+    if (!interestedWebtoon.getMember().equals(member)) {
+      throw new MemberException(MemberExceptionType.MEMBER_NOT_AUTHORIZED);
     }
 
-    public List<InterestedWebtoonResponse> getFavoriteWebtoon(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
-
-        List<InterestedWebtoon> favoriteWebtoons = interestedWebtoonRepository.findAllByMemberId(member);
-
-        return favoriteWebtoons.stream()
-                    .map(InterestedWebtoonResponse::from)
-                    .toList();
-    }
-
-    public List<Member> getAllMembers() {
-        return memberRepository.findAll();
-    }
-
-    @Transactional
-    public void deleteFavoriteWebtoon(Long memberId, Long interestedWebtoonId) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
-
-        InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findById(interestedWebtoonId)
-            .orElseThrow(() -> new MemberException(MemberExceptionType.INTERESTED_WEBTOON_NOT_FOUND));
-
-        if (!interestedWebtoon.getMember().equals(member)) {
-            throw new MemberException(MemberExceptionType.MEMBER_NOT_AUTHORIZED);
-        }
-
-        interestedWebtoonRepository.delete(interestedWebtoon);
-    }
+    interestedWebtoonRepository.delete(interestedWebtoon);
+  }
 }

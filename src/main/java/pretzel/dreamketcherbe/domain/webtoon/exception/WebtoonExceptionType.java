@@ -5,31 +5,31 @@ import pretzel.dreamketcherbe.common.exception.ExceptionType;
 
 public enum WebtoonExceptionType implements ExceptionType {
 
-    GENRE_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 장르입니다."),
-    WEBTOON_GENRE_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 웹툰 장르입니다."),
-    WEBTOON_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 웹툰을 찾을 수 없습니다.");
+  GENRE_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 장르입니다."),
+  WEBTOON_GENRE_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 웹툰 장르입니다."),
+  WEBTOON_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 웹툰을 찾을 수 없습니다.");
 
-    private final HttpStatus status;
-    private final String message;
+  private final HttpStatus status;
+  private final String message;
 
-    WebtoonExceptionType(HttpStatus status, String message) {
-        this.status = status;
-        this.message = message;
-    }
+  WebtoonExceptionType(HttpStatus status, String message) {
+    this.status = status;
+    this.message = message;
+  }
 
 
-    @Override
-    public String message() {
-        return message;
-    }
+  @Override
+  public String message() {
+    return message;
+  }
 
-    @Override
-    public String code() {
-        return this.name();
-    }
+  @Override
+  public String code() {
+    return this.name();
+  }
 
-    @Override
-    public HttpStatus status() {
-        return status;
-    }
+  @Override
+  public HttpStatus status() {
+    return status;
+  }
 }

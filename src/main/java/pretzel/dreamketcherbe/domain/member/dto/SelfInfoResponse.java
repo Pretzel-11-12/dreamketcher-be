@@ -11,13 +11,13 @@ public record SelfInfoResponse(
     Role role
 ) {
 
-    public static SelfInfoResponse of(Member member) {
-        return new SelfInfoResponse(
-            member.getId(),
-            member.getEmail(),
-            member.getName(),
-            member.getImageUri(),
-            member.getRole()
-            );
-    }
+  public static SelfInfoResponse of(Member member) {
+    return new SelfInfoResponse(
+        member.getId(),
+        member.getEmail(),
+        member.getName(),
+        member.getImageUri(),
+        member.getRole()
+    );
+  }
 }

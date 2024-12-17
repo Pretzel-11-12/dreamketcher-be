@@ -8,9 +8,9 @@ public record CreateWebtoonResDto(
     Long id
 ) {
 
-    public static CreateWebtoonResDto of(Webtoon webtoon) {
-        return CreateWebtoonResDto.builder()
-            .id(webtoon.getId())
-            .build();
-    }
+  public static CreateWebtoonResDto of(Webtoon webtoon) {
+    return CreateWebtoonResDto.builder()
+        .id(webtoon.getId())
+        .build();
+  }
 }

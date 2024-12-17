@@ -31,125 +31,127 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class WebtoonService {
 
-    private final WebtoonRepository webtoonRepository;
+  private final WebtoonRepository webtoonRepository;
 
-    private final WebtoonGenreRepository webtoonGenreRepository;
+  private final WebtoonGenreRepository webtoonGenreRepository;
 
-    private final GenreRepository GenreRepository;
+  private final GenreRepository GenreRepository;
 
-    private final MemberRepository memberRepository;
+  private final MemberRepository memberRepository;
 
-    private final InterestedWebtoonRepository interestedWebtoonRepository;
+  private final InterestedWebtoonRepository interestedWebtoonRepository;
 
-    /**
-     * 웹툰 장르별 목록 조회
-     */
-    public List<WebtoonResDto> getWebtoonsByGenre(final String genreName) {
-        Genre genre = GenreRepository.findByName(genreName)
-            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
+  /**
+   * 웹툰 장르별 목록 조회
+   */
+  public List<WebtoonResDto> getWebtoonsByGenre(final String genreName) {
+    Genre genre = GenreRepository.findByName(genreName)
+        .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
 
-        List<Long> webtoonIds = webtoonGenreRepository.findByGenreId(genre.getId())
-            .stream()
-            .map(webtoonGenre -> webtoonGenre.getWebtoon().getId())
-            .collect(Collectors.toList());
+    List<Long> webtoonIds = webtoonGenreRepository.findByGenreId(genre.getId())
+        .stream()
+        .map(webtoonGenre -> webtoonGenre.getWebtoon().getId())
+        .collect(Collectors.toList());
 
-        return webtoonRepository.findAllById(webtoonIds)
-            .stream()
-            .map(WebtoonResDto::of)
-            .collect(Collectors.toList());
+    return webtoonRepository.findAllById(webtoonIds)
+        .stream()
+        .map(WebtoonResDto::of)
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * 웹툰 완결 목록 조회
+   */
+  public List<WebtoonResDto> getWebtoonsByFinish() {
+    return webtoonRepository.findAllByStatus(WebtoonStatus.FINISH.getStatus())
+        .stream()
+        .map(WebtoonResDto::of)
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * 웹툰 신작 목록 조회
+   */
+  public List<WebtoonResDto> getWebtoonsByNew() {
+    LocalDateTime cutoffDate = LocalDateTime.now().minusMonths(1);
+
+    return webtoonRepository.findAllByStatusAndCreatedAtAfter(WebtoonStatus.IN_SERIES.getStatus(),
+            cutoffDate)
+        .stream()
+        .map(WebtoonResDto::of)
+        .collect(Collectors.toList());
+  }
+
+  /*
+   * 웹툰 등록
+   */
+  public CreateWebtoonResDto createWebtoon(Long memberId, CreateWebtoonReqDto request) {
+    Member findMember = memberRepository.findById(memberId)
+        .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+    Webtoon newWebtoon = Webtoon.builder()
+        .title(request.title())
+        .thumbnail(request.thumbnail())
+        .prologue(request.prologue())
+        .story(request.story())
+        .description(request.description())
+        .approval("not_approval")
+        .status("pre_series")
+        .member(findMember)
+        .build();
+
+    webtoonRepository.save(newWebtoon);
+
+    return CreateWebtoonResDto.of(newWebtoon);
+  }
+
+  /*
+   * 관심 웹툰 추가
+   */
+  @Transactional
+  public void addFavoriteWebtoon(Long memberId, Long webtoonId) {
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new WebtoonException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+    Webtoon webtoon = webtoonRepository.findById(webtoonId)
+        .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+    if (interestedWebtoonRepository.findByMemberAndWebtoon(member, webtoon).isPresent()) {
+      throw new MemberException(MemberExceptionType.ALREADY_FAVORITED);
     }
 
-    /**
-     * 웹툰 완결 목록 조회
-     */
-    public List<WebtoonResDto> getWebtoonsByFinish() {
-        return webtoonRepository.findAllByStatus(WebtoonStatus.FINISH.getStatus())
-            .stream()
-            .map(WebtoonResDto::of)
-            .collect(Collectors.toList());
-    }
+    InterestedWebtoon interestedWebtoon = InterestedWebtoon.builder()
+        .member(member)
+        .webtoon(webtoon)
+        .build();
 
-    /**
-     * 웹툰 신작 목록 조회
-     */
-    public List<WebtoonResDto> getWebtoonsByNew() {
-        LocalDateTime cutoffDate = LocalDateTime.now().minusMonths(1);
+    interestedWebtoonRepository.save(interestedWebtoon);
+  }
 
-        return webtoonRepository.findAllByStatusAndCreatedAtAfter(WebtoonStatus.IN_SERIES.getStatus(), cutoffDate)
-            .stream()
-            .map(WebtoonResDto::of)
-            .collect(Collectors.toList());
-    }
+  /**
+   * 웹툰 수정
+   */
+  public void updateWebtoon(Long memberId, Long webtoonId, UpdateWebtoonReqDto request) {
+    Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+        .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-    /*
-     * 웹툰 등록
-     */
-    public CreateWebtoonResDto createWebtoon(Long memberId, CreateWebtoonReqDto request) {
-        Member findMember = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+    findWebtoon.getId();
+    findWebtoon.updateTitle(request.title());
+    findWebtoon.updateThumbnail(request.thumbnail());
+    findWebtoon.updatePrologue(request.prologue());
+    findWebtoon.updateStory(request.story());
+    findWebtoon.updateDescription(request.description());
 
-        Webtoon newWebtoon = Webtoon.builder()
-            .title(request.title())
-            .thumbnail(request.thumbnail())
-            .prologue(request.prologue())
-            .story(request.story())
-            .description(request.description())
-            .approval("not_approval")
-            .status("pre_series")
-            .member(findMember)
-            .build();
+    webtoonRepository.save(findWebtoon);
+  }
 
-        webtoonRepository.save(newWebtoon);
+  /**
+   * 웹툰 삭제
+   */
+  public void deleteWebtoon(Long memberId, Long webtoonId) {
+    Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+        .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-        return CreateWebtoonResDto.of(newWebtoon);
-    }
-
-    /*
-     * 관심 웹툰 추가
-     */
-    @Transactional
-    public void addFavoriteWebtoon(Long memberId, Long webtoonId) {
-        Member member = memberRepository.findById(memberId)
-                            .orElseThrow(() -> new WebtoonException(MemberExceptionType.MEMBER_NOT_FOUND));
-
-        Webtoon webtoon = webtoonRepository.findById(webtoonId)
-                              .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
-
-        if (interestedWebtoonRepository.findByMemberAndWebtoon(member, webtoon).isPresent()) {
-            throw new MemberException(MemberExceptionType.ALREADY_FAVORITED);
-        }
-
-        InterestedWebtoon interestedWebtoon = InterestedWebtoon.builder()
-                                                  .member(member)
-                                                  .webtoon(webtoon)
-                                                  .build();
-
-        interestedWebtoonRepository.save(interestedWebtoon);
-    }
-    /**
-     * 웹툰 수정
-     */
-    public void updateWebtoon(Long memberId, Long webtoonId, UpdateWebtoonReqDto request) {
-        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
-            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
-
-        findWebtoon.getId();
-        findWebtoon.updateTitle(request.title());
-        findWebtoon.updateThumbnail(request.thumbnail());
-        findWebtoon.updatePrologue(request.prologue());
-        findWebtoon.updateStory(request.story());
-        findWebtoon.updateDescription(request.description());
-
-        webtoonRepository.save(findWebtoon);
-    }
-
-    /**
-     * 웹툰 삭제
-     */
-    public void deleteWebtoon(Long memberId, Long webtoonId) {
-        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
-            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
-
-        webtoonRepository.delete(findWebtoon);
-    }
+    webtoonRepository.delete(findWebtoon);
+  }
 }

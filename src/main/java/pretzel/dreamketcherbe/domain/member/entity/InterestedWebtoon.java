@@ -13,21 +13,21 @@ import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 @NoArgsConstructor
 public class InterestedWebtoon extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
+  @ManyToOne
+  @JoinColumn(name = "member_id")
+  private Member member;
 
-    @ManyToOne
-    @JoinColumn(name = "webtoon_id")
-    private Webtoon webtoon;
+  @ManyToOne
+  @JoinColumn(name = "webtoon_id")
+  private Webtoon webtoon;
 
-    @Builder
-    public InterestedWebtoon(Member member, Webtoon webtoon) {
-        this.member = member;
-        this.webtoon = webtoon;
-    }
+  @Builder
+  public InterestedWebtoon(Member member, Webtoon webtoon) {
+    this.member = member;
+    this.webtoon = webtoon;
+  }
 }

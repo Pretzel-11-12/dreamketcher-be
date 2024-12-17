@@ -5,7 +5,7 @@ import pretzel.dreamketcherbe.common.exception.ExceptionType;
 
 public class EpisodeException extends BaseException {
 
-    public EpisodeException(ExceptionType exceptionType) {
-        super(exceptionType);
-    }
+  public EpisodeException(ExceptionType exceptionType) {
+    super(exceptionType);
+  }
 }

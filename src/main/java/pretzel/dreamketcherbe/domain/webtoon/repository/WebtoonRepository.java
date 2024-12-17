@@ -7,7 +7,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
-    List<Webtoon> findAllByStatus(String status);
 
-    List<Webtoon> findAllByStatusAndCreatedAtAfter(String status, LocalDateTime createdAt);
+  List<Webtoon> findAllByStatus(String status);
+
+  List<Webtoon> findAllByStatusAndCreatedAtAfter(String status, LocalDateTime createdAt);
 }

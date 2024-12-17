@@ -22,23 +22,23 @@ import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EpisodeStar extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    @ColumnDefault("0")
-    private float point;
+  @Column(nullable = false)
+  @ColumnDefault("0")
+  private float point;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
+  @ManyToOne
+  @JoinColumn(name = "member_id")
+  private Member member;
 
-    @ManyToOne
-    @JoinColumn(name = "webtoon_id")
-    private Webtoon webtoon;
+  @ManyToOne
+  @JoinColumn(name = "webtoon_id")
+  private Webtoon webtoon;
 
-    @ManyToOne
-    @JoinColumn(name = "episode_id")
-    private Episode episode;
+  @ManyToOne
+  @JoinColumn(name = "episode_id")
+  private Episode episode;
 }

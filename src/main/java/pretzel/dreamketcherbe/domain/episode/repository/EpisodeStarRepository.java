@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface EpisodeStarRepository extends JpaRepository<EpisodeStar, Long> {
 
-    List<EpisodeStar> findByEpisodeId(Long episodeId);
+  List<EpisodeStar> findByEpisodeId(Long episodeId);
 }

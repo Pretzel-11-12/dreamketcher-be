@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 
 public interface ExceptionType {
 
-    String message();
+  String message();
 
-    String code();
+  String code();
 
-    HttpStatus status();
+  HttpStatus status();
 }

@@ -20,70 +20,71 @@ import java.util.List;
 @AllArgsConstructor
 public class WebtoonController {
 
-    private final WebtoonService webtoonService;
+  private final WebtoonService webtoonService;
 
-    /**
-     * 장르별 웹툰 목록 조회
-     */
-    @GetMapping
-    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByGenre(@RequestParam String genre) {
-        return ResponseEntity.ok(webtoonService.getWebtoonsByGenre(genre));
-    }
+  /**
+   * 장르별 웹툰 목록 조회
+   */
+  @GetMapping
+  public ResponseEntity<List<WebtoonResDto>> getWebtoonsByGenre(@RequestParam String genre) {
+    return ResponseEntity.ok(webtoonService.getWebtoonsByGenre(genre));
+  }
 
-    /**
-     * 웹툰 완결 목록 조회
-     */
-    @GetMapping("/finish")
-    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByFinish() {
-        return ResponseEntity.ok(webtoonService.getWebtoonsByFinish());
-    }
+  /**
+   * 웹툰 완결 목록 조회
+   */
+  @GetMapping("/finish")
+  public ResponseEntity<List<WebtoonResDto>> getWebtoonsByFinish() {
+    return ResponseEntity.ok(webtoonService.getWebtoonsByFinish());
+  }
 
-    /**
-     * 웹툰 신작 목록 조회
-     */
-    @GetMapping("/new")
-    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByNew() {
-        return ResponseEntity.ok(webtoonService.getWebtoonsByNew());
-    }
+  /**
+   * 웹툰 신작 목록 조회
+   */
+  @GetMapping("/new")
+  public ResponseEntity<List<WebtoonResDto>> getWebtoonsByNew() {
+    return ResponseEntity.ok(webtoonService.getWebtoonsByNew());
+  }
 
-    /**
-     * 웹툰 등록
-     */
-    @PostMapping
-    public ResponseEntity<CreateWebtoonResDto> createWebtoon(@Auth Long memberId,
-        @RequestBody @Valid
-        CreateWebtoonReqDto request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(webtoonService.createWebtoon(memberId, request));
-    }
+  /**
+   * 웹툰 등록
+   */
+  @PostMapping
+  public ResponseEntity<CreateWebtoonResDto> createWebtoon(@Auth Long memberId,
+      @RequestBody @Valid
+      CreateWebtoonReqDto request) {
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(webtoonService.createWebtoon(memberId, request));
+  }
 
-    /**
-     * 관심 웹툰 추가
-     */
-    @PostMapping("/{webtoonId}/favorite")
-    public ResponseEntity<Void> addFavoriteWebtoon(@Auth Long memberId,
-                                                   @PathVariable Long webtoonId) {
-        webtoonService.addFavoriteWebtoon(memberId, webtoonId);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-    /**
-     * 웹툰 수정
-     */
-    @PutMapping("/{webtoonId}")
-    public ResponseEntity<Void> updateWebtoon(@Auth Long memberId,
-        @PathVariable("webtoonId") Long webtoonId,
-        @RequestBody @Valid UpdateWebtoonReqDto request) {
-        webtoonService.updateWebtoon(memberId, webtoonId, request);
-        return ResponseEntity.ok().build();
-    }
+  /**
+   * 관심 웹툰 추가
+   */
+  @PostMapping("/{webtoonId}/favorite")
+  public ResponseEntity<Void> addFavoriteWebtoon(@Auth Long memberId,
+      @PathVariable Long webtoonId) {
+    webtoonService.addFavoriteWebtoon(memberId, webtoonId);
+    return ResponseEntity.status(HttpStatus.CREATED).build();
+  }
 
-    /**
-     * 웹툰 삭제
-     */
-    @DeleteMapping("/{webtoonId}")
-    public ResponseEntity<Void> deleteWebtoon(@Auth Long memberId,
-        @PathVariable("webtoonId") Long webtoonId) {
-        webtoonService.deleteWebtoon(memberId, webtoonId);
-        return ResponseEntity.ok().build();
-    }
+  /**
+   * 웹툰 수정
+   */
+  @PutMapping("/{webtoonId}")
+  public ResponseEntity<Void> updateWebtoon(@Auth Long memberId,
+      @PathVariable("webtoonId") Long webtoonId,
+      @RequestBody @Valid UpdateWebtoonReqDto request) {
+    webtoonService.updateWebtoon(memberId, webtoonId, request);
+    return ResponseEntity.ok().build();
+  }
+
+  /**
+   * 웹툰 삭제
+   */
+  @DeleteMapping("/{webtoonId}")
+  public ResponseEntity<Void> deleteWebtoon(@Auth Long memberId,
+      @PathVariable("webtoonId") Long webtoonId) {
+    webtoonService.deleteWebtoon(memberId, webtoonId);
+    return ResponseEntity.ok().build();
+  }
 }

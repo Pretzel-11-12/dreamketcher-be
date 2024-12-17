@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface InterestedWebtoonRepository extends JpaRepository<InterestedWebtoon, Long> {
-    List<InterestedWebtoon> findAllByMemberId(Member member);
 
-    Optional<InterestedWebtoon> findByMemberAndWebtoon(Member member, Webtoon webtoon);
+  List<InterestedWebtoon> findAllByMemberId(Member member);
+
+  Optional<InterestedWebtoon> findByMemberAndWebtoon(Member member, Webtoon webtoon);
 }

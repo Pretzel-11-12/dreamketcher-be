@@ -19,74 +19,74 @@ import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final MemberRepository memberRepository;
-    private final TokenProvider tokenprovider;
-    private final TokenRepository tokenRepository;
+  private final MemberRepository memberRepository;
+  private final TokenProvider tokenprovider;
+  private final TokenRepository tokenRepository;
 
-    @Transactional
-    public TokenResponse loginOrRegister(GoogleUserInfo googleUserInfo) {
-        Member member = getOrCreateMember(googleUserInfo);
-        return createToken(member.getId());
-    }
+  @Transactional
+  public TokenResponse loginOrRegister(GoogleUserInfo googleUserInfo) {
+    Member member = getOrCreateMember(googleUserInfo);
+    return createToken(member.getId());
+  }
 
-    private Token getAndDeleteToken(String tokenId) {
-        Token token = tokenRepository.findByTokenId(tokenId)
-            .orElseThrow(() -> new AuthException(AuthExceptionType.INVALID_TOKEN));
-        tokenRepository.deleteByTokenId(tokenId);
-        return token;
-    }
+  private Token getAndDeleteToken(String tokenId) {
+    Token token = tokenRepository.findByTokenId(tokenId)
+        .orElseThrow(() -> new AuthException(AuthExceptionType.INVALID_TOKEN));
+    tokenRepository.deleteByTokenId(tokenId);
+    return token;
+  }
 
-    private Member getOrCreateMember(GoogleUserInfo googleUserInfo) {
-        return memberRepository.findBySocialId(googleUserInfo.socialId())
-            .orElseGet(() -> memberRepository.save(createNewMember(googleUserInfo)));
-    }
+  private Member getOrCreateMember(GoogleUserInfo googleUserInfo) {
+    return memberRepository.findBySocialId(googleUserInfo.socialId())
+        .orElseGet(() -> memberRepository.save(createNewMember(googleUserInfo)));
+  }
 
-    private Member createNewMember(GoogleUserInfo googleUserInfo) {
-        String nickname = generateUniqueNickname();
-        return googleUserInfo.toMember(nickname);
-    }
+  private Member createNewMember(GoogleUserInfo googleUserInfo) {
+    String nickname = generateUniqueNickname();
+    return googleUserInfo.toMember(nickname);
+  }
 
-    private String generateUniqueNickname() {
-        String baseNickname = NicknameGenerator.generate();
-        String uniqueNickname = baseNickname;
-        while (memberRepository.existsByNickname(uniqueNickname)) {
-            uniqueNickname = NicknameGenerator.generateWithRandomSuffix();
-        }
-        return uniqueNickname;
+  private String generateUniqueNickname() {
+    String baseNickname = NicknameGenerator.generate();
+    String uniqueNickname = baseNickname;
+    while (memberRepository.existsByNickname(uniqueNickname)) {
+      uniqueNickname = NicknameGenerator.generateWithRandomSuffix();
     }
+    return uniqueNickname;
+  }
 
-    private TokenResponse createToken(Long memberId) {
-        Token token = new Token(memberId);
-        tokenRepository.save(token);
-        return generatedTokenPair(token);
-    }
+  private TokenResponse createToken(Long memberId) {
+    Token token = new Token(memberId);
+    tokenRepository.save(token);
+    return generatedTokenPair(token);
+  }
 
-    private TokenResponse generatedTokenPair(Token token) {
-        String accessToken = tokenprovider.generatedAccessToken(token.getMemberId());
-        String refreshToken = tokenprovider.generatedRefreshToken(token.getTokenId());
-        return TokenResponse.of(accessToken, refreshToken);
-    }
+  private TokenResponse generatedTokenPair(Token token) {
+    String accessToken = tokenprovider.generatedAccessToken(token.getMemberId());
+    String refreshToken = tokenprovider.generatedRefreshToken(token.getTokenId());
+    return TokenResponse.of(accessToken, refreshToken);
+  }
 
-    public TokenResponse refreshTokenById(String tokenId) {
-        Token token = getAndDeleteToken(tokenId);
-        return createToken(token.getMemberId());
-    }
+  public TokenResponse refreshTokenById(String tokenId) {
+    Token token = getAndDeleteToken(tokenId);
+    return createToken(token.getMemberId());
+  }
 
-    public void logout(Long memberId, String tokenId) {
-        Token token = getTokenById(tokenId);
-        validateTokenOwnership(token, memberId);
-        tokenRepository.deleteByTokenId(tokenId);
-    }
+  public void logout(Long memberId, String tokenId) {
+    Token token = getTokenById(tokenId);
+    validateTokenOwnership(token, memberId);
+    tokenRepository.deleteByTokenId(tokenId);
+  }
 
-    public Token getTokenById(String tokenId) {
-        return tokenRepository.findByTokenId(tokenId)
-            .orElseThrow(() -> new AuthException(AuthExceptionType.INVALID_TOKEN));
-    }
+  public Token getTokenById(String tokenId) {
+    return tokenRepository.findByTokenId(tokenId)
+        .orElseThrow(() -> new AuthException(AuthExceptionType.INVALID_TOKEN));
+  }
 
-    public void validateTokenOwnership(Token token, Long memberId) {
-        if (token.isMatchedMemberId(memberId)) {
-            return;
-        }
-        throw new AuthException(AuthExceptionType.DISMATCHED_AUTHORIZATION);
+  public void validateTokenOwnership(Token token, Long memberId) {
+    if (token.isMatchedMemberId(memberId)) {
+      return;
     }
+    throw new AuthException(AuthExceptionType.DISMATCHED_AUTHORIZATION);
+  }
 }

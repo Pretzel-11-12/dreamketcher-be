@@ -19,67 +19,68 @@ import pretzel.dreamketcherbe.domain.episode.service.EpisodeService;
 @AllArgsConstructor
 public class EpisodeController {
 
-    private final EpisodeService episodeService;
 
-    /**
-     * 에피소드 목록 조회
-     */
-    @GetMapping
-    public ResponseEntity<WebtoonEpisodeListResDto> getEpisodes(
-        @PathVariable Long webtoonId,
-        @RequestParam(defaultValue = "false") boolean fromFirst,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "20") int size
-    ) {
-        WebtoonEpisodeListResDto result = episodeService.getWebtoonEpisodes(
-            webtoonId, fromFirst, page, size);
-        return ResponseEntity.ok(result);
-    }
+  private final EpisodeService episodeService;
 
-    /**
-     * 에피소드 등록
-     */
-    @PostMapping("/uploads")
-    public ResponseEntity<CreateEpisodeResDto> createEpisode(@Auth Long memberId,
-                                                             @RequestBody @Valid CreateEpisodeReqDto request) {
+  /**
+   * 에피소드 목록 조회
+   */
+  @GetMapping
+  public ResponseEntity<WebtoonEpisodeListResDto> getEpisodes(
+      @PathVariable Long webtoonId,
+      @RequestParam(defaultValue = "false") boolean fromFirst,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size
+  ) {
+    WebtoonEpisodeListResDto result = episodeService.getWebtoonEpisodes(
+        webtoonId, fromFirst, page, size);
+    return ResponseEntity.ok(result);
+  }
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                   .body(episodeService.createEpisode(memberId, request));
-    }
+  /**
+   * 에피소드 등록
+   */
+  @PostMapping("/uploads")
+  public ResponseEntity<CreateEpisodeResDto> createEpisode(@Auth Long memberId,
+      @RequestBody @Valid CreateEpisodeReqDto request) {
 
-    /**
-     * 에피소드 수정
-     */
-    @PutMapping("/{episodeId}")
-    public ResponseEntity<Void> updateEpisode(@Auth Long memberId,
-                                              @PathVariable("episodeId") Long episodeId,
-                                              @RequestBody @Valid UpdateEpisodeReqDto request) {
-        episodeService.updateEpisode(memberId, episodeId, request);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(episodeService.createEpisode(memberId, request));
+  }
 
-        return ResponseEntity.ok().build();
-    }
+  /**
+   * 에피소드 수정
+   */
+  @PutMapping("/{episodeId}")
+  public ResponseEntity<Void> updateEpisode(@Auth Long memberId,
+      @PathVariable("episodeId") Long episodeId,
+      @RequestBody @Valid UpdateEpisodeReqDto request) {
+    episodeService.updateEpisode(memberId, episodeId, request);
 
-    /**
-     * 에피소드 삭제
-     */
-    @DeleteMapping("/{episodeId}")
-    public ResponseEntity<Void> deleteEpisode(@Auth Long memberId,
-                                              @PathVariable("episodeId") Long episodeId) {
-        episodeService.deleteEpisode(memberId, episodeId);
+    return ResponseEntity.ok().build();
+  }
 
-        return ResponseEntity.ok().build();
-    }
+  /**
+   * 에피소드 삭제
+   */
+  @DeleteMapping("/{episodeId}")
+  public ResponseEntity<Void> deleteEpisode(@Auth Long memberId,
+      @PathVariable("episodeId") Long episodeId) {
+    episodeService.deleteEpisode(memberId, episodeId);
 
-    /**
-     * 에피소드 상세 조회
-     */
-    @GetMapping("/{episodeId}")
-    public String getEpisode(@PathVariable("episodeId") Long episodeId, Model model,
-                             HttpServletRequest request, HttpServletResponse response) {
-        EpisodeResDto episode = episodeService.getEpisode(episodeId, request, response);
-        episodeService.increaseViewCount(episodeId);
-        model.addAttribute("episode", episode);
+    return ResponseEntity.ok().build();
+  }
 
-        return "episode-view";
-    }
+  /**
+   * 에피소드 상세 조회
+   */
+  @GetMapping("/{episodeId}")
+  public String getEpisode(@PathVariable("episodeId") Long episodeId, Model model,
+      HttpServletRequest request, HttpServletResponse response) {
+    EpisodeResDto episode = episodeService.getEpisode(episodeId, request, response);
+    episodeService.increaseViewCount(episodeId);
+    model.addAttribute("episode", episode);
+
+    return "episode-view";
+  }
 }

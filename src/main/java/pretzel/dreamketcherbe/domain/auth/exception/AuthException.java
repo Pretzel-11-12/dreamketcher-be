@@ -5,7 +5,7 @@ import pretzel.dreamketcherbe.common.exception.ExceptionType;
 
 public class AuthException extends BaseException {
 
-    public AuthException(ExceptionType exceptionType) {
-        super(exceptionType);
-    }
+  public AuthException(ExceptionType exceptionType) {
+    super(exceptionType);
+  }
 }

@@ -10,11 +10,11 @@ public record WebtoonResDto(
     String title
 ) {
 
-    public static WebtoonResDto of(Webtoon webtoon) {
-        return WebtoonResDto.builder()
-            .thumbnail(webtoon.getThumbnail())
-            .member(webtoon.getMember().getName())
-            .title(webtoon.getTitle())
-            .build();
-    }
+  public static WebtoonResDto of(Webtoon webtoon) {
+    return WebtoonResDto.builder()
+        .thumbnail(webtoon.getThumbnail())
+        .member(webtoon.getMember().getName())
+        .title(webtoon.getTitle())
+        .build();
+  }
 }

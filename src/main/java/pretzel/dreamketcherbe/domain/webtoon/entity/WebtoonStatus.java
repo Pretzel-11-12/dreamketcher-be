@@ -1,17 +1,16 @@
 package pretzel.dreamketcherbe.domain.webtoon.entity;
 
 public enum WebtoonStatus {
-    FINISH("FINISH"),
-    IN_SERIES("IN_SERIES")
-    ;
+  FINISH("FINISH"),
+  IN_SERIES("IN_SERIES");
 
-    private String status;
+  private String status;
 
-    WebtoonStatus(String status) {
-        this.status = status;
-    }
+  WebtoonStatus(String status) {
+    this.status = status;
+  }
 
-    public String getStatus() {
-        return status;
-    }
+  public String getStatus() {
+    return status;
+  }
 }

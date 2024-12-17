@@ -12,15 +12,15 @@ import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class WebtoonGenre extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "genre_id")
-    private Genre genre;
+  @ManyToOne
+  @JoinColumn(name = "genre_id")
+  private Genre genre;
 
-    @ManyToOne
-    @JoinColumn(name = "webtoon_id")
-    private Webtoon webtoon;
+  @ManyToOne
+  @JoinColumn(name = "webtoon_id")
+  private Webtoon webtoon;
 }
