@@ -21,6 +21,9 @@ import pretzel.dreamketcherbe.domain.webtoon.repository.GenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class ManageWebtoonService {
@@ -40,18 +43,21 @@ public class ManageWebtoonService {
         Page<Webtoon> webtoons = webtoonRepository.findAllByOrderByCreatedAtDesc(pageable);
 
         return webtoons.map(webtoon -> {
-            WebtoonGenre webtoonGenre = webtoonGenreRepository.findByWebtoonId(webtoon.getId())
-                .orElseThrow(
-                    () -> new WebtoonException(WebtoonExceptionType.WEBTOON_GENRE_NOT_FOUND));
+            List<WebtoonGenre> webtoonGenres = webtoonGenreRepository.findByWebtoonId(
+                webtoon.getId());
+            List<String> genres = new ArrayList<>();
 
-            Genre genre = genreRepository.findById(webtoonGenre.getGenre().getId())
-                .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
+            for (WebtoonGenre webtoonGenre : webtoonGenres) {
+                Genre genre = genreRepository.findById(webtoonGenre.getGenre().getId())
+                    .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
+                genres.add(genre.getName());
+            }
 
             ManagementWebtoon manangeWebtoon = managementWebtoonRespository.findByWebtoonId(
                     webtoon.getId())
                 .orElseThrow(() -> new AdminException(AdminExceptionType.MANAGE_WEBTOON_NOT_FOUND));
 
-            return ManageWebtoonResDto.of(webtoon, genre, manangeWebtoon);
+            return ManageWebtoonResDto.of(webtoon, genres, manangeWebtoon);
         });
     }
 
