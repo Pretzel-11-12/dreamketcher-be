@@ -8,4 +8,6 @@ import java.util.List;
 public interface WebtoonGenreRepository extends JpaRepository<WebtoonGenre, Long> {
 
     List<WebtoonGenre> findByGenreId(Long genreId);
+
+    List<WebtoonGenre> findByWebtoonId(Long webtoonId);
 }
