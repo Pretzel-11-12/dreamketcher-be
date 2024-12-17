@@ -52,12 +52,9 @@ public class Episode extends BaseTimeEntity {
     @ColumnDefault("0")
     @Column(name = "view_count")
     private int viewCount;
+
     @ColumnDefault("'NOT_APPROVAL'")
     private String status;
-
-    @ColumnDefault("0")
-    @Column(name = "view_count")
-    private int viewCount;
 
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
