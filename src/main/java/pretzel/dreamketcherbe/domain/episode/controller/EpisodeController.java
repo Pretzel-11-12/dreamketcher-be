@@ -36,10 +36,11 @@ public class EpisodeController {
      */
     @PostMapping("/uploads")
     public ResponseEntity<CreateEpisodeResDto> createEpisode(@Auth Long memberId,
+        @PathVariable("webtoonId") Long webtoonId,
         @RequestBody @Valid CreateEpisodeReqDto request) {
-        
+
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(episodeService.createEpisode(memberId, request));
+            .body(episodeService.createEpisode(memberId, webtoonId, request));
     }
 
     /**
@@ -47,9 +48,10 @@ public class EpisodeController {
      */
     @PutMapping("/{episodeId}")
     public ResponseEntity<Void> updateEpisode(@Auth Long memberId,
+        @PathVariable("webtoonId") Long webtoonId,
         @PathVariable("episodeId") Long episodeId,
         @RequestBody @Valid UpdateEpisodeReqDto request) {
-        episodeService.updateEpisode(memberId, episodeId, request);
+        episodeService.updateEpisode(memberId, webtoonId, episodeId, request);
 
         return ResponseEntity.ok().build();
     }
@@ -59,8 +61,9 @@ public class EpisodeController {
      */
     @DeleteMapping("/{episodeId}")
     public ResponseEntity<Void> deleteEpisode(@Auth Long memberId,
+        @PathVariable("webtoonId") Long webtoonId,
         @PathVariable("episodeId") Long episodeId) {
-        episodeService.deleteEpisode(memberId, episodeId);
+        episodeService.deleteEpisode(memberId, webtoonId, episodeId);
 
         return ResponseEntity.ok().build();
     }
@@ -69,10 +72,12 @@ public class EpisodeController {
      * 에피소드 조회
      */
     @GetMapping("/{episodeId}")
-    public String getEpisode(@PathVariable("episodeId") Long episodeId, Model model,
+    public String getEpisode(@PathVariable("episodeId") Long episodeId,
+        @PathVariable("webtoonId") Long webtoonId
+        , Model model,
         HttpServletRequest request, HttpServletResponse response) {
-        EpisodeResDto episode = episodeService.getEpisode(episodeId, request, response);
-        episodeService.increaseViewCount(episodeId);
+        EpisodeResDto episode = episodeService.getEpisode(webtoonId, episodeId, request, response);
+
         model.addAttribute("episode", episode);
 
         return "episode-view";
