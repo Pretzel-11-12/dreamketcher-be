@@ -18,7 +18,8 @@ public class NicknameGenerator {
     private static final Random random = new Random();
 
     public static String generate() {
-        return ADJECTIVES.get(random.nextInt(ADJECTIVES.size())) + " " + BIRDS.get(random.nextInt(BIRDS.size()));
+        return ADJECTIVES.get(random.nextInt(ADJECTIVES.size())) + " " + BIRDS.get(
+            random.nextInt(BIRDS.size()));
     }
 
     public static String generateWithRandomSuffix() {

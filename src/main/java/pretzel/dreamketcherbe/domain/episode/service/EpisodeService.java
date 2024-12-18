@@ -3,26 +3,34 @@ package pretzel.dreamketcherbe.domain.episode.service;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.transaction.annotation.Transactional;
-
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
+import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
+import pretzel.dreamketcherbe.domain.episode.entity.EpisodeStar;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeExceptionType;
+import pretzel.dreamketcherbe.domain.episode.repository.EpisodeLikeRepository;
 import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
+import pretzel.dreamketcherbe.domain.episode.repository.EpisodeStarRepository;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
+import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonGenre;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
+import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
 @Slf4j
@@ -31,9 +39,67 @@ import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 public class EpisodeService {
 
     private final EpisodeRepository episodeRepository;
-
     private final MemberRepository memberRepository;
     private final WebtoonRepository webtoonRepository;
+    private final WebtoonGenreRepository webtoonGenreRepository;
+    private final EpisodeLikeRepository episodeLikeRepository;
+    private final EpisodeStarRepository episodeStarRepository;
+
+    /**
+     * 에피소드 목록 조회
+     */
+    public WebtoonEpisodeListResDto getWebtoonEpisodes(Long webtoonId, boolean fromFirst, int page,
+        int size) {
+
+        Webtoon webtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        List<WebtoonGenre> webtoonGenres = webtoonGenreRepository.findByWebtoonId(webtoonId);
+
+        List<String> genreNames = webtoonGenres.stream()
+            .map(wg -> wg.getGenre().getName())
+            .toList();
+
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<Episode> episodePage = fromFirst
+            ? episodeRepository.findByWebtoonIdOrderByPublishedAtAsc(webtoonId, pageable)
+            : episodeRepository.findByWebtoonIdOrderByPublishedAtDesc(webtoonId, pageable);
+
+        List<WebtoonEpisodeListResDto.EpisodeInfo> episodes = episodePage.getContent()
+            .stream()
+            .map(this::toEpisodeInfo)
+            .toList();
+
+        int episodeCount = (int) episodePage.getTotalElements();
+
+        return WebtoonEpisodeListResDto.of(
+            webtoon.getId(),
+            webtoon.getTitle(),
+            webtoon.getThumbnail(),
+            webtoon.getStory(),
+            episodeCount,
+            genreNames,
+            episodePage.getNumber(),
+            episodePage.getTotalPages(),
+            episodes
+        );
+    }
+
+    private WebtoonEpisodeListResDto.EpisodeInfo toEpisodeInfo(Episode episode) {
+        long likeCount = episodeLikeRepository.countByEpisodeId(episode.getId());
+        float averageStar = calculateAverageStar(episode.getId());
+
+        return WebtoonEpisodeListResDto.EpisodeInfo.of(episode, likeCount, averageStar);
+    }
+
+    private float calculateAverageStar(Long episodeId) {
+        List<EpisodeStar> stars = episodeStarRepository.findByEpisodeId(episodeId);
+        if (stars.isEmpty()) {
+            return 0f;
+        }
+        double sum = stars.stream().mapToDouble(EpisodeStar::getPoint).sum();
+        return (float) (sum / stars.size());
+    }
 
     /**
      * 에피소드 등록

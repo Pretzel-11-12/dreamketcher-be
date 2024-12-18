@@ -1,19 +1,26 @@
 package pretzel.dreamketcherbe.domain.webtoon.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/webtoons")
@@ -62,10 +69,11 @@ public class WebtoonController {
      */
     @PostMapping("/{webtoonId}/favorite")
     public ResponseEntity<Void> addFavoriteWebtoon(@Auth Long memberId,
-                                                   @PathVariable Long webtoonId) {
+        @PathVariable Long webtoonId) {
         webtoonService.addFavoriteWebtoon(memberId, webtoonId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
     /**
      * 웹툰 수정
      */
@@ -85,5 +93,13 @@ public class WebtoonController {
         @PathVariable("webtoonId") Long webtoonId) {
         webtoonService.deleteWebtoon(memberId, webtoonId);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 웹툰, 작가 검색
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<SearchedWebtoonResDto>> searchWebtoon(@RequestParam String keyword) {
+        return ResponseEntity.ok(webtoonService.searchWebtoon(keyword));
     }
 }

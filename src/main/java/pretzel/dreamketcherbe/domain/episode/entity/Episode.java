@@ -29,6 +29,9 @@ public class Episode extends BaseTimeEntity {
     private Long id;
 
     @Column(nullable = false)
+    private int no;
+
+    @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)

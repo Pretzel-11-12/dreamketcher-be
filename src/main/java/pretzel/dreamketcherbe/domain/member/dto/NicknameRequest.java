@@ -13,4 +13,5 @@ public record NicknameRequest(
     )
     String nickname
 ) {
+
 }

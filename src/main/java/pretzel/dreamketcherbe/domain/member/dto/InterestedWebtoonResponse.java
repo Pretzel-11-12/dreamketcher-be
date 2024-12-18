@@ -10,6 +10,7 @@ public record InterestedWebtoonResponse(
     String thumbnail,
     String description
 ) {
+
     public static InterestedWebtoonResponse from(InterestedWebtoon interestedWebtoon) {
         return new InterestedWebtoonResponse(
             interestedWebtoon.getId(),

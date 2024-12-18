@@ -15,12 +15,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
+import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
 import pretzel.dreamketcherbe.domain.episode.service.EpisodeService;
 
 @Slf4j
@@ -29,7 +31,23 @@ import pretzel.dreamketcherbe.domain.episode.service.EpisodeService;
 @AllArgsConstructor
 public class EpisodeController {
 
+
     private final EpisodeService episodeService;
+
+    /**
+     * 에피소드 목록 조회
+     */
+    @GetMapping
+    public ResponseEntity<WebtoonEpisodeListResDto> getEpisodes(
+        @PathVariable Long webtoonId,
+        @RequestParam(defaultValue = "false") boolean fromFirst,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size
+    ) {
+        WebtoonEpisodeListResDto result = episodeService.getWebtoonEpisodes(
+            webtoonId, fromFirst, page, size);
+        return ResponseEntity.ok(result);
+    }
 
     /**
      * 에피소드 등록
@@ -69,7 +87,7 @@ public class EpisodeController {
     }
 
     /**
-     * 에피소드 조회
+     * 에피소드 상세 조회
      */
     @GetMapping("/{episodeId}")
     public String getEpisode(@PathVariable("episodeId") Long episodeId,

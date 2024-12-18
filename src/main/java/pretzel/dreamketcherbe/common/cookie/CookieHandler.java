@@ -21,7 +21,8 @@ public class CookieHandler {
         return createCookieWithMaxAge(cookieKey, DELETE_COOKIE_VALUE, DELETE_COOKIE_MAX_AGE);
     }
 
-    private ResponseCookie createCookieWithMaxAge(String cookieKey, String cookieValue, Long maxAge) {
+    private ResponseCookie createCookieWithMaxAge(String cookieKey, String cookieValue,
+        Long maxAge) {
         return ResponseCookie.from(cookieKey, cookieValue)
             .maxAge(maxAge)
             .path(cookieProperties.path())

@@ -1,5 +1,7 @@
 package pretzel.dreamketcherbe.domain.auth.config;
 
+import static java.util.Arrays.stream;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,8 +14,6 @@ import pretzel.dreamketcherbe.domain.auth.exception.AuthExceptionType;
 import pretzel.dreamketcherbe.domain.auth.repository.TokenExtractor;
 import pretzel.dreamketcherbe.domain.auth.service.internal.AuthContext;
 import pretzel.dreamketcherbe.domain.auth.utils.AuthHeaderExtractor;
-
-import static java.util.Arrays.stream;
 
 @Component
 @RequiredArgsConstructor
