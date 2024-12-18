@@ -39,7 +39,7 @@ import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 public class EpisodeService {
 
     private final EpisodeRepository episodeRepository;
-    private final WebtoonRepository webtoonRepositoy;
+    private final WebtoonRepository webtoonRepository;
     private final MemberRepository memberRepository;
     private final WebtoonGenreRepository webtoonGenreRepository;
     private final EpisodeLikeRepository episodeLikeRepository;
@@ -51,38 +51,27 @@ public class EpisodeService {
     public WebtoonEpisodeListResDto getWebtoonEpisodes(Long webtoonId, boolean fromFirst, int page,
         int size) {
 
-        Webtoon webtoon = webtoonRepositoy.findById(webtoonId)
+        Webtoon webtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         List<WebtoonGenre> webtoonGenres = webtoonGenreRepository.findByWebtoonId(webtoonId);
 
-        List<String> genreNames = webtoonGenres.stream()
-            .map(wg -> wg.getGenre().getName())
+        List<String> genreNames = webtoonGenres.stream().map(wg -> wg.getGenre().getName())
             .toList();
 
         PageRequest pageable = PageRequest.of(page, size);
-        Page<Episode> episodePage = fromFirst
-            ? episodeRepository.findByWebtoonIdOrderByPublishedAtAsc(webtoonId, pageable)
-            : episodeRepository.findByWebtoonIdOrderByPublishedAtDesc(webtoonId, pageable);
+        Page<Episode> episodePage =
+            fromFirst ? episodeRepository.findByWebtoonIdOrderByPublishedAtAsc(webtoonId, pageable)
+                : episodeRepository.findByWebtoonIdOrderByPublishedAtDesc(webtoonId, pageable);
 
-        List<WebtoonEpisodeListResDto.EpisodeInfo> episodes = episodePage.getContent()
-            .stream()
-            .map(this::toEpisodeInfo)
-            .toList();
+        List<WebtoonEpisodeListResDto.EpisodeInfo> episodes = episodePage.getContent().stream()
+            .map(this::toEpisodeInfo).toList();
 
         int episodeCount = (int) episodePage.getTotalElements();
 
-        return WebtoonEpisodeListResDto.of(
-            webtoon.getId(),
-            webtoon.getTitle(),
-            webtoon.getThumbnail(),
-            webtoon.getStory(),
-            episodeCount,
-            genreNames,
-            episodePage.getNumber(),
-            episodePage.getTotalPages(),
-            episodes
-        );
+        return WebtoonEpisodeListResDto.of(webtoon.getId(), webtoon.getTitle(),
+            webtoon.getThumbnail(), webtoon.getStory(), episodeCount, genreNames,
+            episodePage.getNumber(), episodePage.getTotalPages(), episodes);
     }
 
     private WebtoonEpisodeListResDto.EpisodeInfo toEpisodeInfo(Episode episode) {
@@ -192,5 +181,44 @@ public class EpisodeService {
     @Transactional
     public void increaseViewCount(Long episodeId) {
         episodeRepository.increaseViewCount(episodeId);
+    }
+
+    /**
+     * 에피소드 별점
+     */
+    @Transactional
+    public void starEpisode(Long memberId, Long episodeId, float point) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Episode findEpisode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        EpisodeStar episodeStar = episodeStarRepository.findByMemberIdAndEpisodeId(memberId,
+                episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_STAR_NOT_FOUND));
+
+        episodeStar.updatePoint(point);
+        episodeStarRepository.save(episodeStar);
+    }
+
+    /**
+     * 애피소드 별점 수정
+     */
+    @Transactional
+    public void updateEpisodeStar(Long memberId, Long episodeId, float point) {
+        starEpisode(memberId, episodeId, point);
+    }
+
+    /**
+     * 에피소드 별점 삭제
+     */
+    @Transactional
+    public void deleteEpisodeStar(Long memberId, Long episodeId) {
+        EpisodeStar episodeStar = episodeStarRepository.findByMemberIdAndEpisodeId(memberId,
+                episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_STAR_NOT_FOUND));
+
+        episodeStarRepository.delete(episodeStar);
     }
 }

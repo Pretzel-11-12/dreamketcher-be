@@ -95,4 +95,39 @@ public class EpisodeController {
 
         return "episode-view";
     }
+
+    /**
+     * 에피소드 별점 등록
+     */
+    @PostMapping("/{episodeId}/star")
+    public ResponseEntity<Void> starEpisode(@Auth Long memberId,
+        @PathVariable("episodeId") Long episodeId,
+        @RequestParam float point) {
+        episodeService.starEpisode(memberId, episodeId, point);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * 에피소드 별점 수정
+     */
+    @PutMapping("/{episodeId}/star")
+    public ResponseEntity<Void> updateStarEpisode(@Auth Long memberId,
+        @PathVariable("episodeId") Long episodeId,
+        @RequestParam float point) {
+        episodeService.updateEpisodeStar(episodeId, memberId, point);
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 에피소드 별점 삭제
+     */
+    @DeleteMapping("/{episodeId}/star")
+    public ResponseEntity<Void> deleteStarEpisode(@Auth Long memberId,
+        @PathVariable("episodeId") Long episodeId) {
+        episodeService.deleteEpisodeStar(memberId, episodeId);
+
+        return ResponseEntity.ok().build();
+    }
 }

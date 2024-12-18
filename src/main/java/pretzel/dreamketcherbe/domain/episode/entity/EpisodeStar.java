@@ -41,4 +41,8 @@ public class EpisodeStar extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "episode_id")
     private Episode episode;
+
+    public void updatePoint(float point) {
+        this.point = point;
+    }
 }
