@@ -1,0 +1,82 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ENC(97yyeOvTkGlNTYeuhxP3HZezgqxFnsvcWHKUBR5epVh0k37fcRaIzfWxbQTf+nJBYisE8jEEQ609nCTVo5xrCFK1snZQb1zyL4bhap+Xrg+Lvn+SYGlYPA6OZwO0X+hxsS+l5ij0ToVtFFd73kXsdtKQCudD4iwDNuRl81Hx+N58raK3BNtDC+bJNzJXk+QxqjWqCxd2ots=)
+    username: ENC(j+I4F16YPr8QNDHP6wUxvQ==)
+    password: ENC(S1G8zl8N5/mt0jRQVw00dAE4J0IKUJSqPjZ8CYB/z+4=)
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  cookie:
+    max-age: 12345678
+    path: /
+    same-site: none
+    http-only: true
+    secure: false
+
+  cors:
+    allowed-origins: ENC(Gx005hJ4OzdP5a2ijLgDWAY9dI6NkMIGwVwGZniFMjNL9IfuY/lVHZntVDmtMQOX1xhiWTYGiNg=)
+    allowed-methods: ENC(fn8bwf3CxhfmwR+c4KDZtX8GJ5dm2eEiRDowm3G2W2Fw9hv7Ad4pDHsUu6sU7wzi)
+
+  springdoc:
+    swagger-ui:
+      display-request-duration: true
+    api-docs:
+      path: /api-docs
+      show-actuator: true
+
+oauth2:
+  google:
+    client-id: ENC(hjD4KBnLfcWr4bVzANcTwyDP2+JH5TTi2kvm//r+zRFdtzEuyCKdmeXIfRrqNNz3WrbC4VBisJVvgJzh9BjwPLnVk7J2GjZcMKTfErvamS0Votb/qjoRfg==)
+    client-secret: ENC(jeFrAdW+qIxcqQLzHuTP0riyL5P5rEpaPH4bg7cN6n1MwraA79uQ8YsWfOFY6uV7)
+    redirect-uri: ENC(As1+r3EPOcoQpyrVQ7/LURksyRL6yUSa9Ac0HFgLnQm4MghgVbCuPoSZia9DdVhN)
+    grant-type: authorization_code
+    scope: email
+
+jwt:
+  secret-key: ENC(5fC95Crbt7dd6mUP0lkjA/3ywegyW77XUo7u6PuuZYA/SzVx7rtj8Ft1bt96z3zd)
+  access-exp: 12345678
+  refresh-exp: 12345678
+
+management:
+  endpoints:
+    web:
+      base-path: /api/v1
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework: info
+    org.hibernate: info
+
+  cloud:
+    aws:
+      s3:
+        bucket: ${AWS_S3_BUCKET_NAME}
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      region:
+        static: ${AWS_REGION}
+      stack:
+        auto: false

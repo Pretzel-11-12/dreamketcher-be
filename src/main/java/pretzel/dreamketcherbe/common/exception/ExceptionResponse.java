@@ -4,4 +4,5 @@ public record ExceptionResponse(
     String code,
     String message
 ) {
+
 }

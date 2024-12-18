@@ -1,11 +1,20 @@
 package pretzel.dreamketcherbe.domain.webtoon.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.member.entity.Member;
 
 @Table(name = "webtoons")
 @Getter
@@ -21,18 +30,65 @@ public class Webtoon extends BaseTimeEntity {
     private String title;
 
     @Column(nullable = false)
-    private String thumnail;
+    private String thumbnail;
+
+    @Column(nullable = false)
+    private String prologue;
+
+    @Column(nullable = false)
+    private String story;
 
     @Column(nullable = false)
     private String description;
 
-    @ColumnDefault("'not_approval'")
+    @ColumnDefault("'NOT_APPROVAL'")
     private String approval;
 
-    @ColumnDefault("'pre_series'")
+    @ColumnDefault("'PRE_SERIES'")
     private String status;
 
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private int episodeCount;
+
     @ManyToOne
-    @JoinColumn(name = "author_id")
-    private Author author;
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @Builder
+    public Webtoon(String title, String thumbnail, String prologue, String story,
+        String description, String approval, String status, Member member) {
+        this.title = title;
+        this.thumbnail = thumbnail;
+        this.prologue = prologue;
+        this.story = story;
+        this.description = description;
+        this.approval = approval;
+        this.status = status;
+        this.member = member;
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public void updatePrologue(String prologue) {
+        this.prologue = prologue;
+    }
+
+    public void updateStory(String story) {
+        this.story = story;
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public void updateStatus(String status) {
+        this.status = status;
+    }
 }

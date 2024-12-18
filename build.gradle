@@ -29,18 +29,22 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
 	// lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	// mysql
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	// h2
 	runtimeOnly 'com.h2database:h2'
+
+	// redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 	// test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -53,16 +57,21 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
 	// swagger
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
 	// JWT
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-	// AWS
+    // AWS
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 	implementation 'software.amazon.awssdk:s3:2.25.13'
+
+	// jasypt
+	implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
+
+	runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.76.Final:osx-aarch_64")
 }
 
 tasks.named('test') {

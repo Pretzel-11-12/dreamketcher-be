@@ -18,6 +18,12 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -43,8 +49,4 @@ out/
 ### VS Code ###
 .vscode/
 
-### env ###
-*.env
-
-### Mac OS ###
-.DS_Store
+.env
