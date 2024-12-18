@@ -2,6 +2,9 @@ package pretzel.dreamketcherbe.domain.webtoon.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,24 +25,31 @@ public class WebtoonController {
      * 장르별 웹툰 목록 조회
      */
     @GetMapping
-    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByGenre(@RequestParam String genre) {
-        return ResponseEntity.ok(webtoonService.getWebtoonsByGenre(genre));
+    public ResponseEntity<Page<WebtoonResDto>> getWebtoonsByGenre(@RequestParam String genre,
+                                                                  @RequestParam(defaultValue = "0") int page,
+                                                                  @RequestParam(defaultValue = "25") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(webtoonService.getWebtoonsByGenre(genre, pageable));
     }
 
     /**
      * 웹툰 완결 목록 조회
      */
     @GetMapping("/finish")
-    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByFinish() {
-        return ResponseEntity.ok(webtoonService.getWebtoonsByFinish());
+    public ResponseEntity<Page<WebtoonResDto>> getWebtoonsByFinish(@RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "25") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(webtoonService.getWebtoonsByFinish(pageable));
     }
 
     /**
      * 웹툰 신작 목록 조회
      */
     @GetMapping("/new")
-    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByNew() {
-        return ResponseEntity.ok(webtoonService.getWebtoonsByNew());
+    public ResponseEntity<Page<WebtoonResDto>> getWebtoonsByNew(@RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "25") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(webtoonService.getWebtoonsByNew(pageable));
     }
 
     /**

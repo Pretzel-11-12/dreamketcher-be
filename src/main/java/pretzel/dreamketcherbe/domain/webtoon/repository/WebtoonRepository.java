@@ -12,9 +12,9 @@ import java.util.List;
 
 public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
 
-    List<Webtoon> findAllByStatus(String status);
+    Page<Webtoon> findAllByStatus(String status, Pageable pageable);
 
-    List<Webtoon> findAllByStatusAndCreatedAtAfter(String status, LocalDateTime createdAt);
+    Page<Webtoon> findAllByStatusAndCreatedAtAfter(String status, LocalDateTime createdAt, Pageable pageable);
 
     @Query("SELECT w FROM Webtoon w, ManagementWebtoon m WHERE (w.title LIKE %:title% OR REPLACE(w.title, ' ', '') LIKE %:title%) AND m.approval = 'APPROVAL'")
     List<Webtoon> findByTitleContaining(@Param("title") String title);
