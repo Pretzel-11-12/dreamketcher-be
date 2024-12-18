@@ -11,13 +11,11 @@ import pretzel.dreamketcherbe.domain.admin.entity.ManagementWebtoon;
 import pretzel.dreamketcherbe.domain.admin.exception.AdminException;
 import pretzel.dreamketcherbe.domain.admin.exception.AdminExceptionType;
 import pretzel.dreamketcherbe.domain.admin.repository.ManagementWebtoonRespository;
-import pretzel.dreamketcherbe.domain.webtoon.entity.Genre;
-import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
-import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonGenre;
-import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
+import pretzel.dreamketcherbe.domain.webtoon.entity.*;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.GenreRepository;
+import pretzel.dreamketcherbe.domain.webtoon.repository.SerializationPeriodRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
@@ -35,6 +33,8 @@ public class ManageWebtoonService {
     private final GenreRepository genreRepository;
 
     private final ManagementWebtoonRespository managementWebtoonRespository;
+
+    private final SerializationPeriodRepository serializationPeriodRepository;
 
     /**
      * 웹툰 목록 조회
@@ -56,7 +56,10 @@ public class ManageWebtoonService {
                     webtoon.getId())
                 .orElseThrow(() -> new AdminException(AdminExceptionType.MANAGE_WEBTOON_NOT_FOUND));
 
-            return ManageWebtoonResDto.of(webtoon, genres, manangeWebtoon);
+            SerializationPeriod serializationPeriod = serializationPeriodRepository.findByWebtoonId(webtoon.getId())
+                    .orElseThrow(() -> new AdminException(WebtoonExceptionType.SERIALIZATION_PERIOD_NOT_FOUND));
+
+            return ManageWebtoonResDto.of(webtoon, genres, manangeWebtoon, serializationPeriod);
         });
     }
 
