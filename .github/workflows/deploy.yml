@@ -88,6 +88,11 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script_stop: true
+
+          env:
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            JASYPT_ENCRYPTOR_PASSWORD: ${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}
+            REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           script: |
             sudo apt-get update -y
             sudo apt-get install -y unzip
@@ -103,16 +108,16 @@ jobs:
             sudo chmod +x /usr/local/bin/docker-compose
             fi
             
-            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin $ECR_REGISTRY
 
             docker stop dreamketcher-dev-server || true
             docker rm dreamketcher-dev-server || true
             
             docker system prune -af || true
             
-            echo "ECR_URL=${{ steps.login-ecr.outputs.registry }}" > /home/ubuntu/.env
-            echo "JASYPT_ENCRYPTOR_PASSWORD=${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}" >> /home/ubuntu/.env
-            echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> /home/ubuntu/.env
+            echo "ECR_URL=$ECR_REGISTRY" > /home/ubuntu/.env
+            echo "JASYPT_ENCRYPTOR_PASSWORD=$JASYPT_ENCRYPTOR_PASSWORD" >> /home/ubuntu/.env
+            echo "REDIS_PASSWORD=$REDIS_PASSWORD" >> /home/ubuntu/.env
             
             cd /home/ubuntu
             docker-compose --env-file .env up -d --build --pull
