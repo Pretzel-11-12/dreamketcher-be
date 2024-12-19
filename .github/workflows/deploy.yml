@@ -89,6 +89,8 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script_stop: true
           script: |
+            sudo apt-get update && sudo apt-get install -y awscli
+            
             if ! command -v docker-compose &> /dev/null
             then
             echo "docker-compose could not be found, installing..."
