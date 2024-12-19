@@ -16,17 +16,18 @@ public class S3Config {
     @Value("${cloud.aws.s3.bucket}")
     private String region;
 
-    @Value("${cloud.aws.s3.access-key}")
+    @Value("${cloud.aws.credentials.access-key}")
     private String accessKey;
 
-    @Value("${cloud.aws.s3.secret-key}")
+    @Value("${cloud.aws.credentials.secret-key}")
     private String secretKey;
 
     @Bean
-    public AmazonS3 amazonS3Client() {
+    public AmazonS3 amazonS3() {
         BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
 
-        return AmazonS3ClientBuilder.standard()
+        return AmazonS3ClientBuilder
+            .standard()
             .withRegion(region)
             .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
             .enablePathStyleAccess()

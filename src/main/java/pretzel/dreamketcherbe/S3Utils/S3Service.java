@@ -1,27 +1,21 @@
 package pretzel.dreamketcherbe.S3Utils;
 
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.util.IOUtils;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
@@ -30,6 +24,7 @@ import pretzel.dreamketcherbe.S3Utils.exception.S3ExceptionType;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@Service
 public class S3Service {
 
     private final AmazonS3 amazonS3;
@@ -37,136 +32,161 @@ public class S3Service {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
-    /*
-     * 이미지 단일 파일 업로드
+    private final Set<String> uploadedFileNames = new HashSet<>();
+    private final Set<Long> uploadedFileSizes = new HashSet<>();
+
+    /**
+     * 단일 이미지 파일 업로드
      */
-    public String imageUpload(MultipartFile image) {
+    public String imageUpload(MultipartFile multipartFile) {
+        String newFileName = generateRandomFileName(multipartFile);
+
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(multipartFile.getSize());
+        metadata.setContentType(multipartFile.getContentType());
 
         try {
-            return uploadImageToS3(image);
+            amazonS3.putObject(bucketName, newFileName, multipartFile.getInputStream(), metadata);
         } catch (IOException e) {
+            log.error("Failed to convert image file", e);
+            throw new S3Exception(S3ExceptionType.FAILED_TO_CONVERT_IMAGE);
+        } catch (AmazonS3Exception e) {
+            log.error("Amazon S3 error while uploading file: {}", e.getMessage(), e);
             throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
         }
+        return amazonS3.getUrl(bucketName, newFileName).toString();
     }
 
-    /*
-     * S3에 단일 이미지 업로드
+    /**
+     * 다중 이미지 파일 업로드
      */
-    private String uploadImageToS3(MultipartFile image) throws IOException {
-        String originalFileName = image.getOriginalFilename();
-        String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+    public List<String> imagesUpload(List<MultipartFile> multipartFiles) {
+        List<String> uploadedFileUrls = new ArrayList<>();
 
-        String s3FileName = UUID.randomUUID().toString().substring(0, 10) + originalFileName;
-
-        InputStream inputStream = image.getInputStream();
-        byte[] bytes = IOUtils.toByteArray(inputStream); // 이미지 바이트 배열로 전환
-
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentType("image/" + extension);
-        objectMetadata.setContentLength(bytes.length);
-
-        // S3에 이미지 업로드
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-
-        try {
-            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, s3FileName,
-                byteArrayInputStream, objectMetadata)
-                .withCannedAcl(CannedAccessControlList.AuthenticatedRead.PublicRead);
-            amazonS3.putObject(putObjectRequest); // 이미지 업로드
-        } catch (Exception e) {
-            throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
-        } finally {
-            byteArrayInputStream.close();
-            inputStream.close();
-        }
-        return amazonS3.getUrl(bucketName, s3FileName).toString();
-    }
-
-    /*
-     * 이미지 파일 검증
-     */
-    private String validateImageFile(MultipartFile image) {
-        if (Objects.isNull(image.getOriginalFilename()) || image.isEmpty()) {
-            throw new S3Exception(S3ExceptionType.EMPTY_FILE);
-        }
-
-        return imageUpload(image);
-    }
-
-    /*
-     * 이미지 파일 다중 업로드
-     */
-    public List<String> uploadImages(List<MultipartFile> iamges) {
-        List<String> fileNameList = new ArrayList<>();
-
-        iamges.forEach(img -> {
-            String fileName = UUID.randomUUID().toString().substring(0, 10) + fileNameList;
-            ObjectMetadata objectMetadata = new ObjectMetadata();
-            objectMetadata.setContentLength(img.getSize());
-            objectMetadata.setContentType(img.getContentType());
-
+        for (MultipartFile multipartFile : multipartFiles) {
+            if (isDuplicated(multipartFile)) {
+                throw new S3Exception(S3ExceptionType.DUPLICATED_FILE);
+            }
             try {
-                InputStream inputStream = img.getInputStream();
-                PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, fileName,
-                    inputStream, objectMetadata)
-                    .withCannedAcl(CannedAccessControlList.PublicRead);
-            } catch (Exception e) {
+                uploadedFileUrls.add(imageUpload(multipartFile));
+            } catch (S3Exception e) {
                 throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
             }
-            fileNameList.add(fileName);
-        });
-        return fileNameList;
+        }
+        clearUploadFiles();
+
+        return uploadedFileUrls;
     }
 
-    /*
-     * 이미지 파일 형식 검사
+    /**
+     * 이미지 파일 수정
      */
-    private void validateImageFileFormat(String imageFileName) {
-        int index = imageFileName.lastIndexOf(".");
+    public String imageUpdate(String oldImage, MultipartFile newImage) {
+        deleteImage(oldImage);
 
-        if (index == -1) {
-            throw new S3Exception(S3ExceptionType.INVALID_FILE_EXTENSION);
-        }
-
-        String extension = imageFileName.substring(index + 1).toLowerCase();
-        List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "JPG", "JPEG", "png", "gif");
-
-        if (!allowedExtensions.contains(extension)) {
-            throw new S3Exception(S3ExceptionType.INVALID_FILE_EXTENSION);
-        }
+        return imageUpload(newImage);
     }
 
-    /*
-     * 이미지 파일 크기 검증
+    /**
+     * 다중 이미지 업로드 부분 수정
      */
-    private void validateImageFileSize(MultipartFile image) {
-        if (image.getSize() > 5 * 1024 * 1024) {
-            throw new S3Exception(S3ExceptionType.INVALID_FILE_SIZE);
+    public List<String> updatePartialImages(
+        List<String> existingImageUrls,
+        List<MultipartFile> newImages,
+        List<Integer> replaceIndices) {
+
+        if (newImages.size() != replaceIndices.size()) {
+            throw new IllegalArgumentException(
+                "The number of new images and replace indices must match.");
         }
+
+        List<String> updatedImageUrls = new ArrayList<>(existingImageUrls);
+
+        for (int i = 0; i < newImages.size(); i++) {
+            int replaceIndex = replaceIndices.get(i);
+
+            if (replaceIndex < 0 || replaceIndex >= existingImageUrls.size()) {
+                throw new IllegalArgumentException("Invalid index: " + replaceIndex);
+            }
+
+            deleteImage(existingImageUrls.get(replaceIndex));
+
+            String newImageUrl = imageUpload(newImages.get(i));
+
+            updatedImageUrls.set(replaceIndex, newImageUrl);
+        }
+
+        return updatedImageUrls;
     }
 
-    /*
+    /**
      * 이미지 파일 삭제
      */
-    public void deleteImageFile(String imageUrl) {
-        String key = getKeyFromImageUrl(imageUrl);
+    public void deleteImage(String fileName) {
+        String objectKey = extractObjectKey(fileName);
+
+        if (!amazonS3.doesObjectExist(bucketName, objectKey)) {
+            throw new S3Exception(S3ExceptionType.IMAGE_NOT_FOUND);
+        }
+
         try {
-            amazonS3.deleteObject(new DeleteObjectRequest(bucketName, key));
-        } catch (Exception e) {
+            amazonS3.deleteObject(bucketName, objectKey);
+        } catch (AmazonS3Exception e) {
             throw new S3Exception(S3ExceptionType.DELETE_FAILED);
         }
     }
 
-    /*
-     * 이미지 URL로부터 key 추출
+    /**
+     * 파일 이름 중복 확인
      */
-    private String getKeyFromImageUrl(String imageUrl) {
-        try {
-            URL url = new URL(imageUrl);
-            String decodingKey = URLDecoder.decode(url.getPath(), "UTF-8");
-            return decodingKey.substring(1);
-        } catch (MalformedURLException | UnsupportedEncodingException e) {
-            throw new S3Exception(S3ExceptionType.DELETE_FAILED);
+    private boolean isDuplicated(MultipartFile multipartFile) {
+        String fileName = multipartFile.getOriginalFilename();
+        Long fileSize = multipartFile.getSize();
+
+        if (uploadedFileNames.contains(fileName) && uploadedFileSizes.contains(fileSize)) {
+            return true;
         }
+
+        uploadedFileNames.add(fileName);
+        uploadedFileSizes.add(fileSize);
+        return false;
+    }
+
+    /**
+     * 파일 정보 초기화
+     */
+    private void clearUploadFiles() {
+        uploadedFileNames.clear();
+        uploadedFileSizes.clear();
+    }
+
+    /**
+     * 랜덤 파일명 생성
+     */
+    private String generateRandomFileName(MultipartFile multipartFile) {
+        String originalFileName = multipartFile.getOriginalFilename();
+        String extension = extractExtensionValidation(originalFileName);
+        return UUID.randomUUID() + "_" + extension;
+    }
+
+    /**
+     * 파일 확장자 검증
+     */
+    private String extractExtensionValidation(String fileName) {
+        String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+        List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+
+        if (!allowedExtensions.contains(fileExtension)) {
+            throw new S3Exception(S3ExceptionType.INVALID_FILE_EXTENSION);
+        }
+        return fileExtension;
+    }
+
+    /**
+     * 객체 키 추출
+     */
+    private String extractObjectKey(String fileUrl) {
+        String[] urlParts = fileUrl.split("/");
+        return String.join("/", Arrays.copyOfRange(urlParts, 3, urlParts.length));
     }
 }
