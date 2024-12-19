@@ -45,7 +45,7 @@ jobs:
       - name: 이전 ECR 이미지 정리
         run: |
           REPO_NAME="dreamketcher-dev-server"
-          OLD_TAGS=$(aws ecr list-images --repository-name $REPO_NAME --qurey 'imageIds[?imageTage!=`latest`].imageTag' --output text)
+          OLD_TAGS=$(aws ecr list-images --repository-name $REPO_NAME --query 'imageIds[?imageTag!=`latest`].imageTag' --output text)
           if [ -n "$OLD_TAGS" ]; then
             for tag in $OLD_TAGS; do
               echo "Deleting image with tage $tag"
