@@ -83,23 +83,12 @@ jobs:
 
       - name: SSH로 EC2에 접속하기
         uses: appleboy/ssh-action@v1.0.3
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          JASYPT_ENCRYPTOR_PASSWORD: ${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script_stop: true
           script: |
-            sudo apt-get update -y
-            sudo apt-get install -y unzip docker.io jq
-            
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            yes | sudo ./aws/install --update
-            export PATH=/usr/local/bin:$PATH
             
             if ! command -v docker-compose &> /dev/null
             then
@@ -108,18 +97,14 @@ jobs:
             sudo chmod +x /usr/local/bin/docker-compose
             fi
             
-            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin $ECR_REGISTRY
-
             docker stop dreamketcher-dev-server || true
             docker rm dreamketcher-dev-server || true
             
             docker system prune -af || true
             
-            echo "ECR_URL=$ECR_REGISTRY" > /home/ubuntu/.env
-            echo "JASYPT_ENCRYPTOR_PASSWORD=$JASYPT_ENCRYPTOR_PASSWORD" >> /home/ubuntu/.env
-            echo "REDIS_PASSWORD=$REDIS_PASSWORD" >> /home/ubuntu/.env
+            docker pull ${{ steps.login-ecr.outputs.registry }}/dreamketcher-dev-server:latest
             
             cd /home/ubuntu
-            docker-compose --env-file .env up -d --build --pull
+            docker-compose -d --build
             
             docker ps
