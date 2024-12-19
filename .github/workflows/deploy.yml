@@ -9,11 +9,6 @@ jobs:
   deploy:
     environment: dev
     runs-on: ubuntu-latest
-    env:
-      ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      JASYPT_ENCRYPTOR_PASSWORD: ${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}
-      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-
     steps:
       - name: Github Repository 파일 불러오기
         uses: actions/checkout@v4
@@ -25,7 +20,7 @@ jobs:
           java-version: 17
 
       - name: 테스트 및 빌드하기
-        run: ./gradlew build -Pjasypt.encryptor.password=${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}
+        run: ./gradlew build -Pjasypt.encryptor.password=${{secrets.JASYPT_ENCRYPTOR_PASSWORD}}
 
       - name: AWS Resource에 접근할 수 있게 AWS credentials 설정
         uses: aws-actions/configure-aws-credentials@v4
@@ -86,36 +81,29 @@ jobs:
           source: "./docker-compose.yml"
           target: "/home/ubuntu"
 
-      - name: SSH로 EC2에 접속 및 애플리케이션 컨테이너만 업데이트
+      - name: SSH로 EC2에 접속하기
         uses: appleboy/ssh-action@v1.0.3
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          JASYPT_ENCRYPTOR_PASSWORD: ${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script_stop: true
           script: |
-            sudo apt-get update -y
-            sudo apt-get install -y unzip docker.io jq
-
+            
             if ! command -v docker-compose &> /dev/null
             then
-              echo "docker-compose could not be found, installing..."
-              sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-              sudo chmod +x /usr/local/bin/docker-compose
+            echo "docker-compose could not be found, installing..."
+            sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
             fi
-
-            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin $ECR_REGISTRY
-
-            echo "ECR_URL=$ECR_REGISTRY" > /home/ubuntu/.env
-            echo "JASYPT_ENCRYPTOR_PASSWORD=$JASYPT_ENCRYPTOR_PASSWORD" >> /home/ubuntu/.env
-            echo "REDIS_PASSWORD=$REDIS_PASSWORD" >> /home/ubuntu/.env
-
+            
+            docker stop dreamketcher-dev-server || true
+            docker rm dreamketcher-dev-server || true
+            
+            docker system prune -af || true
+            
             cd /home/ubuntu
             docker-compose pull app
             docker-compose up -d --no-deps --build app
-
+            
             docker ps
