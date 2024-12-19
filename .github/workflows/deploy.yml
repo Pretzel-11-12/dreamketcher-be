@@ -45,12 +45,31 @@ jobs:
       - name: 이전 ECR 이미지 정리
         run: |
           REPO_NAME="dreamketcher-dev-server"
-          OLD_TAGS=$(aws ecr list-images --repository-name $REPO_NAME --query 'imageIds[?imageTag!=`latest`].imageTag' --output text)
-          if [ -n "$OLD_TAGS" ]; then
-            for tag in $OLD_TAGS; do
-              echo "Deleting image with tage $tag"
-              aws ecr batch-delete-image --repository-name $REPO_NAME --image-ids imageTag=$tag
+
+          OLD_IMAGES=$(aws ecr list-images \
+            --repository-name $REPO_NAME \
+            --query 'imageIds[?imageTag!=`latest`]' \
+            --output json)
+          
+          DIGESTS=$(echo "$OLD_IMAGES" | jq -r '.[] | select(.imageTag == null) | .imageDigest')
+          TAGS=$(echo "$OLD_IMAGES" | jq -r '.[] | select(.imageTag != null) | .imageTag')
+          
+          if [ -n "$DIGESTS" ]; then
+            for DIGEST in $DIGESTS; do
+              echo "Deleting untagged image with digest: $DIGEST"
+              aws ecr batch-delete-image --repository-name $REPO_NAME --image-ids imageDigest=$DIGEST
             done
+          else
+            echo "No untagged images to delete"
+          fi
+          
+          if [ -n "$TAGS" ]; then
+            for TAG in $TAGS; do
+              echo "Deleting image with tag: $TAG"
+              aws ecr batch-delete-image --repository-name $REPO_NAME --image-ids imageTag=$TAG
+            done
+          else
+            echo "No tagged images (other than latest) to delete"
           fi
 
       - name: SSH로 EC2에 접속하기
