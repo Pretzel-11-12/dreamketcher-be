@@ -103,7 +103,6 @@ jobs:
             docker system prune -af || true
             
             cd /home/ubuntu
-            docker-compose pull app
-            docker-compose up -d --no-deps --build app
-            
-            docker ps
+            docker-compose down
+            docker rmi $(docker images -q)
+            docker-compose up -d

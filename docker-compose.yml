@@ -10,6 +10,7 @@ services:
       SPRING_PROFILES_ACTIVE: test/redis
       JASYPT_ENCRYPTOR_PASSWORD: ${{secret.JASYPT_ENCRYPTOR_PASSWORD}}
       SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
     depends_on:
       redis:
         condition: service_healthy
@@ -31,7 +32,6 @@ services:
       test: [
         "CMD",
         "redis-cli",
-        "-a",
         "ping"
       ]
       interval: 10s
