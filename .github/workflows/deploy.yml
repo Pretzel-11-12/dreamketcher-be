@@ -96,6 +96,8 @@ jobs:
             sudo chmod +x /usr/local/bin/docker-compose
             fi
             
+            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+
             docker stop dreamketcher-dev-server || true
             docker rm dreamketcher-dev-server || true
             
@@ -109,6 +111,3 @@ jobs:
             docker-compose --env-file .env up -d --build --pull
             
             docker ps
-
-#            docker pull ${{ steps.login-ecr.outputs.registry }}/dreamketcher-dev-server:latest
-#            docker run -d --name dreamketcher-dev-server -p 8080:8080 -e SPRING_PROFILES_ACTIVE=dev -e JASYPT_ENCRYPTOR_PASSWORD=${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }} ${{ steps.login-ecr.outputs.registry }}/dreamketcher-dev-server:latest
