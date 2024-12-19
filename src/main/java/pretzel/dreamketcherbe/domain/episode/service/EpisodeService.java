@@ -10,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
@@ -44,6 +46,7 @@ public class EpisodeService {
     private final WebtoonGenreRepository webtoonGenreRepository;
     private final EpisodeLikeRepository episodeLikeRepository;
     private final EpisodeStarRepository episodeStarRepository;
+    private final S3Service s3Service;
 
     /**
      * 에피소드 목록 조회
@@ -109,9 +112,16 @@ public class EpisodeService {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        Episode newEpisode = Episode.builder().member(findMember).title(request.title())
-            .thumbnail(request.thumbnail()).content(request.content())
-            .authorNote(request.authorNote()).build();
+        String thumbnailUrl = s3Service.imageUpload(request.thumbnail());
+        List<String> contentUrl = s3Service.imagesUpload(request.content());
+
+        Episode newEpisode = Episode.builder()
+            .member(findMember)
+            .title(request.title())
+            .thumbnail(thumbnailUrl)
+            .content(contentUrl)
+            .authorNote(request.authorNote())
+            .build();
 
         episodeRepository.save(newEpisode);
 
@@ -126,10 +136,18 @@ public class EpisodeService {
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
+        String thumbnailUrl =
+            request.thumbnail() != null ? s3Service.imageUpload(request.thumbnail())
+                : findEpisode.getThumbnail();
+
+        List<String> contentUrls =
+            request.content() != null ? s3Service.imagesUpload(request.content())
+                : findEpisode.getContent();
+
         findEpisode.isAuthor(memberId);
         findEpisode.updateTitle(request.title());
-        findEpisode.updateThumbnail(request.thumbnail());
-        findEpisode.updateContent(request.content());
+        findEpisode.updateThumbnail(thumbnailUrl);
+        findEpisode.updateContent(contentUrls);
         findEpisode.updateAuthorNote(request.authorNote());
     }
 

@@ -1,6 +1,7 @@
 package pretzel.dreamketcherbe.domain.webtoon.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -8,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,8 +34,9 @@ public class Webtoon extends BaseTimeEntity {
     @Column(nullable = false)
     private String thumbnail;
 
+    @ElementCollection
     @Column(nullable = false)
-    private String prologue;
+    private List<String> prologue;
 
     @Column(nullable = false)
     private String story;
@@ -56,7 +59,7 @@ public class Webtoon extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    public Webtoon(String title, String thumbnail, String prologue, String story,
+    public Webtoon(String title, String thumbnail, List<String> prologue, String story,
         String description, String approval, String status, Member member) {
         this.title = title;
         this.thumbnail = thumbnail;
@@ -76,7 +79,7 @@ public class Webtoon extends BaseTimeEntity {
         this.thumbnail = thumbnail;
     }
 
-    public void updatePrologue(String prologue) {
+    public void updatePrologue(List<String> prologue) {
         this.prologue = prologue;
     }
 

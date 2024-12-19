@@ -1,6 +1,7 @@
 package pretzel.dreamketcherbe.domain.episode.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,11 +10,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
@@ -37,8 +40,9 @@ public class Episode extends BaseTimeEntity {
     @Column(nullable = false)
     private String thumbnail;
 
+    @ElementCollection
     @Column(nullable = false)
-    private String content;
+    private List<String> content;
 
     @Column(nullable = false, name = "author_note")
     private String authorNote;
@@ -62,7 +66,7 @@ public class Episode extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    public Episode(String title, String thumbnail, String content, String authorNote,
+    public Episode(String title, String thumbnail, List<String> content, String authorNote,
         Webtoon webtoon, Member member) {
         this.title = title;
         this.thumbnail = thumbnail;
@@ -86,7 +90,7 @@ public class Episode extends BaseTimeEntity {
         this.thumbnail = thumbnail;
     }
 
-    public void updateContent(String content) {
+    public void updateContent(List<String> content) {
         this.content = content;
     }
 

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
@@ -40,6 +41,7 @@ public class WebtoonService {
     private final MemberRepository memberRepository;
 
     private final InterestedWebtoonRepository interestedWebtoonRepository;
+    private final S3Service s3Service;
 
     /**
      * 웹툰 장르별 목록 조회
@@ -89,10 +91,13 @@ public class WebtoonService {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
+        String thumbnailUrl = s3Service.imageUpload(request.thumbnail());
+        List<String> prologueUrl = s3Service.imagesUpload(request.prologue());
+
         Webtoon newWebtoon = Webtoon.builder()
             .title(request.title())
-            .thumbnail(request.thumbnail())
-            .prologue(request.prologue())
+            .thumbnail(thumbnailUrl)
+            .prologue(prologueUrl)
             .story(request.story())
             .description(request.description())
             .approval("not_approval")
@@ -135,10 +140,18 @@ public class WebtoonService {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
+        String thumbnailUrl =
+            request.thumbnail() != null ? s3Service.imageUpload(request.thumbnail())
+                : findWebtoon.getThumbnail();
+
+        List<String> prologueUrl =
+            request.prologue() != null ? s3Service.imagesUpload(request.prologue())
+                : findWebtoon.getPrologue();
+
         findWebtoon.getId();
         findWebtoon.updateTitle(request.title());
-        findWebtoon.updateThumbnail(request.thumbnail());
-        findWebtoon.updatePrologue(request.prologue());
+        findWebtoon.updateThumbnail(thumbnailUrl);
+        findWebtoon.updatePrologue(prologueUrl);
         findWebtoon.updateStory(request.story());
         findWebtoon.updateDescription(request.description());
 
