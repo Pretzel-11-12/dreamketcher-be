@@ -72,6 +72,11 @@ jobs:
             echo "No tagged images (other than latest) to delete"
           fi
 
+      - name: .env 파일 생성
+        run: |
+          echo "ECR_URL=${{ steps.login-ecr.outputs.registry }}" > .env
+          echo "JASYPT_ENCRYPTOR_PASSWORD=${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}" >> .env
+
       - name: .env 파일을 EC2로 전송하기
         uses: appleboy/scp-action@v0.1.3
         with:
