@@ -111,14 +111,11 @@ jobs:
             sudo chmod +x /usr/local/bin/docker-compose
             fi
             
-            docker stop dreamketcher-dev-server || true
-            docker rm dreamketcher-dev-server || true
-            
             docker system prune -af || true
             
             cd /home/ubuntu
             
-            docker-compose down
+            sudo docker-compose down
             
-            docker-compose pull app
-            docker-compose up -d
+            sudo docker-compose up -d
+            sudo docker image prune -f
