@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
@@ -34,7 +35,8 @@ public class Comment extends BaseTimeEntity {
     @Column(nullable = false)
     private String content;
 
-    @Column(name = "is_deleted", columnDefinition = "BOOLEAN DEFAULT false")
+    @Column(name = "is_deleted", nullable = false)
+    @ColumnDefault("false")
     private boolean isDeleted;
 
     private LocalDateTime deletedAt;
@@ -58,5 +60,10 @@ public class Comment extends BaseTimeEntity {
         if (!member.getId().equals(memberId)) {
             throw new IllegalStateException(memberId + ", 작성자가 아닙니다.");
         }
+    }
+
+    public void softDelete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
     }
 }

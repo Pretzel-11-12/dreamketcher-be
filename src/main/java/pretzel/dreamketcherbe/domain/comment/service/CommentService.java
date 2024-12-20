@@ -60,7 +60,8 @@ public class CommentService {
 
         findComment.isAuthor(memberId);
 
-        commentRepository.delete(findComment);
+        findComment.softDelete();
+        commentRepository.save(findComment);
     }
 
 }
