@@ -1,13 +1,6 @@
 package pretzel.dreamketcherbe.domain.webtoon.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,6 +39,10 @@ public class Webtoon extends BaseTimeEntity {
 
     @ColumnDefault("'PRE_SERIES'")
     private String status;
+
+    @ColumnDefault("0.0")
+    @Column(nullable = false, name = "average_star")
+    private float averageStar;
 
     @Column(nullable = false)
     @ColumnDefault("0")
