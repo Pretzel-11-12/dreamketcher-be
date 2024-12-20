@@ -1,26 +1,22 @@
 package pretzel.dreamketcherbe.domain.episode.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import java.time.LocalDate;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
+import java.time.LocalDate;
+
 @Table(name = "episodes")
 @Getter
 @Entity
+@DynamicInsert
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Episode extends BaseTimeEntity {
 
@@ -50,8 +46,16 @@ public class Episode extends BaseTimeEntity {
     private boolean published;
 
     @ColumnDefault("0")
-    @Column(name = "view_count")
-    private int viewCount;
+    @Column(nullable = false, name = "view_count")
+    private Long viewCount;
+
+    @ColumnDefault("0")
+    @Column(nullable = false, name = "like_count")
+    private Long likeCount;
+
+    @ColumnDefault("0.0")
+    @Column(nullable = false, name = "average_star")
+    private float averageStar;
 
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
