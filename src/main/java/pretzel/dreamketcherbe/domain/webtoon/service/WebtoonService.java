@@ -82,7 +82,7 @@ public class WebtoonService {
             .collect(Collectors.toList());
     }
 
-    /*
+    /**
      * 웹툰 등록
      */
     public CreateWebtoonResDto createWebtoon(Long memberId, CreateWebtoonReqDto request) {
@@ -105,7 +105,7 @@ public class WebtoonService {
         return CreateWebtoonResDto.of(newWebtoon);
     }
 
-    /*
+    /**
      * 관심 웹툰 추가
      */
     @Transactional
@@ -120,10 +120,7 @@ public class WebtoonService {
             throw new MemberException(MemberExceptionType.ALREADY_FAVORITED);
         }
 
-        InterestedWebtoon interestedWebtoon = InterestedWebtoon.builder()
-            .member(member)
-            .webtoon(webtoon)
-            .build();
+        InterestedWebtoon interestedWebtoon = createInterestedWebtoon(member, webtoon);
 
         interestedWebtoonRepository.save(interestedWebtoon);
     }
@@ -171,5 +168,12 @@ public class WebtoonService {
             .distinct()
             .map(SearchedWebtoonResDto::of)
             .collect(Collectors.toList());
+    }
+
+    private static InterestedWebtoon createInterestedWebtoon(Member member, Webtoon webtoon) {
+        return InterestedWebtoon.builder()
+            .member(member)
+            .webtoon(webtoon)
+            .build();
     }
 }
