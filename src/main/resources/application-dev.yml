@@ -12,6 +12,7 @@ spring:
     redis:
       host: localhost
       port: 6379
+      password: ENC(9w8auTWmenvvNaElbNAgevWEo9AbSzQbW7n0qKdtl/ZFSDYcTqMr/Dfe3V9H+b0Zh8ECpIRnA6k=)
 
   jpa:
     database: mysql
