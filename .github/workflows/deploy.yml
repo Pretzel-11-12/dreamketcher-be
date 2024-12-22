@@ -76,6 +76,7 @@ jobs:
         run: |
           echo "ECR_URL=${{ steps.login-ecr.outputs.registry }}" > .env
           echo "JASYPT_ENCRYPTOR_PASSWORD=${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}" >> .env
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
 
       - name: .env 파일을 EC2로 전송하기
         uses: appleboy/scp-action@v0.1.3
