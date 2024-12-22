@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.service.CommentService;
 
 @Slf4j
@@ -47,6 +49,27 @@ public class CommentController {
     public ResponseEntity<Void> deleteComment(@Auth Long memberId, @PathVariable Long episodeId,
         @PathVariable Long commentId) {
         commentService.deleteComment(memberId, episodeId, commentId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 대댓글 생성
+     */
+    @PostMapping("/{commentId}/recomment/create")
+    public ResponseEntity<CreateRecommentResDto> createRecomment(@Auth Long memberId,
+        @PathVariable Long episodeId, @PathVariable Long commentId,
+        @RequestBody @Valid CreateRecommentReqDto request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(commentService.createRecomment(memberId, episodeId, commentId, request));
+    }
+
+    /**
+     * 대댓글 삭제
+     */
+    @PostMapping("/{commentId}/recomment/delete")
+    public ResponseEntity<Void> deleteRecomment(@Auth Long memberId, @PathVariable Long episodeId,
+        @PathVariable Long commentId, @PathVariable Long recommentId) {
+        commentService.deleteRecomment(memberId, episodeId, commentId, recommentId);
         return ResponseEntity.noContent().build();
     }
 }

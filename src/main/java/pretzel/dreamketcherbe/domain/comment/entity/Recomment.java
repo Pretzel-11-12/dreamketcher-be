@@ -2,6 +2,7 @@ package pretzel.dreamketcherbe.domain.comment.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,13 +21,13 @@ import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 
-@Table(name = "comments")
+@Table(name = "re_comments")
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLDelete(sql = "UPDATE comments SET is_deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE re_comments SET is_deleted = true WHERE id = ?")
 @SQLRestriction("is_deleted = false")
-public class Comment extends BaseTimeEntity {
+public class Recomment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,31 +36,41 @@ public class Comment extends BaseTimeEntity {
     @Column(nullable = false)
     private String content;
 
+    @Column(name = "parent_comment_id", nullable = false)
+    private Long parentCommentId;
+
+    @Column(name = "comment_order")
+    private Long commentOrder;
+
+    @Column(name = "child_comment_count")
+    private int childCommentCount;
+
     @Column(name = "is_deleted", nullable = false)
     @ColumnDefault("false")
-    private boolean isDeleted;
+    private Boolean isDeleted;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "episode_id")
     private Episode episode;
 
     @Builder
-    public Comment(String content, Member member, Episode episode) {
+    public Recomment(String content, Long parentCommentId, Member member, Episode episode) {
         this.content = content;
+        this.parentCommentId = parentCommentId;
         this.member = member;
         this.episode = episode;
     }
 
     public void isAuthor(Long memberId) {
         if (!member.getId().equals(memberId)) {
-            throw new IllegalStateException(memberId + ", 작성자가 아닙니다.");
+            throw new IllegalStateException(memberId + ", 답글 작성자가 아닙니다.");
         }
     }
 
