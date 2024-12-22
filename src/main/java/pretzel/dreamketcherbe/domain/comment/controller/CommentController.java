@@ -6,6 +6,7 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.service.CommentService;
@@ -70,6 +72,48 @@ public class CommentController {
     public ResponseEntity<Void> deleteRecomment(@Auth Long memberId, @PathVariable Long episodeId,
         @PathVariable Long commentId, @PathVariable Long recommentId) {
         commentService.deleteRecomment(memberId, episodeId, commentId, recommentId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 댓글 추천
+     */
+    @PostMapping("/{commentId}/recommend")
+    public ResponseEntity<CreateRecommendationResDto> recommend(@Auth Long memberId,
+        @PathVariable Long episodeId,
+        @PathVariable Long commentId) {
+        commentService.recommendComment(memberId, commentId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * 댓글 비추천
+     */
+    @PostMapping("/{commentId}/not-recommend")
+    public ResponseEntity<Void> notRecommend(@Auth Long memberId, @PathVariable Long episodeId,
+        @PathVariable Long commentId) {
+        commentService.notRecommendComment(memberId, commentId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 댓글 추천 해제
+     */
+    @DeleteMapping("/{commentId}/{recommendationId}/")
+    public ResponseEntity<Void> cancelRecommend(@Auth Long memberId, @PathVariable Long episodeId,
+        @PathVariable Long commentId, @PathVariable Long recommendationId) {
+        commentService.unrecommendComment(memberId, commentId, recommendationId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 댓글 비추천 해제
+     */
+    @DeleteMapping("/{commentId}/{notRecommendationId}/")
+    public ResponseEntity<Void> cancelNotRecommend(@Auth Long memberId,
+        @PathVariable Long episodeId,
+        @PathVariable Long commentId, @PathVariable Long notRecommendationId) {
+        commentService.unnotRecommendComment(memberId, commentId, notRecommendationId);
         return ResponseEntity.noContent().build();
     }
 }

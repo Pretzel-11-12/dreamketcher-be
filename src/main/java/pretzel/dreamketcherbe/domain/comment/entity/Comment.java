@@ -35,6 +35,14 @@ public class Comment extends BaseTimeEntity {
     @Column(nullable = false)
     private String content;
 
+    @Column(name = "recommendation_count", nullable = false)
+    @ColumnDefault("0")
+    private int recommendationCount;
+
+    @Column(name = "not_recommendation_count", nullable = false)
+    @ColumnDefault("0")
+    private int notRecommendationCount;
+
     @Column(name = "is_deleted", nullable = false)
     @ColumnDefault("false")
     private boolean isDeleted;
