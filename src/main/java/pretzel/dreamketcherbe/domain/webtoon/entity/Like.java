@@ -4,16 +4,14 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
+import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
-
-import java.time.LocalDateTime;
 
 @Table(name = "likes")
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Like {
+public class Like extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,8 +24,4 @@ public class Like {
     @OneToOne
     @JoinColumn(name = "webtoon_id")
     private Webtoon webtoon;
-
-    @CreatedDate
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
 }
