@@ -27,9 +27,9 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
 
   cookie:
-    max-age: 12345678
+    max-age: 604800000
     path: /
-    same-site: none
+    same-site: Strict
     http-only: true
     secure: false
 
