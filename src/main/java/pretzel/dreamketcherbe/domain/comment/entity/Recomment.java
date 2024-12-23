@@ -41,9 +41,7 @@ public class Recomment extends BaseTimeEntity {
 
     @Column(name = "comment_order")
     private Long commentOrder;
-
-    @Column(name = "child_comment_count")
-    private int childCommentCount;
+    
 
     @Column(name = "is_deleted", nullable = false)
     @ColumnDefault("false")
@@ -61,9 +59,11 @@ public class Recomment extends BaseTimeEntity {
     private Episode episode;
 
     @Builder
-    public Recomment(String content, Long parentCommentId, Member member, Episode episode) {
+    public Recomment(String content, Long parentCommentId, Long commentOrder, Member member,
+        Episode episode) {
         this.content = content;
         this.parentCommentId = parentCommentId;
+        this.commentOrder = commentOrder;
         this.member = member;
         this.episode = episode;
     }
