@@ -54,8 +54,8 @@ oauth2:
 
 jwt:
   secret-key: ENC(5fC95Crbt7dd6mUP0lkjA/3ywegyW77XUo7u6PuuZYA/SzVx7rtj8Ft1bt96z3zd)
-  access-exp: 12345678
-  refresh-exp: 12345678
+  access-exp: 7200000
+  refresh-exp: 604800000
 
 management:
   endpoints:
