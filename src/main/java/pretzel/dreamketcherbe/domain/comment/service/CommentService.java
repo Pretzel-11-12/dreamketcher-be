@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommendationResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentNotRecommendationResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.NotRecommendationResDto;
@@ -14,11 +16,15 @@ import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 import pretzel.dreamketcherbe.domain.comment.entity.NotRecommendation;
 import pretzel.dreamketcherbe.domain.comment.entity.Recommendation;
 import pretzel.dreamketcherbe.domain.comment.entity.Recomment;
+import pretzel.dreamketcherbe.domain.comment.entity.RecommentNotRecommendation;
+import pretzel.dreamketcherbe.domain.comment.entity.RecommentRecommendation;
 import pretzel.dreamketcherbe.domain.comment.exception.CommentException;
 import pretzel.dreamketcherbe.domain.comment.exception.CommentExceptionType;
 import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.NotRecommendationRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.RecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentNotRecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentRecomendationRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.RecommentRepository;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
@@ -40,6 +46,8 @@ public class CommentService {
     private final RecommentRepository recommentRepository;
     private final RecommendationRepository recommendationRepository;
     private final NotRecommendationRepository notRecommendationRepository;
+    private final RecommentRecomendationRepository recommentRecommendationRepository;
+    private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
 
     /**
      * 댓글 생성
@@ -191,5 +199,88 @@ public class CommentService {
                 () -> new CommentException(CommentExceptionType.NOT_RECOMMENDATION_NOT_FOUND));
 
         notRecommendationRepository.delete(findNotRecommendation);
+    }
+
+    /**
+     * 답글 추천
+     */
+    @Transactional
+    public CreateRecommentRecommendationResDto recommendRecomment(Long memberId, Long recommentId) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Recomment findRecomment = recommentRepository.findById(recommentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
+
+        RecommentRecommendation newRecommentRecommendation = RecommentRecommendation
+            .builder()
+            .member(findMember)
+            .recomment(findRecomment)
+            .build();
+
+        return CreateRecommentRecommendationResDto.of(newRecommentRecommendation);
+    }
+
+    /**
+     * 답글 추천 해제
+     */
+    @Transactional
+    public void unrecommentRecommendation(Long memberId, Long recommentId,
+        Long recommentRecommendationId) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Recomment findRecomment = recommentRepository.findById(recommentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
+
+        RecommentRecommendation findRecommentRecommendation = recommentRecommendationRepository
+            .findByMemberAndRecomment(memberId, recommentId)
+            .orElseThrow(
+                () -> new CommentException(
+                    CommentExceptionType.RECOMMENT_RECOMMENDATION_NOT_FOUND));
+
+        recommentRecommendationRepository.delete(findRecommentRecommendation);
+    }
+
+    /**
+     * 답글 비추천
+     */
+    @Transactional
+    public CreateRecommentNotRecommendationResDto recommentNotRecommendation(Long memberId,
+        Long recommentId) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Recomment findRecomment = recommentRepository.findById(recommentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
+
+        RecommentNotRecommendation newRecommentNotRecommendation = RecommentNotRecommendation
+            .builder()
+            .member(findMember)
+            .recomment(findRecomment)
+            .build();
+
+        return CreateRecommentNotRecommendationResDto.of(newRecommentNotRecommendation);
+    }
+
+    /**
+     * 답글 비추천 해제
+     */
+    @Transactional
+    public void unrecommentNotRecommendation(Long memberId, Long recommentId,
+        Long recommentNotRecommendationId) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Recomment findRecomment = recommentRepository.findById(recommentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
+
+        RecommentNotRecommendation findRecommentNotRecommendation = recommentNotRecommendationRepository
+            .findByMemberAndRecomment(memberId, recommentId)
+            .orElseThrow(
+                () -> new CommentException(
+                    CommentExceptionType.RECOMMENT_NOT_RECOMMENDATION_NOT_FOUND));
+
+        recommentNotRecommendationRepository.delete(findRecommentNotRecommendation);
     }
 }
