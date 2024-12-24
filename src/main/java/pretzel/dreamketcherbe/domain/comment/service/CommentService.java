@@ -6,10 +6,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.entity.Comment;
+import pretzel.dreamketcherbe.domain.comment.entity.Recomment;
 import pretzel.dreamketcherbe.domain.comment.exception.CommentException;
 import pretzel.dreamketcherbe.domain.comment.exception.CommentExceptionType;
 import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentRepository;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeExceptionType;
@@ -27,6 +31,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final EpisodeRepository episodeRepository;
+    private final RecommentRepository recommentRepository;
 
     /**
      * 댓글 생성
@@ -61,6 +66,63 @@ public class CommentService {
         findComment.isAuthor(memberId);
 
         findComment.softDelete();
+        commentRepository.save(findComment);
+    }
+
+    /**
+     * 답글 생성
+     */
+    @Transactional
+    public CreateRecommentResDto createRecomment(Long memberId, Long episodeId, Long commentId,
+        CreateRecommentReqDto request) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Episode findEpisode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        Comment findComment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
+
+        long commentOrder =
+            recommentRepository.countByParentCommentIdAndIsDeletedFalse(findComment.getId()) + 1;
+
+        Recomment newRecomment = Recomment
+            .builder()
+            .member(findMember)
+            .episode(findEpisode)
+            .content(request.content())
+            .parentCommentId(findComment.getId())
+            .commentOrder(commentOrder)
+            .build();
+
+        int childCommentCount = (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(
+            findComment.getId());
+        findComment.updateChildCommentCount(childCommentCount);
+        commentRepository.save(findComment);
+
+        return CreateRecommentResDto.of(newRecomment);
+    }
+
+    /**
+     * 답글 삭제
+     */
+    @Transactional
+    public void deleteRecomment(Long memberId, Long episodeId, Long commentId, Long recommentId) {
+        Recomment findRecomment = recommentRepository.findById(recommentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
+
+        Comment findComment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
+
+        findRecomment.isAuthor(memberId);
+
+        findRecomment.softDelete();
+        recommentRepository.save(findRecomment);
+
+        int childCommentCount = (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(
+            findComment.getId());
+        findComment.updateChildCommentCount(childCommentCount);
         commentRepository.save(findComment);
     }
 
