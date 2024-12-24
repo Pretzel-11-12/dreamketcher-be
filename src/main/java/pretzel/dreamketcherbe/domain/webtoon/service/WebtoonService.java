@@ -120,13 +120,7 @@ public class WebtoonService {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-        findWebtoon.getId();
-        findWebtoon.updateTitle(request.title());
-        findWebtoon.updateThumbnail(request.thumbnail());
-        findWebtoon.updatePrologue(request.prologue());
-        findWebtoon.updateStory(request.story());
-        findWebtoon.updateDescription(request.description());
-
+        findWebtoon.updateOf(request);
         webtoonRepository.save(findWebtoon);
     }
 
