@@ -24,4 +24,23 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
     List<Webtoon> findByMemberNickname(@Param("nickname") String nickname);
 
     Page<Webtoon> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    @Query(value = """
+        SELECT 
+            w.title,
+            w.thumbnail,
+            (SELECT GROUP_CONCAT(DISTINCT g.name SEPARATOR ',') 
+             FROM webtoon_genres wg 
+             JOIN genres g ON wg.genre_id = g.id 
+             WHERE wg.webtoon_id = w.id) AS genres,
+            w.episode_count,
+            w.average_star,
+            (SELECT COUNT(*) FROM episodes e WHERE e.webtoon_id = w.id) AS num_of_stars,
+            (SELECT COUNT(*) FROM likes l WHERE l.webtoon_id = w.id) AS like_count,
+            (SELECT SUM(e.view_count) FROM episodes e WHERE e.webtoon_id = w.id) AS view_count,
+            (SELECT COUNT(*) FROM interested_webtoon iw WHERE iw.webtoon_id = w.id) AS interested_count
+        FROM webtoons w
+    """, nativeQuery = true)
+    List<Object[]> findAllWithPopularityData();
+
 }
