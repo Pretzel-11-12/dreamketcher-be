@@ -51,8 +51,8 @@ public class WebtoonService {
         Genre genre = GenreRepository.findByName(genreName)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
 
-        return webtoonGenreRepository.findByGenreId(genre.getId(), pageable)
-                .map(webtoonGenre -> WebtoonResDto.of(webtoonGenre.getWebtoon()));
+        return webtoonGenreRepository.findByGenreIdAndStatus(genre.getId(), pageable)
+            .map(webtoonGenre -> WebtoonResDto.of(webtoonGenre.getWebtoon()));
     }
 
     /**
@@ -60,7 +60,7 @@ public class WebtoonService {
      */
     public Page<WebtoonResDto> getWebtoonsByFinish(Pageable pageable) {
         return webtoonRepository.findAllByStatus(WebtoonStatus.FINISH.getStatus(), pageable)
-                .map(WebtoonResDto::of);
+            .map(WebtoonResDto::of);
     }
 
     /**
