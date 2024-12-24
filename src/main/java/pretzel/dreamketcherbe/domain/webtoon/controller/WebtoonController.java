@@ -64,8 +64,7 @@ public class WebtoonController {
      * 관심 웹툰 추가
      */
     @PostMapping("/{webtoonId}/favorite")
-    public ResponseEntity<Void> addFavoriteWebtoon(@Auth Long memberId,
-        @PathVariable Long webtoonId) {
+    public ResponseEntity<Void> addFavoriteWebtoon(@Auth Long memberId, @PathVariable Long webtoonId) {
         webtoonService.addFavoriteWebtoon(memberId, webtoonId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -75,8 +74,8 @@ public class WebtoonController {
      */
     @PutMapping("/{webtoonId}")
     public ResponseEntity<Void> updateWebtoon(@Auth Long memberId,
-        @PathVariable("webtoonId") Long webtoonId,
-        @RequestBody @Valid UpdateWebtoonReqDto request) {
+                                              @PathVariable("webtoonId") Long webtoonId,
+                                              @RequestBody @Valid UpdateWebtoonReqDto request) {
         webtoonService.updateWebtoon(memberId, webtoonId, request);
         return ResponseEntity.ok().build();
     }
@@ -85,8 +84,7 @@ public class WebtoonController {
      * 웹툰 삭제
      */
     @DeleteMapping("/{webtoonId}")
-    public ResponseEntity<Void> deleteWebtoon(@Auth Long memberId,
-        @PathVariable("webtoonId") Long webtoonId) {
+    public ResponseEntity<Void> deleteWebtoon(@Auth Long memberId, @PathVariable("webtoonId") Long webtoonId) {
         webtoonService.deleteWebtoon(memberId, webtoonId);
         return ResponseEntity.ok().build();
     }
