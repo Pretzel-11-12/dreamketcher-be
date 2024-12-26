@@ -33,4 +33,13 @@ public class RankingController {
     public ResponseEntity<List<RankingResDto>> getAllRankingByGenre(@RequestParam String genre) {
         return ResponseEntity.ok(rankingService.getAllRankingByGenre(genre));
     }
+
+    /**
+     * 신작 랭킹 목록 조회
+     */
+    @GetMapping("/new")
+    public ResponseEntity<List<RankingResDto>> getNewRanking(@RequestParam(defaultValue = "none") String genre) {
+        return ResponseEntity.ok(rankingService.getNewRanking(genre));
+    }
+
 }

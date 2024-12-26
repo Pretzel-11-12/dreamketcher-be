@@ -34,6 +34,21 @@ public class RankingService {
     }
 
     /**
+     * 신작 랭킹 목록 조회
+     */
+    public List<RankingResDto> getNewRanking(String genre) {
+        if (genre.equals("none")) {
+            return getNewPopularityDataDto().stream()
+                .map(RankingResDto::of)
+                .toList();
+        }
+
+        return getNewPopularityDataDtoByGenre(genre).stream()
+            .map(RankingResDto::of)
+            .toList();
+    }
+
+    /**
      * 전체 랭킹 인기 dto 가져오는 메서드
      */
     private List<WebtoonPopularityDataDto> getAllPopularityDataDto() {
@@ -54,5 +69,28 @@ public class RankingService {
                 .sorted(Comparator.comparing(WebtoonPopularityDataDto::getPopularity).reversed())
                 .limit(12)
                 .toList();
+    }
+
+    /**
+     * 신작 랭킹 dto 가져오는 메서드
+     */
+    private List<WebtoonPopularityDataDto> getNewPopularityDataDto() {
+        return webtoonRepository.findNewWithPopularityData().stream()
+            .map(WebtoonPopularityDataDto::of)
+            .sorted(Comparator.comparing(WebtoonPopularityDataDto::getPopularity).reversed())
+            .limit(12)
+            .toList();
+    }
+
+    /**
+     * 신작 + 장르 dto 가져오는 메서드
+     */
+    private List<WebtoonPopularityDataDto> getNewPopularityDataDtoByGenre(String genre) {
+        return webtoonRepository.findNewWithPopularityData().stream()
+            .map(WebtoonPopularityDataDto::of)
+            .filter(webtoon -> webtoon.getGenres().contains(genre))
+            .sorted(Comparator.comparing(WebtoonPopularityDataDto::getPopularity).reversed())
+            .limit(12)
+            .toList();
     }
 }
