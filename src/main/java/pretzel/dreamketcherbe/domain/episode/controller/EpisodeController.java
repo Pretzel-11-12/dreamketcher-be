@@ -32,7 +32,6 @@ import pretzel.dreamketcherbe.domain.episode.service.EpisodeService;
 @AllArgsConstructor
 public class EpisodeController {
 
-
     private final EpisodeService episodeService;
 
     /**
@@ -100,10 +99,36 @@ public class EpisodeController {
     @PostMapping("/{episodeId}/like")
     public ResponseEntity<CreateEpisodeLikeResDto> likeEpisode(@Auth Long memberId,
         @PathVariable("episodeId") Long episodeId) {
-        int likeCount = episodeService.likeEpisode(memberId, episodeId);
+        CreateEpisodeLikeResDto like = episodeService.likeEpisode(memberId, episodeId);
 
         return ResponseEntity
-            .status(HttpStatus.CREATED)  // 상태 코드 변경
-            .body(CreateEpisodeLikeResDto.of(episodeId, likeCount));
+            .status(HttpStatus.CREATED)
+            .body(like);
+    }
+
+    /**
+     * 애피소드 동기화
+     */
+    @PostMapping("/{episodeId}/sync-redis")
+    public ResponseEntity<Void> syncRedisLikeCount(@PathVariable("episodeId") Long episodeId) {
+        episodeService.initailizeRedisLikeCount(episodeId);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 좋아요 수 가져오기
+     */
+    @GetMapping("/{episodeId}/like-count")
+    public ResponseEntity<Integer> getLikeCount(@PathVariable("episodeId") Long episodeId) {
+        try {
+            String likeCountKey = EpisodeService.EPISODE_LIKE_COUNT_KEY_PREFIX + episodeId;
+            String likeCount = episodeService.redisTemplate.opsForValue().get(likeCountKey);
+            int likeCountInt = likeCount == null ? episodeService.getLikeCountFallback(episodeId)
+                : Integer.parseInt(likeCount);
+            return ResponseEntity.ok(likeCountInt);
+        } catch (Exception e) {
+            int fallbackCount = episodeService.getLikeCountFallback(episodeId);
+            return ResponseEntity.ok(fallbackCount);
+        }
     }
 }

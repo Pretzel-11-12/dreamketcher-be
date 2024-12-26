@@ -5,12 +5,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeLikeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
@@ -34,6 +39,7 @@ import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value.Bool;
 
 @Slf4j
 @Service
@@ -41,11 +47,29 @@ import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 public class EpisodeService {
 
     private final EpisodeRepository episodeRepository;
-    private final WebtoonRepository webtoonRepositoy;
+    private final WebtoonRepository webtoonRepository;
     private final MemberRepository memberRepository;
     private final WebtoonGenreRepository webtoonGenreRepository;
     private final EpisodeLikeRepository episodeLikeRepository;
     private final EpisodeStarRepository episodeStarRepository;
+    public final RedisTemplate<String, String> redisTemplate;
+
+    public static final String EPISODE_LIKE_COUNT_KEY_PREFIX = "episode:likeCount:";
+    private static final String EPISODE_LIKE_USER_KEY_PREFIX = "episode:likeUser:";
+
+    private static final String LIKE_SCRIPT = """
+        if redis.call('sismember', KEYS[1], ARGV[1]) == 1 then
+            redis.call('srem', KEYS[1], ARGV[1])
+            redis.call('decr', KEYS[2])
+            return -1
+        else
+            redis.call('sadd', KEYS[1], ARGV[1])
+            redis.call('incr', KEYS[2])
+            return 1
+        end
+        """;
+
+    private final RedisScript<Long> likeScript = new DefaultRedisScript<>(LIKE_SCRIPT, Long.class);
 
     /**
      * 에피소드 목록 조회
@@ -53,7 +77,7 @@ public class EpisodeService {
     public WebtoonEpisodeListResDto getWebtoonEpisodes(Long webtoonId, boolean fromFirst, int page,
         int size) {
 
-        Webtoon webtoon = webtoonRepositoy.findById(webtoonId)
+        Webtoon webtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         List<WebtoonGenre> webtoonGenres = webtoonGenreRepository.findByWebtoonId(webtoonId);
@@ -196,28 +220,86 @@ public class EpisodeService {
     }
 
     /**
-     * 좋아요
+     * 에피소드 좋아요
      */
     @Transactional
-    public int likeEpisode(Long episodeId, Long memberId) {
+    public CreateEpisodeLikeResDto likeEpisode(Long episodeId, Long memberId) {
         Episode episode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        Optional<EpisodeLike> episodeLike = episodeLikeRepository.findByEpisodeIdAndMemberId(
-            episodeId,
-            memberId);
-        
-        if (episodeLike.isEmpty()) {  // 좋아요 추가
-            episode.incrementLikeCount();
-            episodeLikeRepository.save(new EpisodeLike(episode, member));
-        } else {  // 좋아요 해제
-            episode.decrementLikeCount();
-            episodeLikeRepository.delete(episodeLike.get());
+        String likeCountKey = EPISODE_LIKE_COUNT_KEY_PREFIX + episodeId;
+        String likeUserKey = EPISODE_LIKE_USER_KEY_PREFIX + episodeId;
+
+        Long result = redisTemplate.execute(likeScript, List.of(likeUserKey, likeCountKey),
+            memberId.toString());
+
+        if (result == null) {
+            throw new IllegalStateException("Redis execution failed");
         }
 
-        return episode.getLikeCount();
+        if (result == 1) {
+            episodeLikeRepository.save(new EpisodeLike(episode, member));
+        } else if (result == -1) {
+            episodeLikeRepository.deleteByEpisodeAndMember(episodeId, memberId);
+        }
+
+        String likeCount = redisTemplate.opsForValue().get(likeCountKey);
+        int likeCountInt = likeCount == null ? 0 : Integer.parseInt(likeCount);
+
+        return CreateEpisodeLikeResDto.of(episodeId, likeCountInt);
+    }
+
+    /**
+     * 에피소드 좋아요 수 동기화
+     */
+    @Transactional
+    public void syncEpisodeLikeCount(Long episodeId) {
+        String likeCountkey = EPISODE_LIKE_COUNT_KEY_PREFIX + episodeId;
+
+        String likeCount = redisTemplate.opsForValue().get(likeCountkey);
+        if (likeCount != null) {
+            int likeCountInt = Integer.parseInt(likeCount);
+            Episode episode = episodeRepository.findById(episodeId)
+                .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+            episode.setLikeCount(likeCountInt);
+            episodeRepository.save(episode);
+        }
+    }
+
+    /**
+     * Redis 장애 대비
+     */
+    @Transactional
+    public int getLikeCountFallback(Long episodId) {
+        long likeCount = episodeLikeRepository.countByEpisodeId(episodId);
+        Episode episode = episodeRepository.findById(episodId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        episode.setLikeCount((int) likeCount);
+        episodeRepository.save(episode);
+        return (int) likeCount;
+    }
+
+    /**
+     * Redis 데이터 초기화 및 재동기화
+     */
+    @Transactional
+    public void initailizeRedisLikeCount(Long episodeId) {
+        String likeCountKey = EPISODE_LIKE_COUNT_KEY_PREFIX + episodeId;
+        String likeUserKey = EPISODE_LIKE_USER_KEY_PREFIX + episodeId;
+
+        int likeCount = getLikeCountFallback(episodeId);
+        redisTemplate.opsForValue().set(likeCountKey, String.valueOf(likeCount), 1, TimeUnit.DAYS);
+
+        List<EpisodeLike> likes = episodeLikeRepository.findAllById(episodeId);
+        for (EpisodeLike like : likes) {
+            redisTemplate.opsForSet().add(likeUserKey, like.getMember().getId().toString());
+        }
+
+        redisTemplate.expire(likeUserKey, 1, TimeUnit.DAYS);
     }
 }
