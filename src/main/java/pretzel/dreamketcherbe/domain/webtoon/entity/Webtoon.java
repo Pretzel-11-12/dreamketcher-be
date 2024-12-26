@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 
 @Table(name = "webtoons")
 @Getter
@@ -46,6 +47,10 @@ public class Webtoon extends BaseTimeEntity {
 
     @ColumnDefault("'PRE_SERIES'")
     private String status;
+
+    @ColumnDefault("0.0")
+    @Column(nullable = false, name = "average_star")
+    private float averageStar;
 
     @Column(nullable = false)
     @ColumnDefault("0")

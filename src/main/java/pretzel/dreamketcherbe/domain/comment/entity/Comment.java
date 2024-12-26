@@ -35,6 +35,9 @@ public class Comment extends BaseTimeEntity {
     @Column(nullable = false)
     private String content;
 
+    @Column(name = "child_comment_count")
+    private int childCommentCount;
+
     @Column(name = "recommendation_count", nullable = false)
     @ColumnDefault("0")
     private int recommendationCount;
@@ -74,5 +77,9 @@ public class Comment extends BaseTimeEntity {
     public void softDelete() {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public void updateChildCommentCount(int count) {
+        this.childCommentCount = count;
     }
 }
