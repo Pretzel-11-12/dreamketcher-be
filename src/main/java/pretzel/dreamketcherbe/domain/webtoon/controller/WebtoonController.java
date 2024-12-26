@@ -43,6 +43,15 @@ public class WebtoonController {
     }
 
     /**
+     * 웹툰 완결 + 장르 목록 조회
+     */
+    @GetMapping("/finish/genre")
+    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByFinishAndGenre(@RequestParam String genre,
+                                                                        @RequestParam String order) {
+        return ResponseEntity.ok(webtoonService.getWebtoonsByFinishAndGenre(genre, order));
+    }
+
+    /**
      * 웹툰 신작 전체 목록 조회
      */
     @GetMapping("/new")

@@ -64,6 +64,25 @@ public class WebtoonService {
     }
 
     /**
+     * 웹툰 완결 + 장르 전체 목록 조회
+     */
+    public List<WebtoonResDto> getWebtoonsByFinishAndGenre(String genre, String order) {
+        List<Long> webtoonIdsInGenre = getWebtoonIdsInGenre(genre);
+
+        List<Webtoon> webtoons = switch (order.toLowerCase()) {
+            case "latest" -> webtoonRepository.findAllByStatusOrderByUpdatedAtDesc(WebtoonStatus.FINISH.getStatus());
+            case "stars" -> webtoonRepository.findAllByStatusOrderByAverageStarDesc(WebtoonStatus.FINISH.getStatus());
+            case "likes" -> webtoonRepository.findAllByStatusAndOrderByLikesDesc(WebtoonStatus.FINISH.getStatus());
+            default -> throw new WebtoonException(WebtoonExceptionType.ORDER_NOT_FOUND);
+        };
+
+        return webtoons.stream()
+                .filter(webtoon -> webtoonIdsInGenre.contains(webtoon.getId()))
+                .map(WebtoonResDto::of)
+                .toList();
+    }
+
+    /**
      * 웹툰 신작 전체 목록 조회
      */
     public Page<WebtoonResDto> getWebtoonsByNew(Pageable pageable) {
@@ -78,9 +97,6 @@ public class WebtoonService {
      */
     public List<WebtoonResDto> getWebtoonsByNewAndGenre(String genre, String order) {
         LocalDateTime cutoffDate = LocalDateTime.now().minusMonths(1);
-        Long genreId = genreRepository.findByName(genre)
-            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND))
-            .getId();
 
         List<Webtoon> webtoons = switch (order.toLowerCase()) {
             case "latest" -> webtoonRepository.findNewWebtoonsOrderByLatest(cutoffDate);
@@ -89,9 +105,7 @@ public class WebtoonService {
             default -> throw new WebtoonException(WebtoonExceptionType.ORDER_NOT_FOUND);
         };
 
-        List<Long> webtoonIdsInGenre = webtoonGenreRepository.findAllByGenreId(genreId).stream()
-            .map(webtoonGenre -> webtoonGenre.getWebtoon().getId())
-            .toList();
+        List<Long> webtoonIdsInGenre = getWebtoonIdsInGenre(genre);
 
         return webtoons.stream()
                 .filter(webtoon -> webtoonIdsInGenre.contains(webtoon.getId()))
@@ -176,5 +190,15 @@ public class WebtoonService {
             .distinct()
             .map(SearchedWebtoonResDto::of)
             .collect(Collectors.toList());
+    }
+
+    private List<Long> getWebtoonIdsInGenre(String genre) {
+        Long genreId = genreRepository.findByName(genre)
+                .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND))
+                .getId();
+
+         return webtoonGenreRepository.findAllByGenreId(genreId).stream()
+                .map(webtoonGenre -> webtoonGenre.getWebtoon().getId())
+                .toList();
     }
 }

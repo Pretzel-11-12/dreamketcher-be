@@ -14,6 +14,13 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
 
     Page<Webtoon> findAllByStatus(String status, Pageable pageable);
 
+    List<Webtoon> findAllByStatusOrderByUpdatedAtDesc(String status);
+
+    List<Webtoon> findAllByStatusOrderByAverageStarDesc(String status);
+
+    @Query("SELECT w FROM Webtoon w JOIN Like l ON w.id = l.webtoon.id WHERE w.status = :status GROUP BY w.id ORDER BY COUNT(l.id) DESC")
+    List<Webtoon> findAllByStatusAndOrderByLikesDesc(@Param("status") String status);
+
     Page<Webtoon> findAllByStatusAndCreatedAtAfter(String status, LocalDateTime createdAt, Pageable pageable);
 
     @Query("SELECT w FROM Webtoon w WHERE w.status = 'IN_SERIES' AND w.createdAt >= :cutoffDate ORDER BY w.updatedAt DESC")
