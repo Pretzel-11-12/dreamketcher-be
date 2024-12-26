@@ -33,7 +33,7 @@ public class WebtoonController {
     }
 
     /**
-     * 웹툰 완결 목록 조회
+     * 웹툰 완결 전체 목록 조회
      */
     @GetMapping("/finish")
     public ResponseEntity<Page<WebtoonResDto>> getWebtoonsByFinish(@RequestParam(defaultValue = "0") int page,
@@ -43,13 +43,22 @@ public class WebtoonController {
     }
 
     /**
-     * 웹툰 신작 목록 조회
+     * 웹툰 신작 전체 목록 조회
      */
     @GetMapping("/new")
     public ResponseEntity<Page<WebtoonResDto>> getWebtoonsByNew(@RequestParam(defaultValue = "0") int page,
                                                                 @RequestParam(defaultValue = "25") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(webtoonService.getWebtoonsByNew(pageable));
+    }
+
+    /**
+     * 웹툰 신작 + 장르 목록 조회
+     */
+    @GetMapping("/new/genre")
+    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByNewAndGenre(@RequestParam String genre,
+                                                                        @RequestParam String order) {
+        return ResponseEntity.ok(webtoonService.getWebtoonsByNewAndGenre(genre, order));
     }
 
     /**
