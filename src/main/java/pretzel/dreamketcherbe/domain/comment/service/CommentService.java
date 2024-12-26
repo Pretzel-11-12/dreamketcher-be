@@ -120,10 +120,18 @@ public class CommentService {
         Recomment findRecomment = recommentRepository.findById(recommentId)
             .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
 
+        Comment findComment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
+
         findRecomment.isAuthor(memberId);
 
         findRecomment.softDelete();
         recommentRepository.save(findRecomment);
+
+        int childCommentCount = (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(
+            findComment.getId());
+        findComment.updateChildCommentCount(childCommentCount);
+        commentRepository.save(findComment);
     }
 
     /**

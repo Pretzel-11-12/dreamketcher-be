@@ -73,6 +73,17 @@ public class Webtoon extends BaseTimeEntity {
         this.member = member;
     }
 
+    public static Webtoon addOf(CreateWebtoonReqDto request, Member member) {
+        return Webtoon.builder()
+            .title(request.title())
+            .thumbnail(request.thumbnail())
+            .prologue(request.prologue())
+            .story(request.story())
+            .description(request.description())
+            .member(member)
+            .build();
+    }
+
     public void updateTitle(String title) {
         this.title = title;
     }
