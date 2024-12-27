@@ -42,4 +42,11 @@ public class RankingController {
         return ResponseEntity.ok(rankingService.getNewRanking(genre));
     }
 
+    /**
+     * 완결 랭킹 목록 조회
+     */
+    @GetMapping("/finish")
+    public ResponseEntity<List<RankingResDto>> getFinishRanking(@RequestParam(defaultValue = "none") String genre) {
+        return ResponseEntity.ok(rankingService.getFinishRanking(genre));
+    }
 }
