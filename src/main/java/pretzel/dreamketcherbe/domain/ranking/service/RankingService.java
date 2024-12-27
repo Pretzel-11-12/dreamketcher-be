@@ -18,19 +18,16 @@ public class RankingService {
     /**
      * 전체 랭킹 목록 조회
      */
-    public List<RankingResDto> getAllRanking() {
-        return getAllPopularityDataDto().stream()
-            .map(RankingResDto::of)
-            .toList();
-    }
+    public List<RankingResDto> getAllRanking(String genre) {
+        if (genre.equals("none")) {
+            return getAllPopularityDataDto().stream()
+                .map(RankingResDto::of)
+                .toList();
+        }
 
-    /**
-     * 전체 + 장르 랭킹 목록 조회
-     */
-    public List<RankingResDto> getAllRankingByGenre(String genre) {
         return getAllPopularityDataDtoByGenre(genre).stream()
-            .map(RankingResDto::of)
-            .toList();
+                .map(RankingResDto::of)
+                .toList();
     }
 
     /**

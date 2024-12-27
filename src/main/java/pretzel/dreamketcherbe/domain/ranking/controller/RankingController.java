@@ -22,16 +22,8 @@ public class RankingController {
      * 전체 랭킹 목록 조회
      */
     @GetMapping
-    public ResponseEntity<List<RankingResDto>> getAllRanking() {
-        return ResponseEntity.ok(rankingService.getAllRanking());
-    }
-
-    /**
-     * 전체 + 장르 랭킹 목록 조회
-     */
-    @GetMapping("/genre")
-    public ResponseEntity<List<RankingResDto>> getAllRankingByGenre(@RequestParam String genre) {
-        return ResponseEntity.ok(rankingService.getAllRankingByGenre(genre));
+    public ResponseEntity<List<RankingResDto>> getAllRanking(@RequestParam(defaultValue = "none") String genre) {
+        return ResponseEntity.ok(rankingService.getAllRanking(genre));
     }
 
     /**
