@@ -11,7 +11,7 @@ public record EpisodeResDto(
     String thumbnail,
     List<String> content,
     String authorNote,
-    int viewCount
+    long viewCount
 ) {
 
     public static EpisodeResDto of(Episode episode) {

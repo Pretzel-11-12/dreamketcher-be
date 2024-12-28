@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 
 @Table(name = "webtoons")
 @Getter
@@ -44,11 +45,12 @@ public class Webtoon extends BaseTimeEntity {
     @Column(nullable = false)
     private String description;
 
-    @ColumnDefault("'NOT_APPROVAL'")
-    private String approval;
-
     @ColumnDefault("'PRE_SERIES'")
     private String status;
+
+    @ColumnDefault("0.0")
+    @Column(nullable = false, name = "average_star")
+    private float averageStar;
 
     @Column(nullable = false)
     @ColumnDefault("0")
@@ -59,16 +61,28 @@ public class Webtoon extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    public Webtoon(String title, String thumbnail, List<String> prologue, String story,
-        String description, String approval, String status, Member member) {
+    private Webtoon(String title, String thumbnail, List<String> prologue, String story,
+        String status,
+        String description, Member member) {
         this.title = title;
         this.thumbnail = thumbnail;
         this.prologue = prologue;
         this.story = story;
-        this.description = description;
-        this.approval = approval;
         this.status = status;
+        this.description = description;
         this.member = member;
+    }
+
+    public static Webtoon addOf(CreateWebtoonReqDto request, Member member, String thumbnailUrl,
+        List<String> prologueUrls) {
+        return Webtoon.builder()
+            .title(request.title())
+            .thumbnail(thumbnailUrl)
+            .prologue(prologueUrls)
+            .story(request.story())
+            .description(request.description())
+            .member(member)
+            .build();
     }
 
     public void updateTitle(String title) {
