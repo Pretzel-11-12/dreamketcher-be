@@ -5,13 +5,15 @@ import pretzel.dreamketcherbe.domain.comment.entity.RecommentNotRecommendation;
 
 @Builder
 public record CreateRecommentNotRecommendationResDto(
-    Long id
+    Long id,
+    int notRecommendationCount
 ) {
 
     public static CreateRecommentNotRecommendationResDto of(
-        RecommentNotRecommendation recommentNotRecommendation) {
+        RecommentNotRecommendation recommentNotRecommendation, int notRecommendationCount) {
         return CreateRecommentNotRecommendationResDto.builder()
             .id(recommentNotRecommendation.getId())
+            .notRecommendationCount(notRecommendationCount)
             .build();
     }
 

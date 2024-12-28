@@ -14,6 +14,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -45,6 +46,16 @@ public class Recomment extends BaseTimeEntity {
     @Column(name = "child_comment_count")
     private int childCommentCount;
 
+    @Column(name = "recommendation_count", nullable = false)
+    @ColumnDefault("0")
+    @Setter
+    private int recommendationCount;
+
+    @Column(name = "not_recommendation_count", nullable = false)
+    @ColumnDefault("0")
+    @Setter
+    private int notRecommendationCount;
+
     @Column(name = "is_deleted", nullable = false)
     @ColumnDefault("false")
     private Boolean isDeleted;
@@ -61,11 +72,14 @@ public class Recomment extends BaseTimeEntity {
     private Episode episode;
 
     @Builder
-    public Recomment(String content, Long parentCommentId, Long commentOrder, Member member,
+    public Recomment(String content, Long parentCommentId, Long commentOrder,
+        int recommentRecommendationCount, int notRecommendationCount, Member member,
         Episode episode) {
         this.content = content;
         this.parentCommentId = parentCommentId;
         this.commentOrder = commentOrder;
+        this.recommendationCount = recommentRecommendationCount;
+        this.notRecommendationCount = notRecommendationCount;
         this.member = member;
         this.episode = episode;
     }

@@ -12,4 +12,7 @@ public interface RecommentRepository extends JpaRepository<Recomment, Long> {
 
     long countByParentCommentIdAndIsDeletedFalse(Long parentCommentId);
 
+    @Query("SELECT r.id FROM Recomment r")
+    List<Long> findAllRecommentIds();
+
 }

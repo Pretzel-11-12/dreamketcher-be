@@ -16,6 +16,7 @@ import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentNotRecommendationResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.NotRecommendationResDto;
@@ -52,7 +53,7 @@ public class CommentController {
     @PostMapping("/delete")
     public ResponseEntity<Void> deleteComment(@Auth Long memberId, @PathVariable Long episodeId,
         @PathVariable Long commentId) {
-        commentService.deleteComment(memberId, episodeId, commentId);
+        commentService.deleteComment(memberId, commentId);
 
         return ResponseEntity.noContent().build();
     }
@@ -75,7 +76,7 @@ public class CommentController {
     @PostMapping("/{commentId}/recomment/delete")
     public ResponseEntity<Void> deleteRecomment(@Auth Long memberId, @PathVariable Long episodeId,
         @PathVariable Long commentId, @PathVariable Long recommentId) {
-        commentService.deleteRecomment(memberId, episodeId, commentId, recommentId);
+        commentService.deleteRecomment(memberId, commentId, recommentId);
 
         return ResponseEntity.noContent().build();
     }
@@ -125,23 +126,25 @@ public class CommentController {
     /**
      * 답글 추천
      */
-    @PostMapping("/{commentId}/recomment/{recommentId}/recommend")
-    public ResponseEntity<CreateRecommendationResDto> recommentRecommendation(@Auth Long memberId,
+    @PostMapping("/{commentId}/recomments/{recommentId}/recommend")
+    public ResponseEntity<CreateRecommentRecommendationResDto> recommentRecommendation(
+        @Auth Long memberId,
         @PathVariable Long episodeId, @PathVariable Long commentId,
         @PathVariable Long recommentId) {
-        commentService.recommendRecomment(memberId, recommentId);
+        CreateRecommentRecommendationResDto response = commentService.recommendRecomment(memberId,
+            recommentId);
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
      * 답글 추천 해제
      */
-    @DeleteMapping("/{commentId}/recomment/{recommentId}/{recommentRecommendationId}/")
-    public ResponseEntity<Void> cancelRecommentRecommend(@Auth Long memberId,
+    @DeleteMapping("/{commentId}/recomment/{recommentId}/recommend")
+    public ResponseEntity<Void> cancelRecommendRecomment(@Auth Long memberId,
         @PathVariable Long episodeId, @PathVariable Long commentId,
         @PathVariable Long recommentId, @PathVariable Long recommendationId) {
-        commentService.unrecommentRecommendation(memberId, recommentId, recommendationId);
+        commentService.unrecommentRecommendation(memberId, recommentId);
 
         return ResponseEntity.noContent().build();
     }
@@ -154,20 +157,20 @@ public class CommentController {
         @Auth Long memberId,
         @PathVariable Long episodeId, @PathVariable Long commentId,
         @PathVariable Long recommentId) {
-        commentService.recommentNotRecommendation(memberId, recommentId);
+        CreateRecommentNotRecommendationResDto response = commentService.recommentNotRecommendation(
+            memberId, recommentId);
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
      * 답글 비추천 해제
      */
-    @DeleteMapping("/{commentId}/recomment/{recommentId}/{notRecommentRecommendationId}/")
+    @DeleteMapping("/{commentId}/recomment/{recommentId}/not-recommend")
     public ResponseEntity<Void> cancelRecommentNotRecommend(@Auth Long memberId,
         @PathVariable Long episodeId, @PathVariable Long commentId,
-        @PathVariable Long recommentId, @PathVariable Long recommentNotRecommendationId) {
-        commentService.unrecommentNotRecommendation(memberId, recommentId,
-            recommentNotRecommendationId);
+        @PathVariable Long recommentId) {
+        commentService.unrecommentNotRecommendation(memberId, recommentId);
 
         return ResponseEntity.noContent().build();
     }
