@@ -109,23 +109,31 @@ public class EpisodeService {
      */
     @Transactional
     public CreateEpisodeResDto createEpisode(Long memberId, CreateEpisodeReqDto request) {
-        Member findMember = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+        try {
+            Member findMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        String thumbnailUrl = s3Service.imageUpload(request.thumbnail());
-        List<String> contentUrl = s3Service.imagesUpload(request.content());
+            String folderName = "episode/" + memberId + "/" + request.title();
 
-        Episode newEpisode = Episode.builder()
-            .member(findMember)
-            .title(request.title())
-            .thumbnail(thumbnailUrl)
-            .content(contentUrl)
-            .authorNote(request.authorNote())
-            .build();
+            String thumbnailUrl = s3Service.imageUpload(request.thumbnail(),
+                folderName + "/thumbnail");
+            List<String> contentUrl = s3Service.imagesUpload(request.content(),
+                folderName + "/content");
 
-        episodeRepository.save(newEpisode);
+            Episode newEpisode = Episode.builder()
+                .member(findMember)
+                .title(request.title())
+                .thumbnail(thumbnailUrl)
+                .content(contentUrl)
+                .authorNote(request.authorNote())
+                .build();
 
-        return CreateEpisodeResDto.of(newEpisode);
+            episodeRepository.save(newEpisode);
+
+            return CreateEpisodeResDto.of(newEpisode);
+        } catch (Exception e) {
+            throw new EpisodeException(EpisodeExceptionType.CREATE_EPISODE_FAILED);
+        }
     }
 
     /**
@@ -136,12 +144,16 @@ public class EpisodeService {
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
+        String folderName = "episode/" + memberId + "/" + request.title();
+
         String thumbnailUrl =
-            request.thumbnail() != null ? s3Service.imageUpload(request.thumbnail())
+            request.thumbnail() != null ? s3Service.imageUpload(request.thumbnail(),
+                folderName + "/thumbnail")
                 : findEpisode.getThumbnail();
 
         List<String> contentUrls =
-            request.content() != null ? s3Service.imagesUpload(request.content())
+            request.content() != null ? s3Service.imagesUpload(request.content(),
+                folderName + "/content")
                 : findEpisode.getContent();
 
         findEpisode.isAuthor(memberId);
@@ -160,6 +172,13 @@ public class EpisodeService {
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
         findEpisode.isAuthor(memberId);
+
+        String folderName = "episode/" + memberId + "/" + findEpisode.getTitle();
+
+        s3Service.deleteImage(findEpisode.getThumbnail());
+        for (String contentUrl : findEpisode.getContent()) {
+            s3Service.deleteImage(contentUrl);
+        }
 
         episodeRepository.delete(findEpisode);
     }

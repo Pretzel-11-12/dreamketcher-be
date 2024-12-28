@@ -1,6 +1,5 @@
 package pretzel.dreamketcherbe.S3Utils;
 
-import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -38,15 +37,16 @@ public class S3Service {
     /**
      * 단일 이미지 파일 업로드
      */
-    public String imageUpload(MultipartFile multipartFile) {
+    public String imageUpload(MultipartFile multipartFile, String folderName) {
         String newFileName = generateRandomFileName(multipartFile);
+        String filePath = folderName + "/" + newFileName;
 
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(multipartFile.getSize());
         metadata.setContentType(multipartFile.getContentType());
 
         try {
-            amazonS3.putObject(bucketName, newFileName, multipartFile.getInputStream(), metadata);
+            amazonS3.putObject(bucketName, filePath, multipartFile.getInputStream(), metadata);
         } catch (IOException e) {
             log.error("Failed to convert image file", e);
             throw new S3Exception(S3ExceptionType.FAILED_TO_CONVERT_IMAGE);
@@ -54,13 +54,13 @@ public class S3Service {
             log.error("Amazon S3 error while uploading file: {}", e.getMessage(), e);
             throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
         }
-        return amazonS3.getUrl(bucketName, newFileName).toString();
+        return amazonS3.getUrl(bucketName, filePath).toString();
     }
 
     /**
      * 다중 이미지 파일 업로드
      */
-    public List<String> imagesUpload(List<MultipartFile> multipartFiles) {
+    public List<String> imagesUpload(List<MultipartFile> multipartFiles, String folderName) {
         List<String> uploadedFileUrls = new ArrayList<>();
 
         for (MultipartFile multipartFile : multipartFiles) {
@@ -68,7 +68,7 @@ public class S3Service {
                 throw new S3Exception(S3ExceptionType.DUPLICATED_FILE);
             }
             try {
-                uploadedFileUrls.add(imageUpload(multipartFile));
+                uploadedFileUrls.add(imageUpload(multipartFile, folderName));
             } catch (S3Exception e) {
                 throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
             }
@@ -81,10 +81,10 @@ public class S3Service {
     /**
      * 이미지 파일 수정
      */
-    public String imageUpdate(String oldImage, MultipartFile newImage) {
+    public String imageUpdate(String oldImage, MultipartFile newImage, String folderName) {
         deleteImage(oldImage);
 
-        return imageUpload(newImage);
+        return imageUpload(newImage, folderName);
     }
 
     /**
@@ -93,7 +93,8 @@ public class S3Service {
     public List<String> updatePartialImages(
         List<String> existingImageUrls,
         List<MultipartFile> newImages,
-        List<Integer> replaceIndices) {
+        List<Integer> replaceIndices,
+        String folderName) {
 
         if (newImages.size() != replaceIndices.size()) {
             throw new IllegalArgumentException(
@@ -111,7 +112,7 @@ public class S3Service {
 
             deleteImage(existingImageUrls.get(replaceIndex));
 
-            String newImageUrl = imageUpload(newImages.get(i));
+            String newImageUrl = imageUpload(newImages.get(i), folderName);
 
             updatedImageUrls.set(replaceIndex, newImageUrl);
         }

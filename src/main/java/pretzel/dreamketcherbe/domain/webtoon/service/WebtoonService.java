@@ -91,8 +91,11 @@ public class WebtoonService {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        String thumbnailUrl = s3Service.imageUpload(request.thumbnail());
-        List<String> prologueUrl = s3Service.imagesUpload(request.prologue());
+        String folderName = "/webtoon" + findMember.getId() + "/" + request.title();
+
+        String thumbnailUrl = s3Service.imageUpload(request.thumbnail(), folderName + "/thumbnail");
+        List<String> prologueUrl = s3Service.imagesUpload(request.prologue(),
+            folderName + "/prologue");
 
         Webtoon newWebtoon = Webtoon.builder()
             .title(request.title())
@@ -137,15 +140,22 @@ public class WebtoonService {
      * 웹툰 수정
      */
     public void updateWebtoon(Long memberId, Long webtoonId, UpdateWebtoonReqDto request) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
+        String folderName = "/webtoon" + findMember.getId() + "/" + request.title();
+
         String thumbnailUrl =
-            request.thumbnail() != null ? s3Service.imageUpload(request.thumbnail())
+            request.thumbnail() != null ? s3Service.imageUpload(request.thumbnail(),
+                folderName + "/thumbnail")
                 : findWebtoon.getThumbnail();
 
         List<String> prologueUrl =
-            request.prologue() != null ? s3Service.imagesUpload(request.prologue())
+            request.prologue() != null ? s3Service.imagesUpload(request.prologue(),
+                folderName + "/prologue")
                 : findWebtoon.getPrologue();
 
         findWebtoon.getId();
@@ -162,6 +172,10 @@ public class WebtoonService {
      * 웹툰 삭제
      */
     public void deleteWebtoon(Long memberId, Long webtoonId) {
+
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 

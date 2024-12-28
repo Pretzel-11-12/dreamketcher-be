@@ -24,52 +24,57 @@ public class S3Controller {
     /*
      * 이미지 파일 단일 업로드
      */
-    @PostMapping("/upload")
+    @PostMapping("/upload/{folderName}")
     public ResponseEntity<String> s3UploadImage(
+        @PathVariable String folderName,
         @RequestParam(value = "image") MultipartFile image) {
-        String thumbnailImage = s3Service.imageUpload(image);
+        String thumbnailImage = s3Service.imageUpload(image, folderName);
         return ResponseEntity.ok(thumbnailImage);
     }
 
     /*
      * 이미지 파일 다중 업로드
      */
-    @PostMapping("/uploads")
+    @PostMapping("/uploads/{folderName}")
     public ResponseEntity<?> s3UploadImages(
+        @PathVariable String folderName,
         @RequestParam(value = "images") List<MultipartFile> images) {
-        List<String> uploadedImages = s3Service.imagesUpload(images);
+        List<String> uploadedImages = s3Service.imagesUpload(images, folderName);
         return ResponseEntity.ok(uploadedImages);
     }
 
     /**
      * 단일 이미지 수정
      */
-    @PutMapping("/{imageUrl}")
+    @PutMapping("/{folderName}/{imageUrl}")
     public ResponseEntity<String> s3UpdateImage(
+        @PathVariable String folderName,
         @PathVariable String imageUrl, @RequestParam("image") MultipartFile image) {
-        String updatedImageUrl = s3Service.imageUpdate(imageUrl, image);
+        String updatedImageUrl = s3Service.imageUpdate(imageUrl, image, folderName);
         return ResponseEntity.ok(updatedImageUrl);
     }
 
     /**
      * 이미지 부분 수정
      */
-    @PutMapping("/images")
+    @PutMapping("/images/{folderName}")
     public ResponseEntity<List<String>> updatePartialImages(
+        @PathVariable String folderName,
         @RequestParam("existingUrls") List<String> existingUrls,
         @RequestParam("newImages") List<MultipartFile> newImages,
         @RequestParam("replaceIndices") List<Integer> replaceIndices) {
 
         List<String> updatedImageUrls = s3Service.updatePartialImages(existingUrls, newImages,
-            replaceIndices);
+            replaceIndices, folderName);
         return ResponseEntity.ok(updatedImageUrls);
     }
 
     /*
      * 이미지 파일 삭제
      */
-    @GetMapping("/delete")
-    public ResponseEntity<Void> s3Delete(@RequestParam("image") String imageUrl) {
+    @GetMapping("/delete/{folderName}")
+    public ResponseEntity<Void> s3Delete(@PathVariable String folderName,
+        @RequestParam("image") String imageUrl) {
         s3Service.deleteImage(imageUrl);
         return ResponseEntity.noContent().build();
     }
