@@ -3,6 +3,7 @@ package pretzel.dreamketcherbe.domain.admin.dto;
 import lombok.Builder;
 import pretzel.dreamketcherbe.domain.admin.entity.ManagementWebtoon;
 import pretzel.dreamketcherbe.domain.admin.entity.Reason;
+import pretzel.dreamketcherbe.domain.webtoon.entity.SerializationPeriod;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
 import java.time.format.DateTimeFormatter;

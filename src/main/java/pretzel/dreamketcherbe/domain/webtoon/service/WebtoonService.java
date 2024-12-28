@@ -44,6 +44,8 @@ public class WebtoonService {
     private final InterestedWebtoonRepository interestedWebtoonRepository;
     private final S3Service s3Service;
 
+    private final ManagementWebtoonRespository managementWebtoonRespository;
+
     /**
      * 웹툰 장르별 목록 조회
      */
