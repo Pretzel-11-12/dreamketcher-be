@@ -196,19 +196,21 @@ public class EpisodeService {
 
         EpisodeStar episodeStar = episodeStarRepository.findByMemberIdAndEpisodeId(memberId,
                 episodeId)
-            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_STAR_NOT_FOUND));
+            .orElse(null);
 
-        episodeStar.updatePoint(point);
-        episodeStarRepository.save(episodeStar);
+        if (episodeStar != null) {
+            episodeStar.updatePoint(point);
+        } else {
+            episodeStar = EpisodeStar.builder()
+                .member(findMember)
+                .episode(findEpisode)
+                .point(point)
+                .build();
+
+            episodeStarRepository.save(episodeStar);
+        }
     }
 
-    /**
-     * 애피소드 별점 수정
-     */
-    @Transactional
-    public void updateEpisodeStar(Long memberId, Long episodeId, float point) {
-        starEpisode(memberId, episodeId, point);
-    }
 
     /**
      * 에피소드 별점 삭제

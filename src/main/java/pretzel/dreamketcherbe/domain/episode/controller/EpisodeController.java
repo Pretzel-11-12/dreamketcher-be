@@ -3,6 +3,8 @@ package pretzel.dreamketcherbe.domain.episode.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -99,23 +101,11 @@ public class EpisodeController {
     /**
      * 에피소드 별점 등록
      */
-    @PostMapping("/{episodeId}/star")
+    @PutMapping("/{episodeId}/star")
     public ResponseEntity<Void> starEpisode(@Auth Long memberId,
         @PathVariable("episodeId") Long episodeId,
-        @RequestParam float point) {
+        @RequestParam @Min(0) @Max(5) float point) {
         episodeService.starEpisode(memberId, episodeId, point);
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    /**
-     * 에피소드 별점 수정
-     */
-    @PutMapping("/{episodeId}/star")
-    public ResponseEntity<Void> updateStarEpisode(@Auth Long memberId,
-        @PathVariable("episodeId") Long episodeId,
-        @RequestParam float point) {
-        episodeService.updateEpisodeStar(episodeId, memberId, point);
 
         return ResponseEntity.ok().build();
     }

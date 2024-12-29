@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
@@ -44,5 +45,15 @@ public class EpisodeStar extends BaseTimeEntity {
 
     public void updatePoint(float point) {
         this.point = point;
+    }
+
+    @Builder
+    public static EpisodeStar create(Member member, Webtoon webtoon, Episode episode, float point) {
+        EpisodeStar episodeStar = new EpisodeStar();
+        episodeStar.member = member;
+        episodeStar.webtoon = webtoon;
+        episodeStar.episode = episode;
+        episodeStar.point = point;
+        return episodeStar;
     }
 }
