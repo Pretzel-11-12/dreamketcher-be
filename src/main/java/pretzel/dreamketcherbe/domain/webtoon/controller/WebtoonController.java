@@ -1,26 +1,18 @@
 package pretzel.dreamketcherbe.domain.webtoon.controller;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pretzel.dreamketcherbe.common.annotation.Auth;
-import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
-import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
-import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
-import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
-import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.*;
 import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/webtoons")
@@ -33,43 +25,64 @@ public class WebtoonController {
      * 장르별 웹툰 목록 조회
      */
     @GetMapping
-    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByGenre(@RequestParam String genre) {
-        return ResponseEntity.ok(webtoonService.getWebtoonsByGenre(genre));
+    public ResponseEntity<Page<WebtoonResDto>> getWebtoonsByGenre(@RequestParam String genre,
+                                                                  @RequestParam(defaultValue = "0") int page,
+                                                                  @RequestParam(defaultValue = "25") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(webtoonService.getWebtoonsByGenre(genre, pageable));
     }
 
     /**
-     * 웹툰 완결 목록 조회
+     * 웹툰 완결 전체 목록 조회
      */
     @GetMapping("/finish")
-    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByFinish() {
-        return ResponseEntity.ok(webtoonService.getWebtoonsByFinish());
+    public ResponseEntity<Page<WebtoonResDto>> getWebtoonsByFinish(@RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "25") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(webtoonService.getWebtoonsByFinish(pageable));
     }
 
     /**
-     * 웹툰 신작 목록 조회
+     * 웹툰 완결 + 장르 목록 조회
+     */
+    @GetMapping("/finish/filter")
+    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByFinishAndGenre(@RequestParam String genre,
+                                                                        @RequestParam String order) {
+        return ResponseEntity.ok(webtoonService.getWebtoonsByFinishAndGenre(genre, order));
+    }
+
+    /**
+     * 웹툰 신작 전체 목록 조회
      */
     @GetMapping("/new")
-    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByNew() {
-        return ResponseEntity.ok(webtoonService.getWebtoonsByNew());
+    public ResponseEntity<Page<WebtoonResDto>> getWebtoonsByNew(@RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "25") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(webtoonService.getWebtoonsByNew(pageable));
+    }
+
+    /**
+     * 웹툰 신작 + 장르 목록 조회
+     */
+    @GetMapping("/new/filter")
+    public ResponseEntity<List<WebtoonResDto>> getWebtoonsByNewAndGenre(@RequestParam String genre,
+                                                                        @RequestParam String order) {
+        return ResponseEntity.ok(webtoonService.getWebtoonsByNewAndGenre(genre, order));
     }
 
     /**
      * 웹툰 등록
      */
     @PostMapping
-    public ResponseEntity<CreateWebtoonResDto> createWebtoon(@Auth Long memberId,
-        @RequestBody @Valid
-        CreateWebtoonReqDto request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(webtoonService.createWebtoon(memberId, request));
+    public ResponseEntity<CreateWebtoonResDto> createWebtoon(@Auth Long memberId, @RequestBody @Valid CreateWebtoonReqDto request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(webtoonService.createWebtoon(memberId, request));
     }
 
     /**
      * 관심 웹툰 추가
      */
     @PostMapping("/{webtoonId}/favorite")
-    public ResponseEntity<Void> addFavoriteWebtoon(@Auth Long memberId,
-        @PathVariable Long webtoonId) {
+    public ResponseEntity<Void> addFavoriteWebtoon(@Auth Long memberId, @PathVariable Long webtoonId) {
         webtoonService.addFavoriteWebtoon(memberId, webtoonId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -79,8 +92,8 @@ public class WebtoonController {
      */
     @PutMapping("/{webtoonId}")
     public ResponseEntity<Void> updateWebtoon(@Auth Long memberId,
-        @PathVariable("webtoonId") Long webtoonId,
-        @RequestBody @Valid UpdateWebtoonReqDto request) {
+                                              @PathVariable("webtoonId") Long webtoonId,
+                                              @RequestBody @Valid UpdateWebtoonReqDto request) {
         webtoonService.updateWebtoon(memberId, webtoonId, request);
         return ResponseEntity.ok().build();
     }
@@ -89,8 +102,7 @@ public class WebtoonController {
      * 웹툰 삭제
      */
     @DeleteMapping("/{webtoonId}")
-    public ResponseEntity<Void> deleteWebtoon(@Auth Long memberId,
-        @PathVariable("webtoonId") Long webtoonId) {
+    public ResponseEntity<Void> deleteWebtoon(@Auth Long memberId, @PathVariable("webtoonId") Long webtoonId) {
         webtoonService.deleteWebtoon(memberId, webtoonId);
         return ResponseEntity.ok().build();
     }
