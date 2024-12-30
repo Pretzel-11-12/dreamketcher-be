@@ -25,6 +25,7 @@ public class RedisConfig {
     ) {
         this.host = host;
         this.port = port;
+        this.password = password;
     }
 
     @Bean
