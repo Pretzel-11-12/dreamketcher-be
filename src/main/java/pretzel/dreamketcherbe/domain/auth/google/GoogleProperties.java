@@ -9,4 +9,5 @@ public record GoogleProperties(
     String redirectUri,
     String grantType
 ) {
+
 }

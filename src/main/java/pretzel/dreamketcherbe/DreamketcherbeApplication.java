@@ -10,8 +10,8 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 @EnableBatchProcessing
 public class DreamketcherbeApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(DreamketcherbeApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(DreamketcherbeApplication.class, args);
+    }
 
 }

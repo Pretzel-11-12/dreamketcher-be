@@ -1,6 +1,13 @@
 package pretzel.dreamketcherbe.domain.member.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,10 +35,10 @@ public class Member extends BaseTimeEntity {
     @Column(unique = true)
     private String email;
 
-    @Column(unique = true)
+    @Column(nullable = false)
     private String name;
 
-    @Column(unique = true)
+    @Column(name = "nickname", unique = true, nullable = false)
     private String nickname;
 
     @Column(name = "image_uri")
@@ -41,7 +48,9 @@ public class Member extends BaseTimeEntity {
     private Role role;
 
     @Builder
-    public Member(SocialType socialType, String socialId, String email, String name, String nickname, String imageUri, Role role) {
+    public Member(SocialType socialType, String socialId, String email, String name,
+        String nickname,
+        String imageUri, Role role) {
         this.socialType = socialType;
         this.socialId = socialId;
         this.name = name;
