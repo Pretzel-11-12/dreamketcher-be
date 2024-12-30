@@ -66,8 +66,9 @@ public class Episode extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    public Episode(String title, String thumbnail, String content, String authorNote,
+    public Episode(int no, String title, String thumbnail, String content, String authorNote,
         Webtoon webtoon, Member member) {
+        this.no = no;
         this.title = title;
         this.thumbnail = thumbnail;
         this.content = content;

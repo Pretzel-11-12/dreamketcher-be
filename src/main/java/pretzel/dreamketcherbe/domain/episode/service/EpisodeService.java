@@ -103,6 +103,9 @@ public class EpisodeService {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
+        Long episodeCount = episodeRepository.countByWebtoonId(webtoonId);
+        int nextEpisodeNo = episodeCount.intValue() + 1;
+
         Episode newEpisode = Episode.builder()
             .member(findMember)
             .webtoon(findWebtoon)
@@ -110,6 +113,7 @@ public class EpisodeService {
             .thumbnail(request.thumbnail())
             .content(request.content())
             .authorNote(request.authorNote())
+            .no(nextEpisodeNo)
             .build();
 
         episodeRepository.save(newEpisode);
@@ -211,6 +215,7 @@ public class EpisodeService {
     public void increaseViewCount(Long episodeId) {
         episodeRepository.increaseViewCount(episodeId);
     }
+    
 
     /**
      * 에피소드 별점
