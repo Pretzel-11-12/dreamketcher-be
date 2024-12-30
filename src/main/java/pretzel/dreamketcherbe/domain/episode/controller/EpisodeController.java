@@ -111,7 +111,7 @@ public class EpisodeController {
      */
     @PostMapping("/{episodeId}/sync-redis")
     public ResponseEntity<Void> syncRedisLikeCount(@PathVariable("episodeId") Long episodeId) {
-        episodeService.initailizeRedisLikeCount(episodeId);
+        episodeService.initializeRedisLikeCount(episodeId);
         return ResponseEntity.ok().build();
     }
 

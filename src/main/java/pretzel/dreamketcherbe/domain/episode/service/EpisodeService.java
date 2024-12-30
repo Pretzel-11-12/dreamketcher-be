@@ -4,7 +4,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +38,6 @@ import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value.Bool;
 
 @Slf4j
 @Service
@@ -254,6 +252,7 @@ public class EpisodeService {
 
     /**
      * 에피소드 좋아요 수 동기화
+     * TODO: 추후, scheduler로 주기적으로 동기화
      */
     @Transactional
     public void syncEpisodeLikeCount(Long episodeId) {
@@ -272,6 +271,7 @@ public class EpisodeService {
 
     /**
      * Redis 장애 대비
+     * TODO: 추후, scheduler로 주기적으로 동기화
      */
     @Transactional
     public int getLikeCountFallback(Long episodId) {
@@ -286,9 +286,10 @@ public class EpisodeService {
 
     /**
      * Redis 데이터 초기화 및 재동기화
+     * TODO: 추후, scheduler로 주기적으로 동기화
      */
     @Transactional
-    public void initailizeRedisLikeCount(Long episodeId) {
+    public void initializeRedisLikeCount(Long episodeId) {
         String likeCountKey = EPISODE_LIKE_COUNT_KEY_PREFIX + episodeId;
         String likeUserKey = EPISODE_LIKE_USER_KEY_PREFIX + episodeId;
 
@@ -301,5 +302,6 @@ public class EpisodeService {
         }
 
         redisTemplate.expire(likeUserKey, 1, TimeUnit.DAYS);
+        redisTemplate.expire(likeCountKey, 1, TimeUnit.DAYS);
     }
 }
