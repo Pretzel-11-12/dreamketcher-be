@@ -5,7 +5,8 @@ import pretzel.dreamketcherbe.common.exception.ExceptionType;
 
 public enum EpisodeExceptionType implements ExceptionType {
     EPISODE_NOT_FOUND(HttpStatus.NOT_FOUND, "에피소드를 찾을 수 없습니다."),
-    EPIOSDE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 존재하는 에피소드입니다.");
+    EPIOSDE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 존재하는 에피소드입니다."),
+    EPISODE_STAR_NOT_FOUND(HttpStatus.NOT_FOUND, "에피소드 별점을 찾을 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;

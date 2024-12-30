@@ -18,6 +18,7 @@ import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeLikeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
+import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
@@ -79,33 +80,23 @@ public class EpisodeService {
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         List<WebtoonGenre> webtoonGenres = webtoonGenreRepository.findByWebtoonId(webtoonId);
-        List<String> genreNames = webtoonGenres.stream()
-            .map(wg -> wg.getGenre().getName())
+
+        List<String> genreNames = webtoonGenres.stream().map(wg -> wg.getGenre().getName())
             .toList();
 
         PageRequest pageable = PageRequest.of(page, size);
-        Page<Episode> episodePage = fromFirst
-            ? episodeRepository.findByWebtoonIdOrderByPublishedAtAsc(webtoonId, pageable)
-            : episodeRepository.findByWebtoonIdOrderByPublishedAtDesc(webtoonId, pageable);
+        Page<Episode> episodePage =
+            fromFirst ? episodeRepository.findByWebtoonIdOrderByPublishedAtAsc(webtoonId, pageable)
+                : episodeRepository.findByWebtoonIdOrderByPublishedAtDesc(webtoonId, pageable);
 
-        List<WebtoonEpisodeListResDto.EpisodeInfo> episodes = episodePage.getContent()
-            .stream()
-            .map(this::toEpisodeInfo)
-            .toList();
+        List<WebtoonEpisodeListResDto.EpisodeInfo> episodes = episodePage.getContent().stream()
+            .map(this::toEpisodeInfo).toList();
 
         int episodeCount = (int) episodePage.getTotalElements();
 
-        return WebtoonEpisodeListResDto.of(
-            webtoon.getId(),
-            webtoon.getTitle(),
-            webtoon.getThumbnail(),
-            webtoon.getStory(),
-            episodeCount,
-            genreNames,
-            episodePage.getNumber(),
-            episodePage.getTotalPages(),
-            episodes
-        );
+        return WebtoonEpisodeListResDto.of(webtoon.getId(), webtoon.getTitle(),
+            webtoon.getThumbnail(), webtoon.getStory(), episodeCount, genreNames,
+            episodePage.getNumber(), episodePage.getTotalPages(), episodes);
     }
 
     private WebtoonEpisodeListResDto.EpisodeInfo toEpisodeInfo(Episode episode) {
@@ -303,5 +294,43 @@ public class EpisodeService {
 
         redisTemplate.expire(likeUserKey, 1, TimeUnit.DAYS);
         redisTemplate.expire(likeCountKey, 1, TimeUnit.DAYS);
+    }
+
+    /**
+     * 에피소드 별점
+     */
+    @Transactional
+    public void starEpisode(Long memberId, Long episodeId, float point) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Episode findEpisode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        EpisodeStar episodeStar = episodeStarRepository.findByMemberIdAndEpisodeId(memberId,
+                episodeId)
+            .orElse(null);
+
+        EpisodeStarReqDto dto = new EpisodeStarReqDto(memberId, episodeId, point); // DTO 생성
+
+        if (episodeStar != null) {
+            episodeStar.updateOf(dto);
+        } else {
+            episodeStar = EpisodeStar.addOf(dto, findMember, findEpisode);
+            episodeStarRepository.save(episodeStar);
+        }
+    }
+
+
+    /**
+     * 에피소드 별점 삭제
+     */
+    @Transactional
+    public void deleteEpisodeStar(Long memberId, Long episodeId) {
+        EpisodeStar episodeStar = episodeStarRepository.findByMemberIdAndEpisodeId(memberId,
+                episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_STAR_NOT_FOUND));
+
+        episodeStarRepository.delete(episodeStar);
     }
 }
