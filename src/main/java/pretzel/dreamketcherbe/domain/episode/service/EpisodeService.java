@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
+import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
@@ -198,15 +199,12 @@ public class EpisodeService {
                 episodeId)
             .orElse(null);
 
-        if (episodeStar != null) {
-            episodeStar.updatePoint(point);
-        } else {
-            episodeStar = EpisodeStar.builder()
-                .member(findMember)
-                .episode(findEpisode)
-                .point(point)
-                .build();
+        EpisodeStarReqDto dto = new EpisodeStarReqDto(memberId, episodeId, point); // DTO 생성
 
+        if (episodeStar != null) {
+            episodeStar.updateOf(dto);
+        } else {
+            episodeStar = EpisodeStar.addOf(dto, findMember, findEpisode);
             episodeStarRepository.save(episodeStar);
         }
     }

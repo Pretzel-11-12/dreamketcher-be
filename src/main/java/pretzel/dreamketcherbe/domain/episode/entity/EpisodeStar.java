@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarReqDto;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
@@ -43,17 +44,23 @@ public class EpisodeStar extends BaseTimeEntity {
     @JoinColumn(name = "episode_id")
     private Episode episode;
 
-    public void updatePoint(float point) {
+    @Builder
+    private EpisodeStar(Member member, Webtoon webtoon, Episode episode, float point) {
+        this.member = member;
+        this.webtoon = webtoon;
+        this.episode = episode;
         this.point = point;
     }
 
-    @Builder
-    public static EpisodeStar create(Member member, Webtoon webtoon, Episode episode, float point) {
-        EpisodeStar episodeStar = new EpisodeStar();
-        episodeStar.member = member;
-        episodeStar.webtoon = webtoon;
-        episodeStar.episode = episode;
-        episodeStar.point = point;
-        return episodeStar;
+    public static EpisodeStar addOf(EpisodeStarReqDto dto, Member member, Episode episode) {
+        return EpisodeStar.builder()
+            .member(member)
+            .episode(episode)
+            .point(dto.point())
+            .build();
+    }
+
+    public void updateOf(EpisodeStarReqDto dto) {
+        this.point = dto.point();
     }
 }
