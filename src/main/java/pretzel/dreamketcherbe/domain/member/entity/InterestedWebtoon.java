@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
-@Table(name = "interested_webtoons")
+@Table(name = "interested_webtoon")
 @Getter
 @Entity
 @NoArgsConstructor
