@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
@@ -43,6 +44,7 @@ public class Episode extends BaseTimeEntity {
     private LocalDate publishedAt;
 
     @ColumnDefault("false")
+    @Setter
     private boolean published;
 
     @ColumnDefault("0")

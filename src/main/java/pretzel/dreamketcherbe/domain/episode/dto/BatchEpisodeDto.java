@@ -1,6 +1,10 @@
 package pretzel.dreamketcherbe.domain.episode.dto;
 
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 
 public record BatchEpisodeDto(
@@ -27,13 +31,9 @@ public record BatchEpisodeDto(
         );
     }
 
-    public Episode toEntity() {
-        return Episode.builder()
-            .title(title)
-            .thumbnail(thumbnail)
-            .content(content)
-            .authorNote(authorNote)
-            .build();
-
+    public Episode toEntity(Episode existingEpisode) {
+        existingEpisode.setPublished(this.published);
+        return existingEpisode;
     }
+    
 }
