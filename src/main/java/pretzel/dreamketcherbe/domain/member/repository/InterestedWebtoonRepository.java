@@ -9,7 +9,10 @@ import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
 public interface InterestedWebtoonRepository extends JpaRepository<InterestedWebtoon, Long> {
 
-    List<InterestedWebtoon> findAllByMemberId(Member member);
+    List<InterestedWebtoon> findAllByMemberId(Long memberId);
 
     Optional<InterestedWebtoon> findByMemberAndWebtoon(Member member, Webtoon webtoon);
+
+    Optional<InterestedWebtoon> findByIdAndMemberId(Long id, Long memberId);
+
 }

@@ -44,11 +44,9 @@ public class MemberService {
     }
 
     public List<InterestedWebtoonResponse> getFavoriteWebtoon(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
         List<InterestedWebtoon> favoriteWebtoons = interestedWebtoonRepository.findAllByMemberId(
-            member);
+            memberId);
 
         return favoriteWebtoons.stream()
             .map(InterestedWebtoonResponse::from)
@@ -64,8 +62,8 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findById(
-                interestedWebtoonId)
+        InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findByIdAndMemberId(
+                interestedWebtoonId, memberId)
             .orElseThrow(
                 () -> new MemberException(MemberExceptionType.INTERESTED_WEBTOON_NOT_FOUND));
 
