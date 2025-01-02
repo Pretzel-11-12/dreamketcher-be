@@ -3,6 +3,8 @@ package pretzel.dreamketcherbe.domain.episode.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -94,5 +96,28 @@ public class EpisodeController {
         model.addAttribute("episode", episode);
 
         return "episode-view";
+    }
+
+    /**
+     * 에피소드 별점 등록
+     */
+    @PutMapping("/{episodeId}/star")
+    public ResponseEntity<Void> starEpisode(@Auth Long memberId,
+        @PathVariable("episodeId") Long episodeId,
+        @RequestParam @Min(0) @Max(5) float point) {
+        episodeService.starEpisode(memberId, episodeId, point);
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 에피소드 별점 삭제
+     */
+    @DeleteMapping("/{episodeId}/star")
+    public ResponseEntity<Void> deleteStarEpisode(@Auth Long memberId,
+        @PathVariable("episodeId") Long episodeId) {
+        episodeService.deleteEpisodeStar(memberId, episodeId);
+
+        return ResponseEntity.ok().build();
     }
 }

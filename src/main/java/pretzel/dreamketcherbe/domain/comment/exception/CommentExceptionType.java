@@ -1,17 +1,16 @@
-package pretzel.dreamketcherbe.domain.episode.exception;
+package pretzel.dreamketcherbe.domain.comment.exception;
 
 import org.springframework.http.HttpStatus;
 import pretzel.dreamketcherbe.common.exception.ExceptionType;
 
-public enum EpisodeExceptionType implements ExceptionType {
-    EPISODE_NOT_FOUND(HttpStatus.NOT_FOUND, "에피소드를 찾을 수 없습니다."),
-    EPIOSDE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 존재하는 에피소드입니다."),
-    EPISODE_STAR_NOT_FOUND(HttpStatus.NOT_FOUND, "에피소드 별점을 찾을 수 없습니다.");
+public enum CommentExceptionType implements ExceptionType {
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."),
+    RECOMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "대댓글을 찾을 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;
 
-    EpisodeExceptionType(HttpStatus status, String message) {
+    CommentExceptionType(HttpStatus status, String message) {
         this.status = status;
         this.message = message;
     }
