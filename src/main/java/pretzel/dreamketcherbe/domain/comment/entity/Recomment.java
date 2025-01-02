@@ -41,9 +41,7 @@ public class Recomment extends BaseTimeEntity {
 
     @Column(name = "comment_order")
     private Long commentOrder;
-
-    @Column(name = "child_comment_count")
-    private int childCommentCount;
+    
 
     @Column(name = "is_deleted", nullable = false)
     @ColumnDefault("false")
