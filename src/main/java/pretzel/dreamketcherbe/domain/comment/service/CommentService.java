@@ -1,14 +1,11 @@
 package pretzel.dreamketcherbe.domain.comment.service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
@@ -48,7 +45,6 @@ public class CommentService {
     private final RecommendationRepository recommendationRepository;
     private final NotRecommendationRepository notRecommendationRepository;
     private final RedisTemplate<String, String> redisTemplate;
-    private final SimpMessagingTemplate simpMessagingTemplate;
 
     private static final String RECOMMEND_SET_KEY_PREFIX = "comment:recommend:";
     private static final String RECOMMEND_COUNT_KEY_PREFIX = "comment:recommendCount:";
@@ -184,6 +180,7 @@ public class CommentService {
     public CreateRecommendationResDto recommendComment(Long memberId, Long commentId) {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
         Comment findComment = commentRepository.findById(commentId)
             .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
 
@@ -202,14 +199,9 @@ public class CommentService {
             .build();
         recommendationRepository.save(recommendation);
 
-        int updatedRecommendCount = Integer.parseInt(
-            redisTemplate.opsForValue().get(recommendCountKey));
-        simpMessagingTemplate.convertAndSend("/topic/comments/" + commentId,
-            Map.of("recommendCount", updatedRecommendCount));
-
         return CreateRecommendationResDto.builder()
             .id(recommendation.getId())
-            .recommendationCount(updatedRecommendCount)
+            .recommendationCount(getRecommendationCount(recommendCountKey))
             .build();
     }
 
@@ -228,11 +220,6 @@ public class CommentService {
         }
 
         recommendationRepository.deleteByMemberAndComment(memberId, commentId);
-
-        int updatedRecommendCount = Integer.parseInt(
-            redisTemplate.opsForValue().get(recommendCountKey));
-        simpMessagingTemplate.convertAndSend("/topic/comments/" + commentId,
-            Map.of("recommendCount", updatedRecommendCount));
     }
 
 
@@ -260,6 +247,7 @@ public class CommentService {
     public NotRecommendationResDto notRecommendComment(Long memberId, Long commentId) {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
         Comment findComment = commentRepository.findById(commentId)
             .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
 
@@ -278,14 +266,9 @@ public class CommentService {
             .build();
         notRecommendationRepository.save(notRecommendation);
 
-        int updatedNotRecommendCount = Integer.parseInt(
-            Objects.requireNonNull(redisTemplate.opsForValue().get(notRecommendCountKey)));
-        simpMessagingTemplate.convertAndSend("/topic/comments/" + commentId,
-            Map.of("notRecommendCount", updatedNotRecommendCount));
-
         return NotRecommendationResDto.builder()
             .id(notRecommendation.getId())
-            .notRecommendationCount(updatedNotRecommendCount)
+            .notRecommendationCount(getRecommendationCount(notRecommendCountKey))
             .build();
     }
 
@@ -305,11 +288,14 @@ public class CommentService {
         }
 
         notRecommendationRepository.deleteByMemberAndComment(memberId, commentId);
+    }
 
-        int updatedNotRecommendCount = Integer.parseInt(
-            Objects.requireNonNull(redisTemplate.opsForValue().get(notRecommendCountKey)));
-        simpMessagingTemplate.convertAndSend("/topic/comments/" + commentId,
-            Map.of("notRecommendCount", updatedNotRecommendCount));
+    /**
+     * 추천 수, 비추천 수 가져오기
+     */
+    public int getRecommendationCount(String countKey) {
+        String countValue = redisTemplate.opsForValue().get(countKey);
+        return countValue == null ? 0 : Integer.parseInt(countValue);
     }
 
 }
