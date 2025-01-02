@@ -58,16 +58,16 @@ public class MemberService {
     }
 
     @Transactional
-    public void deleteFavoriteWebtoon(Long memberId, Long interestedWebtoonId) {
+    public void deleteFavoriteWebtoon(Long memberId, Long WebtoonId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findByIdAndMemberId(
-                interestedWebtoonId, memberId)
+        InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findByWebtoonIdAndMemberId(
+                WebtoonId, memberId)
             .orElseThrow(
                 () -> new MemberException(MemberExceptionType.INTERESTED_WEBTOON_NOT_FOUND));
 
-        if (!interestedWebtoon.getMember().equals(member)) {
+        if (!interestedWebtoon.getMember().getId().equals(memberId)) {
             throw new MemberException(MemberExceptionType.MEMBER_NOT_AUTHORIZED);
         }
 

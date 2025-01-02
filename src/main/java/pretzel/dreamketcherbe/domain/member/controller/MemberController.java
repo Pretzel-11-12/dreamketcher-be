@@ -49,10 +49,10 @@ public class MemberController {
         return ResponseEntity.ok(memberService.getFavoriteWebtoon(memberId));
     }
 
-    @DeleteMapping("/favorite/{InterestedWebtoonId}")
+    @DeleteMapping("/favorite/{WebtoonId}")
     public ResponseEntity<Void> deleteFavoriteWebtoon(@Auth Long memberId,
-        @PathVariable Long InterestedWebtoonId) {
-        memberService.deleteFavoriteWebtoon(memberId, InterestedWebtoonId);
+        @PathVariable Long WebtoonId) {
+        memberService.deleteFavoriteWebtoon(memberId, WebtoonId);
         return ResponseEntity.ok().build();
     }
 }
