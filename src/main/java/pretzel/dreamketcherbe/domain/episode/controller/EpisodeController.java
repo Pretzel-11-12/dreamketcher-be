@@ -135,15 +135,6 @@ public class EpisodeController {
     }
 
     /**
-     * 애피소드 동기화
-     */
-    @PostMapping("/{episodeId}/sync-redis")
-    public ResponseEntity<Void> syncRedisLikeCount(@PathVariable("episodeId") Long episodeId) {
-        episodeService.initializeRedisLikeCount(episodeId);
-        return ResponseEntity.ok().build();
-    }
-
-    /**
      * 좋아요 수 가져오기
      */
     @GetMapping("/{episodeId}/like-count")

@@ -243,7 +243,6 @@ public class EpisodeService {
 
     /**
      * 에피소드 좋아요 수 동기화
-     * TODO: 추후, scheduler로 주기적으로 동기화
      */
     @Transactional
     public void syncEpisodeLikeCount(Long episodeId) {
@@ -262,7 +261,6 @@ public class EpisodeService {
 
     /**
      * Redis 장애 대비
-     * TODO: 추후, scheduler로 주기적으로 동기화
      */
     @Transactional
     public int getLikeCountFallback(Long episodId) {
@@ -277,7 +275,6 @@ public class EpisodeService {
 
     /**
      * Redis 데이터 초기화 및 재동기화
-     * TODO: 추후, scheduler로 주기적으로 동기화
      */
     @Transactional
     public void initializeRedisLikeCount(Long episodeId) {
