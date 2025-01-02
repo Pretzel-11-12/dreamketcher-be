@@ -93,7 +93,6 @@ public class CommentService {
         """;
     private final RedisScript<Long> notRecommendScript = new DefaultRedisScript<>(
         NOT_RECOMMEND_LUA_SCRIPT, Long.class);
-    private final RecommentRecomendationRepository recommentRecomendationRepository;
 
 
     /**
@@ -217,12 +216,12 @@ public class CommentService {
 
         return CreateRecommendationResDto.builder()
             .id(recommendation.getId())
-            .recommendationCount(updatedRecommendCount)
+            .recommendationCount(getRecommendationCount(recommendCountKey))
             .build();
     }
 
     /**
-     * 댓굴 추천 해제
+     * 댓글 추천 해제
      */
     @Transactional
     public void unrecommendComment(Long memberId, Long commentId) {
@@ -236,6 +235,24 @@ public class CommentService {
         }
 
         recommendationRepository.deleteByMemberAndComment(memberId, commentId);
+    }
+
+
+    /**
+     * Redis와 DB 동기화
+     */
+    @Transactional
+    public void syncRecommendationCountToDatabase(Long commentId) {
+        String recommendCountKey = RECOMMEND_COUNT_KEY_PREFIX + commentId;
+
+        String countValue = redisTemplate.opsForValue().get(recommendCountKey);
+        int recommendCount = countValue == null ? 0 : Integer.parseInt(countValue);
+
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
+
+        comment.setRecommendationCount(recommendCount);
+        commentRepository.save(comment);
     }
 
     /**
@@ -266,9 +283,10 @@ public class CommentService {
 
         return NotRecommendationResDto.builder()
             .id(notRecommendation.getId())
-            .notRecommendationCount(updatedNotRecommendCount)
+            .notRecommendationCount(getRecommendationCount(notRecommendCountKey))
             .build();
     }
+
 
     /**
      * 댓글 비추천 해제
@@ -285,6 +303,14 @@ public class CommentService {
         }
 
         notRecommendationRepository.deleteByMemberAndComment(memberId, commentId);
+    }
+
+    /**
+     * 추천 수, 비추천 수 가져오기
+     */
+    public int getRecommendationCount(String countKey) {
+        String countValue = redisTemplate.opsForValue().get(countKey);
+        return countValue == null ? 0 : Integer.parseInt(countValue);
     }
 
     /**
@@ -312,7 +338,7 @@ public class CommentService {
             .member(findMember)
             .recomment(findRecomment)
             .build();
-        recommentRecomendationRepository.save(newRecommentRecommendation);
+        recommentRecommendationRepository.save(newRecommentRecommendation);
 
         return CreateRecommentRecommendationResDto.builder()
             .id(newRecommentRecommendation.getId())
