@@ -1,14 +1,6 @@
 package pretzel.dreamketcherbe.domain.episode.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import java.time.LocalDate;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,6 +10,8 @@ import org.hibernate.annotations.DynamicInsert;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
+
+import java.time.LocalDate;
 
 @Table(name = "episodes")
 @Getter
