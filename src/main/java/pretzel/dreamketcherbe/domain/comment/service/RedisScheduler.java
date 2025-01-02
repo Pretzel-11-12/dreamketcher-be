@@ -1,6 +1,8 @@
 package pretzel.dreamketcherbe.domain.comment.service;
 
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 public class RedisScheduler {
 
     private final CommentService commentService;
+    private final RedisTemplate redisTemplate;
 
     @Scheduled(cron = "0 0 * * * ?") // 정각 마다 실행
     public void syncRecommendationCountToDBScheduler() {
@@ -28,5 +31,45 @@ public class RedisScheduler {
     @Scheduled(cron = "0 0 0 * * ?") // 자정 실행
     public void reloadRecommentRedisFromDBScheduler() {
         commentService.reloadRecommentRedisFromDB();
+    }
+
+    @Scheduled(cron = "0 0 * * * ?")
+    public void getCommentRecommendationCount() {
+        Set<String> keys = redisTemplate.keys("COMMENT_RECOMMEND_COUNT_KEY_PREFIX:*");
+
+        if (keys != null) {
+            for (String key : keys) {
+                int count = commentService.getRecommendationCount(key);
+
+                Long commentId = extractCommmentIdFromKey(key);
+
+                commentService.syncRecommendationCountToDatabase();
+            }
+        }
+    }
+
+    private Long extractCommmentIdFromKey(String key) {
+        String idString = key.replace("COMMENT_RECOMMEND_COUNT_KEY_PREFIX:", "");
+        return Long.parseLong(idString);
+    }
+
+    @Scheduled(cron = "0 0 * * * ?")
+    public void getRecommentRecommendationCount() {
+        Set<String> keys = redisTemplate.keys("RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX:*");
+
+        if (keys != null) {
+            for (String key : keys) {
+                int count = commentService.getRecommentRecommendationCount(key);
+
+                Long commentId = extractRecommmentIdFromKey(key);
+
+                commentService.syncRecommentRecommendationCountToDatabase();
+            }
+        }
+    }
+
+    private Long extractRecommmentIdFromKey(String key) {
+        String idString = key.replace("RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX:", "");
+        return Long.parseLong(idString);
     }
 }
