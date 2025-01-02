@@ -43,6 +43,16 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
+    public InterestedWebtoonResponse getFavoriteWebtoon(Long memberId, Long WebtoonId) {
+
+        InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findByWebtoonIdAndMemberId(
+                WebtoonId, memberId)
+            .orElseThrow(
+                () -> new MemberException(MemberExceptionType.INTERESTED_WEBTOON_NOT_FOUND));
+
+        return InterestedWebtoonResponse.from(interestedWebtoon);
+    }
+
     public List<InterestedWebtoonResponse> getAllFavoriteWebtoon(Long memberId) {
 
         List<InterestedWebtoon> favoriteWebtoons = interestedWebtoonRepository.findAllByMemberId(
