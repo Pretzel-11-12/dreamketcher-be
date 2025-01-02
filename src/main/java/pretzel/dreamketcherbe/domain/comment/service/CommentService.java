@@ -398,7 +398,15 @@ public class CommentService {
     }
 
     /**
-     * Redis와 DB 동기화
+     * 답글 추천수/비추천수 가져오기
+     */
+    public int getRecommentRecommendationCount(String key) {
+        String value = redisTemplate.opsForValue().get(key);
+        return value == null ? 0 : Integer.parseInt(value);
+    }
+
+    /**
+     * Redis와 DB 댓글 동기화
      */
     public void syncRecommendationCountToDatabase() {
         List<Long> commentIds = commentRepository.findAllCommentIds();
@@ -425,7 +433,7 @@ public class CommentService {
     }
 
     /**
-     * Redis와 DB 동기화
+     * Redis와 DB 답글 동기화
      */
     public void syncRecommentRecommendationCountToDatabase() {
         List<Long> recommentIds = recommentRepository.findAllRecommentIds();
@@ -503,13 +511,4 @@ public class CommentService {
             }
         }
     }
-
-    /**
-     * 답글 추천수/비추천수 가져오기
-     */
-    public int getRecommentRecommendationCount(String key) {
-        String value = redisTemplate.opsForValue().get(key);
-        return value == null ? 0 : Integer.parseInt(value);
-    }
-
 }
