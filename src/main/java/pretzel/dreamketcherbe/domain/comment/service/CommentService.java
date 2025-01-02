@@ -8,8 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
@@ -57,7 +55,6 @@ public class CommentService {
     private final RecommentRecomendationRepository recommentRecommendationRepository;
     private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
     private final RedisTemplate<String, String> redisTemplate;
-    private final SimpMessagingTemplate simpMessagingTemplate;
 
     private static final String RECOMMEND_SET_KEY_PREFIX = "comment:recommend:";
     private static final String RECOMMEND_COUNT_KEY_PREFIX = "comment:recommendCount:";
@@ -218,11 +215,6 @@ public class CommentService {
             .build();
         recommendationRepository.save(recommendation);
 
-        int updatedRecommendCount = Integer.parseInt(
-            Objects.requireNonNull(redisTemplate.opsForValue().get(recommendCountKey)));
-        simpMessagingTemplate.convertAndSend("/topic/comments/" + commentId,
-            Map.of("recommendCount", updatedRecommendCount));
-
         return CreateRecommendationResDto.builder()
             .id(recommendation.getId())
             .recommendationCount(updatedRecommendCount)
@@ -244,11 +236,6 @@ public class CommentService {
         }
 
         recommendationRepository.deleteByMemberAndComment(memberId, commentId);
-
-        int updatedRecommendCount = Integer.parseInt(
-            Objects.requireNonNull(redisTemplate.opsForValue().get(recommendCountKey)));
-        simpMessagingTemplate.convertAndSend("/topic/comments/" + commentId,
-            Map.of("recommendCount", updatedRecommendCount));
     }
 
     /**
@@ -277,11 +264,6 @@ public class CommentService {
             .build();
         notRecommendationRepository.save(notRecommendation);
 
-        int updatedNotRecommendCount = Integer.parseInt(
-            Objects.requireNonNull(redisTemplate.opsForValue().get(notRecommendCountKey)));
-        simpMessagingTemplate.convertAndSend("/topic/comments/" + commentId,
-            Map.of("notRecommendCount", updatedNotRecommendCount));
-
         return NotRecommendationResDto.builder()
             .id(notRecommendation.getId())
             .notRecommendationCount(updatedNotRecommendCount)
@@ -303,11 +285,6 @@ public class CommentService {
         }
 
         notRecommendationRepository.deleteByMemberAndComment(memberId, commentId);
-
-        int updatedNotRecommendCount = Integer.parseInt(
-            Objects.requireNonNull(redisTemplate.opsForValue().get(notRecommendCountKey)));
-        simpMessagingTemplate.convertAndSend("/topic/comments/" + commentId,
-            Map.of("notRecommendCount", updatedNotRecommendCount));
     }
 
     /**
@@ -337,15 +314,10 @@ public class CommentService {
             .build();
         recommentRecomendationRepository.save(newRecommentRecommendation);
 
-        int updatedRecommentRecommendationCount = Integer.parseInt(
-            Objects.requireNonNull(redisTemplate.opsForValue().get(recommendRecommentCountKey))
-        );
-        simpMessagingTemplate.convertAndSend("/topic/recomments/" + recommentId,
-            Map.of("recommentRecommendationCount", updatedRecommentRecommendationCount));
-
         return CreateRecommentRecommendationResDto.builder()
             .id(newRecommentRecommendation.getId())
-            .recommentRecommendationCount(updatedRecommentRecommendationCount)
+            .recommentRecommendationCount(
+                getRecommentRecommendationCount(recommendRecommentCountKey))
             .build();
     }
 
@@ -364,11 +336,6 @@ public class CommentService {
         }
 
         recommentRecommendationRepository.deleteByMemberAndRecomment(memberId, recommentId);
-
-        int updatedRecommendCount = Integer.parseInt(
-            Objects.requireNonNull(redisTemplate.opsForValue().get(recommendRecommentCountKey)));
-        simpMessagingTemplate.convertAndSend("/topic/recomments/" + recommentId,
-            Map.of("recommendCount", updatedRecommendCount));
     }
 
     /**
@@ -399,14 +366,9 @@ public class CommentService {
             .build();
         recommentNotRecommendationRepository.save(newRecommentNotRecommendation);
 
-        int updatedNotRecommendCount = Integer.parseInt(
-            Objects.requireNonNull(redisTemplate.opsForValue().get(notRecommendRecommentCountKey)));
-        simpMessagingTemplate.convertAndSend("/topic/recomments/" + recommentId,
-            Map.of("notRecommendCount", updatedNotRecommendCount));
-
         return CreateRecommentNotRecommendationResDto.builder()
             .id(newRecommentNotRecommendation.getId())
-            .notRecommendationCount(updatedNotRecommendCount)
+            .notRecommendationCount(getRecommentRecommendationCount(notRecommendRecommentCountKey))
             .build();
     }
 
@@ -427,11 +389,6 @@ public class CommentService {
         }
 
         recommentNotRecommendationRepository.deleteByMemberAndRecomment(memberId, recommentId);
-
-        int updatedNotRecommendCount = Integer.parseInt(
-            Objects.requireNonNull(redisTemplate.opsForValue().get(notRecommentRecommendCountKey)));
-        simpMessagingTemplate.convertAndSend("/topic/recomments/" + recommentId,
-            Map.of("notRecommendCount", updatedNotRecommendCount));
     }
 
     /**
@@ -536,6 +493,14 @@ public class CommentService {
                         String.valueOf(recomment.getNotRecommendationCount()));
             }
         }
+    }
+
+    /**
+     * 답글 추천수/비추천수 가져오기
+     */
+    public int getRecommentRecommendationCount(String key) {
+        String value = redisTemplate.opsForValue().get(key);
+        return value == null ? 0 : Integer.parseInt(value);
     }
 
 }
