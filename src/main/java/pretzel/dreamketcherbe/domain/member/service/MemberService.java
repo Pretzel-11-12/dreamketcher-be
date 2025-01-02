@@ -43,7 +43,7 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
-    public List<InterestedWebtoonResponse> getFavoriteWebtoon(Long memberId) {
+    public List<InterestedWebtoonResponse> getAllFavoriteWebtoon(Long memberId) {
 
         List<InterestedWebtoon> favoriteWebtoons = interestedWebtoonRepository.findAllByMemberId(
             memberId);
