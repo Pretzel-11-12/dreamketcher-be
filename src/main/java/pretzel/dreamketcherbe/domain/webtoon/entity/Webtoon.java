@@ -1,14 +1,6 @@
 package pretzel.dreamketcherbe.domain.webtoon.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,6 +10,7 @@ import org.hibernate.annotations.ColumnDefault;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 
 @Table(name = "webtoons")
 @Getter
@@ -73,14 +66,14 @@ public class Webtoon extends BaseTimeEntity {
         this.member = member;
     }
 
-    public static Webtoon addOf(CreateWebtoonReqDto request, Member member, String thumbnailUrl,
+    public static Webtoon addOf(CreateWebtoonReqDto dto, Member member, String thumbnailUrl,
         List<String> prologueUrls) {
         return Webtoon.builder()
-            .title(request.title())
+            .title(dto.title())
             .thumbnail(thumbnailUrl)
             .prologue(prologueUrls)
-            .story(request.story())
-            .description(request.description())
+            .story(dto.story())
+            .description(dto.description())
             .member(member)
             .build();
     }
@@ -101,8 +94,13 @@ public class Webtoon extends BaseTimeEntity {
         this.story = story;
     }
 
-    public void updateDescription(String description) {
-        this.description = description;
+    public void updateOf(UpdateWebtoonReqDto dto, String thumbnailUrl,
+        List<String> prologueUrls) {
+        this.title = dto.title();
+        this.thumbnail = thumbnailUrl;
+        this.prologue = prologueUrls;
+        this.story = dto.story();
+        this.description = dto.description();
     }
 
     public void updateStatus(String status) {
