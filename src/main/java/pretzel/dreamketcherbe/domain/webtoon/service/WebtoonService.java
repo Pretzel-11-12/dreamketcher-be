@@ -139,7 +139,7 @@ public class WebtoonService {
                 folderName + "/prologue")
                 : findWebtoon.getPrologue();
 
-        findWebtoon.updateOf(request);
+        findWebtoon.updateOf(request, thumbnailUrl, prologueUrl);
 
         webtoonRepository.save(findWebtoon);
     }
@@ -178,11 +178,11 @@ public class WebtoonService {
 
     private List<Long> getWebtoonIdsInGenre(String genre) {
         Long genreId = genreRepository.findByName(genre)
-                .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND))
-                .getId();
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND))
+            .getId();
 
-         return webtoonGenreRepository.findAllByGenreId(genreId).stream()
-                .map(webtoonGenre -> webtoonGenre.getWebtoon().getId())
-                .toList();
+        return webtoonGenreRepository.findAllByGenreId(genreId).stream()
+            .map(webtoonGenre -> webtoonGenre.getWebtoon().getId())
+            .toList();
     }
 }
