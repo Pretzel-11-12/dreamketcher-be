@@ -121,13 +121,18 @@ public class EpisodeService {
      * 에피소드 등록
      */
     @Transactional
-    public CreateEpisodeResDto createEpisode(Long memberId, CreateEpisodeReqDto request) {
+    public CreateEpisodeResDto createEpisode(Long memberId, Long webtoonId,
+        CreateEpisodeReqDto request) {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        Episode newEpisode = Episode.builder().member(findMember).title(request.title())
-            .thumbnail(request.thumbnail()).content(request.content())
-            .authorNote(request.authorNote()).build();
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        Long episodeCount = episodeRepository.countByWebtoonId(webtoonId);
+        int nextEpisodeNo = episodeCount.intValue() + 1;
+
+        Episode newEpisode = Episode.addOf(request, nextEpisodeNo, findWebtoon, findMember);
 
         episodeRepository.save(newEpisode);
 
@@ -138,22 +143,32 @@ public class EpisodeService {
      * 에피소드 수정
      */
     @Transactional
-    public void updateEpisode(Long memberId, Long episodeId, UpdateEpisodeReqDto request) {
+    public void updateEpisode(Long memberId, Long webtoonId, Long episodeId,
+        UpdateEpisodeReqDto request) {
+
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
+        if (!findEpisode.getWebtoon().getId().equals(webtoonId)) {
+            throw new EpisodeException(EpisodeExceptionType.INVALID_EPISODE);
+        }
+
+        // 작성자 검증
         findEpisode.isAuthor(memberId);
-        findEpisode.updateTitle(request.title());
-        findEpisode.updateThumbnail(request.thumbnail());
-        findEpisode.updateContent(request.content());
-        findEpisode.updateAuthorNote(request.authorNote());
+
+        // 에피소드 수정
+        findEpisode.updateOf(request);
+        episodeRepository.save(findEpisode);
     }
 
     /**
      * 에피소드 삭제
      */
     @Transactional
-    public void deleteEpisode(Long memberId, Long episodeId) {
+    public void deleteEpisode(Long memberId, Long webtoonId, Long episodeId) {
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
@@ -167,10 +182,17 @@ public class EpisodeService {
      * TODO: 조회수 중복 관리 부분 리팩토링
      */
     @Transactional
-    public EpisodeResDto getEpisode(Long episodeId, HttpServletRequest request,
+    public EpisodeResDto getEpisode(Long webtoonId, Long episodeId, HttpServletRequest request,
         HttpServletResponse response) {
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        if (!findEpisode.getWebtoon().getId().equals(webtoonId)) {
+            throw new EpisodeException(EpisodeExceptionType.INVALID_EPISODE);
+        }
 
         // 조회수 중복 방지
         Cookie oldCookie = null;
@@ -209,6 +231,7 @@ public class EpisodeService {
     public void increaseViewCount(Long episodeId) {
         episodeRepository.increaseViewCount(episodeId);
     }
+
 
     /**
      * 에피소드 좋아요

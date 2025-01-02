@@ -5,10 +5,11 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
+import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
@@ -52,15 +53,11 @@ public class Episode extends BaseTimeEntity {
 
     @ColumnDefault("0")
     @Column(nullable = false, name = "like_count")
-    @Setter
-    private int likeCount;
+    private Long likeCount;
 
     @ColumnDefault("0.0")
     @Column(nullable = false, name = "average_star")
     private float averageStar;
-
-    @ColumnDefault("'NOT_APPROVAL'")
-    private String status;
 
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
@@ -71,15 +68,39 @@ public class Episode extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    public Episode(String title, String thumbnail, String content, String authorNote, int likeCount,
+    public Episode(int no, String title, String thumbnail, String content, String authorNote,
+        LocalDate publishedAt,
         Webtoon webtoon, Member member) {
+        this.no = no;
         this.title = title;
         this.thumbnail = thumbnail;
         this.content = content;
         this.authorNote = authorNote;
-        this.likeCount = likeCount;
+        this.publishedAt = publishedAt;
         this.webtoon = webtoon;
         this.member = member;
+    }
+
+    public static Episode addOf(CreateEpisodeReqDto dto, int nextEpisodeNo,
+        Webtoon webtoon, Member member) {
+        return Episode.builder()
+            .no(nextEpisodeNo)
+            .title(dto.title())
+            .thumbnail(dto.thumbnail())
+            .content(dto.content())
+            .authorNote(dto.authorNote())
+            .publishedAt(dto.publishedAt())
+            .webtoon(webtoon)
+            .member(member)
+            .build();
+    }
+
+    public void updateOf(UpdateEpisodeReqDto dto) {
+        this.title = dto.title();
+        this.thumbnail = dto.thumbnail();
+        this.content = dto.content();
+        this.authorNote = dto.authorNote();
+        this.publishedAt = dto.publishedAt();
     }
 
     public void isAuthor(Long memberId) {
@@ -87,21 +108,4 @@ public class Episode extends BaseTimeEntity {
             throw new IllegalStateException(memberId + ", 작성자가 아닙니다.");
         }
     }
-
-    public void updateTitle(String title) {
-        this.title = title;
-    }
-
-    public void updateThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
-    }
-
-    public void updateContent(String content) {
-        this.content = content;
-    }
-
-    public void updateAuthorNote(String authorNote) {
-        this.authorNote = authorNote;
-    }
-    
 }
