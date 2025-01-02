@@ -237,24 +237,6 @@ public class CommentService {
         recommendationRepository.deleteByMemberAndComment(memberId, commentId);
     }
 
-
-    /**
-     * Redis와 DB 동기화
-     */
-    @Transactional
-    public void syncRecommendationCountToDatabase(Long commentId) {
-        String recommendCountKey = RECOMMEND_COUNT_KEY_PREFIX + commentId;
-
-        String countValue = redisTemplate.opsForValue().get(recommendCountKey);
-        int recommendCount = countValue == null ? 0 : Integer.parseInt(countValue);
-
-        Comment comment = commentRepository.findById(commentId)
-            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
-
-        comment.setRecommendationCount(recommendCount);
-        commentRepository.save(comment);
-    }
-
     /**
      * 댓글 비추천
      */
@@ -306,7 +288,7 @@ public class CommentService {
     }
 
     /**
-     * 추천 수, 비추천 수 가져오기
+     * 댓글 추천 수, 비추천 수 가져오기
      */
     public int getRecommendationCount(String countKey) {
         String countValue = redisTemplate.opsForValue().get(countKey);
@@ -475,7 +457,7 @@ public class CommentService {
     }
 
     /**
-     * Redis 데이터 복구
+     * Redis 댓글 추천/비추천 데이터 복구
      */
     @Transactional(readOnly = true)
     public void reloadCommentRedisFromDB() {
@@ -497,6 +479,9 @@ public class CommentService {
         }
     }
 
+    /**
+     * Redis 답글 추천/비추천 데이터 복구
+     */
     @Transactional(readOnly = true)
     public void reloadRecommentRedisFromDB() {
         List<Recomment> recomments = recommentRepository.findAll();
