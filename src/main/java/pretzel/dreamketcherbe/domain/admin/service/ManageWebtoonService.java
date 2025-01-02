@@ -43,12 +43,13 @@ public class ManageWebtoonService {
         Page<Webtoon> webtoons = webtoonRepository.findAllByOrderByCreatedAtDesc(pageable);
 
         return webtoons.map(webtoon -> {
-            List<WebtoonGenre> webtoonGenres = webtoonGenreRepository.findByWebtoonId(webtoon.getId());
+            List<WebtoonGenre> webtoonGenres = webtoonGenreRepository.findByWebtoonId(
+                webtoon.getId());
             List<String> genres = new ArrayList<>();
 
             for (WebtoonGenre webtoonGenre : webtoonGenres) {
                 Genre genre = genreRepository.findById(webtoonGenre.getGenre().getId())
-                        .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
+                    .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
                 genres.add(genre.getName());
             }
 

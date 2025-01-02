@@ -24,10 +24,11 @@ public class WebtoonController {
      * 연재중인 웹툰 목록 조회
      */
     @GetMapping
-    public ResponseEntity<PageResDto<WebtoonResDto>> getWebtoons(@RequestParam(defaultValue = "none") String genre,
-                                                                        @RequestParam(defaultValue = "0") int page,
-                                                                        @RequestParam(defaultValue = "25") int size,
-                                                                        @RequestParam(defaultValue = "latest") String order) {
+    public ResponseEntity<PageResDto<WebtoonResDto>> getWebtoons(
+        @RequestParam(defaultValue = "none") String genre,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "25") int size,
+        @RequestParam(defaultValue = "latest") String order) {
         PageReqDto pageReqDto = PageReqDto.of(genre, page, size, order);
         return ResponseEntity.ok(webtoonService.getWebtoons(pageReqDto));
     }
@@ -36,10 +37,11 @@ public class WebtoonController {
      * 웹툰 완결 목록 조회
      */
     @GetMapping("/finish")
-    public ResponseEntity<PageResDto<WebtoonResDto>> getWebtoonsByFinish(@RequestParam(defaultValue = "none") String genre,
-                                                                   @RequestParam(defaultValue = "0") int page,
-                                                                   @RequestParam(defaultValue = "25") int size,
-                                                                   @RequestParam(defaultValue = "latest") String order) {
+    public ResponseEntity<PageResDto<WebtoonResDto>> getWebtoonsByFinish(
+        @RequestParam(defaultValue = "none") String genre,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "25") int size,
+        @RequestParam(defaultValue = "latest") String order) {
         PageReqDto pageReqDto = PageReqDto.of(genre, page, size, order);
         return ResponseEntity.ok(webtoonService.getWebtoonsByFinish(pageReqDto));
     }
@@ -48,10 +50,11 @@ public class WebtoonController {
      * 웹툰 신작 목록 조회
      */
     @GetMapping("/new")
-    public ResponseEntity<PageResDto<WebtoonResDto>> getWebtoonsByNew(@RequestParam(defaultValue = "none") String genre,
-                                                                @RequestParam(defaultValue = "0") int page,
-                                                                @RequestParam(defaultValue = "25") int size,
-                                                                @RequestParam(defaultValue = "latest") String order) {
+    public ResponseEntity<PageResDto<WebtoonResDto>> getWebtoonsByNew(
+        @RequestParam(defaultValue = "none") String genre,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "25") int size,
+        @RequestParam(defaultValue = "latest") String order) {
         PageReqDto pageReqDto = PageReqDto.of(genre, page, size, order);
         return ResponseEntity.ok(webtoonService.getWebtoonsByNew(pageReqDto));
     }
@@ -59,16 +62,19 @@ public class WebtoonController {
     /**
      * 웹툰 등록
      */
-    @PostMapping
-    public ResponseEntity<CreateWebtoonResDto> createWebtoon(@Auth Long memberId, @RequestBody @Valid CreateWebtoonReqDto request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(webtoonService.createWebtoon(memberId, request));
+    @PostMapping("/upload")
+    public ResponseEntity<CreateWebtoonResDto> createWebtoon(@Auth Long memberId,
+        @RequestBody @Valid CreateWebtoonReqDto request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(webtoonService.createWebtoon(memberId, request));
     }
 
     /**
      * 관심 웹툰 추가
      */
     @PostMapping("/{webtoonId}/favorite")
-    public ResponseEntity<Void> addFavoriteWebtoon(@Auth Long memberId, @PathVariable Long webtoonId) {
+    public ResponseEntity<Void> addFavoriteWebtoon(@Auth Long memberId,
+        @PathVariable Long webtoonId) {
         webtoonService.addFavoriteWebtoon(memberId, webtoonId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -78,8 +84,8 @@ public class WebtoonController {
      */
     @PutMapping("/{webtoonId}")
     public ResponseEntity<Void> updateWebtoon(@Auth Long memberId,
-                                              @PathVariable("webtoonId") Long webtoonId,
-                                              @RequestBody @Valid UpdateWebtoonReqDto request) {
+        @PathVariable("webtoonId") Long webtoonId,
+        @RequestBody @Valid UpdateWebtoonReqDto request) {
         webtoonService.updateWebtoon(memberId, webtoonId, request);
         return ResponseEntity.ok().build();
     }
@@ -88,7 +94,8 @@ public class WebtoonController {
      * 웹툰 삭제
      */
     @DeleteMapping("/{webtoonId}")
-    public ResponseEntity<Void> deleteWebtoon(@Auth Long memberId, @PathVariable("webtoonId") Long webtoonId) {
+    public ResponseEntity<Void> deleteWebtoon(@Auth Long memberId,
+        @PathVariable("webtoonId") Long webtoonId) {
         webtoonService.deleteWebtoon(memberId, webtoonId);
         return ResponseEntity.ok().build();
     }
