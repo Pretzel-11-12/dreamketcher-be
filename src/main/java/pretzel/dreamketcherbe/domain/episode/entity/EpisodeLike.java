@@ -30,4 +30,9 @@ public class EpisodeLike extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
+
+    public EpisodeLike(Episode episode, Member member) {
+        this.episode = episode;
+        this.member = member;
+    }
 }
