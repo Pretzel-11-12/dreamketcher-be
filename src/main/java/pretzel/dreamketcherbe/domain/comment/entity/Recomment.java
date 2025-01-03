@@ -43,9 +43,6 @@ public class Recomment extends BaseTimeEntity {
     @Column(name = "comment_order")
     private Long commentOrder;
 
-    @Column(name = "child_comment_count")
-    private int childCommentCount;
-
     @Column(name = "recommendation_count", nullable = false)
     @ColumnDefault("0")
     @Setter
