@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 
-@Table(name = "recommendations")
+@Table(name = "recommendation")
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

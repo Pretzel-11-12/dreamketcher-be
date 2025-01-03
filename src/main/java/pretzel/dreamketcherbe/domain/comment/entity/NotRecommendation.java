@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 
-@Table(name = "not_recommendations")
+@Table(name = "not_recommendation")
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

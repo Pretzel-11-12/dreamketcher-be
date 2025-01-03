@@ -14,7 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 
-@Table(name = "recomment_recommendations")
+@Table(name = "re_recommendation")
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -28,7 +28,7 @@ public class RecommentRecommendation {
     @ManyToOne
     private Member member;
 
-    @JoinColumn(name = "recomment_id")
+    @JoinColumn(name = "re_comment_id")
     @ManyToOne
     private Recomment recomment;
 
