@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
@@ -53,11 +54,15 @@ public class Episode extends BaseTimeEntity {
 
     @ColumnDefault("0")
     @Column(nullable = false, name = "like_count")
-    private Long likeCount;
+    @Setter
+    private int likeCount;
 
     @ColumnDefault("0.0")
     @Column(nullable = false, name = "average_star")
     private float averageStar;
+
+    @ColumnDefault("'NOT_APPROVAL'")
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
@@ -69,7 +74,7 @@ public class Episode extends BaseTimeEntity {
 
     @Builder
     public Episode(int no, String title, String thumbnail, String content, String authorNote,
-        LocalDate publishedAt,
+        int likeCount, LocalDate publishedAt,
         Webtoon webtoon, Member member) {
         this.no = no;
         this.title = title;
@@ -77,6 +82,7 @@ public class Episode extends BaseTimeEntity {
         this.content = content;
         this.authorNote = authorNote;
         this.publishedAt = publishedAt;
+        this.likeCount = likeCount;
         this.webtoon = webtoon;
         this.member = member;
     }
