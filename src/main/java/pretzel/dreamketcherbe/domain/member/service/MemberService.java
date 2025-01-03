@@ -1,18 +1,22 @@
 package pretzel.dreamketcherbe.domain.member.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pretzel.dreamketcherbe.common.dto.PageReqDto;
+import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
 import pretzel.dreamketcherbe.domain.member.dto.NicknameRequest;
 import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
+import pretzel.dreamketcherbe.domain.member.dto.WorkResDto;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -72,5 +76,10 @@ public class MemberService {
         }
 
         interestedWebtoonRepository.delete(interestedWebtoon);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResDto<WorkResDto> getAllWorks(final Long memberId, final String status, final PageReqDto pageReqDto) {
+        return memberRepository.findAllWorkWithPage(memberId, status, pageReqDto);
     }
 }
