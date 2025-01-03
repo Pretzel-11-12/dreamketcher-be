@@ -53,9 +53,6 @@ public class Comment extends BaseTimeEntity {
     @ColumnDefault("false")
     private boolean isDeleted;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
@@ -80,7 +77,6 @@ public class Comment extends BaseTimeEntity {
 
     public void softDelete() {
         this.isDeleted = true;
-        this.deletedAt = LocalDateTime.now();
     }
 
     public void updateChildCommentCount(int count) {
