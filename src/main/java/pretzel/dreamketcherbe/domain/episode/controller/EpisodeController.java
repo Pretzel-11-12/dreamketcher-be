@@ -3,6 +3,8 @@ package pretzel.dreamketcherbe.domain.episode.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Auth;
+import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeLikeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
@@ -30,7 +33,6 @@ import pretzel.dreamketcherbe.domain.episode.service.EpisodeService;
 @RequestMapping("/api/v1/webtoons/{webtoonId}/episode")
 @AllArgsConstructor
 public class EpisodeController {
-
 
     private final EpisodeService episodeService;
 
@@ -94,5 +96,58 @@ public class EpisodeController {
         model.addAttribute("episode", episode);
 
         return "episode-view";
+    }
+
+    /**
+     * 에피소드 별점 등록
+     */
+    @PutMapping("/{episodeId}/star")
+    public ResponseEntity<Void> starEpisode(@Auth Long memberId,
+        @PathVariable("episodeId") Long episodeId,
+        @RequestParam @Min(0) @Max(5) float point) {
+        episodeService.starEpisode(memberId, episodeId, point);
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 에피소드 별점 삭제
+     */
+    @DeleteMapping("/{episodeId}/star")
+    public ResponseEntity<Void> deleteStarEpisode(@Auth Long memberId,
+        @PathVariable("episodeId") Long episodeId) {
+        episodeService.deleteEpisodeStar(memberId, episodeId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 에피소드 좋아요
+     */
+    @PostMapping("/{episodeId}/like")
+    public ResponseEntity<CreateEpisodeLikeResDto> likeEpisode(@Auth Long memberId,
+        @PathVariable("episodeId") Long episodeId) {
+        CreateEpisodeLikeResDto like = episodeService.likeEpisode(memberId, episodeId);
+
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(like);
+    }
+
+    /**
+     * 좋아요 수 가져오기
+     */
+    @GetMapping("/{episodeId}/like-count")
+    public ResponseEntity<Integer> getLikeCount(@PathVariable("episodeId") Long episodeId) {
+        try {
+            String likeCountKey = EpisodeService.EPISODE_LIKE_COUNT_KEY_PREFIX + episodeId;
+            String likeCount = episodeService.redisTemplate.opsForValue().get(likeCountKey);
+            int likeCountInt = likeCount == null ? episodeService.getLikeCountFallback(episodeId)
+                : Integer.parseInt(likeCount);
+            return ResponseEntity.ok(likeCountInt);
+        } catch (Exception e) {
+            int fallbackCount = episodeService.getLikeCountFallback(episodeId);
+            return ResponseEntity.ok(fallbackCount);
+        }
     }
 }

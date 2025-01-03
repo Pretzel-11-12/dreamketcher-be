@@ -6,15 +6,17 @@ import java.util.List;
 
 @Builder
 public record RankingResDto(
+        Long id,
         String title,
         String thumbnail,
         List<String> genres,
         int lastEpisode,
         float averageStar,
-        int numOfStars
+        Long numOfStars
 ) {
     public static RankingResDto of(WebtoonPopularityDataDto data) {
         return RankingResDto.builder()
+            .id(data.getId())
             .title(data.getTitle())
             .thumbnail(data.getThumbnail())
             .genres(data.getGenres())

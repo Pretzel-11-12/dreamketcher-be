@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   app:
     image: ${ECR_URL}/dreamketcher-dev-server:latest
     container_name: dreamketcher-dev-server
     ports:
-      - "8080:8080"
+      - "80:8080"
     environment:
       SPRING_PROFILES_ACTIVE: dev
       JASYPT_ENCRYPTOR_PASSWORD: ${JASYPT_ENCRYPTOR_PASSWORD}
