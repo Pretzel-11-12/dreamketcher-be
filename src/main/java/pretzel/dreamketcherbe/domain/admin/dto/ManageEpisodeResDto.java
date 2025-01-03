@@ -17,6 +17,7 @@ public record ManageEpisodeResDto(
     String publishedAt,
     String createdAt,
     String updatedAt,
+    String status,
     String reason
 ) {
 

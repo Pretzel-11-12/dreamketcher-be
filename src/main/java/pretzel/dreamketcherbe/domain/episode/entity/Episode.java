@@ -1,25 +1,19 @@
 package pretzel.dreamketcherbe.domain.episode.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import java.time.LocalDate;
+import jakarta.persistence.*;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
+
+import java.time.LocalDate;
 
 @Table(name = "episodes")
 @Getter
@@ -60,11 +54,15 @@ public class Episode extends BaseTimeEntity {
 
     @ColumnDefault("0")
     @Column(nullable = false, name = "like_count")
-    private Long likeCount;
+    @Setter
+    private int likeCount;
 
     @ColumnDefault("0.0")
     @Column(nullable = false, name = "average_star")
     private float averageStar;
+
+    @ColumnDefault("'NOT_APPROVAL'")
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
@@ -76,11 +74,12 @@ public class Episode extends BaseTimeEntity {
 
     @Builder
     public Episode(String title, String thumbnail, List<String> content, String authorNote,
-        Webtoon webtoon, Member member) {
+        int likeCount, Webtoon webtoon, Member member) {
         this.title = title;
         this.thumbnail = thumbnail;
         this.content = content;
         this.authorNote = authorNote;
+        this.likeCount = likeCount;
         this.webtoon = webtoon;
         this.member = member;
     }

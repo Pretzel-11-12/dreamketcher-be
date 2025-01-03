@@ -43,7 +43,7 @@ public class WebtoonRepositoryCustomImpl implements WebtoonRepositoryCustom{
      */
     private List<WebtoonResDto> getWebtoons(String status, PageReqDto pageReqDto) {
         return jpaQueryFactory.select(
-                    Projections.constructor(WebtoonResDto.class, webtoon.thumbnail, webtoon.member.name, webtoon.title))
+                    Projections.constructor(WebtoonResDto.class, webtoon.id, webtoon.thumbnail, webtoon.member.name, webtoon.title))
             .from(webtoon)
             .join(webtoonGenre).on(webtoonGenre.webtoon.id.eq(webtoon.id))
             .where(getWhereConditions(status, pageReqDto))
