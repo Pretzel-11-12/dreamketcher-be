@@ -1,10 +1,12 @@
 package pretzel.dreamketcherbe.domain.member.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
+import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonSimpleResponse;
 import pretzel.dreamketcherbe.domain.member.dto.NicknameRequest;
 import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
@@ -13,6 +15,8 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
+import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,6 +25,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final InterestedWebtoonRepository interestedWebtoonRepository;
+    private final WebtoonGenreRepository webtoonGenreRepository;
 
     public SelfInfoResponse getSelfInfo(Long memberId) {
         Member member = memberRepository.findById(memberId)
@@ -43,14 +48,14 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
-    public InterestedWebtoonResponse getFavoriteWebtoon(Long memberId, Long WebtoonId) {
+    public InterestedWebtoonSimpleResponse getFavoriteWebtoon(Long memberId, Long WebtoonId) {
 
         InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findByWebtoonIdAndMemberId(
                 WebtoonId, memberId)
             .orElseThrow(
                 () -> new MemberException(MemberExceptionType.INTERESTED_WEBTOON_NOT_FOUND));
 
-        return InterestedWebtoonResponse.from(interestedWebtoon);
+        return InterestedWebtoonSimpleResponse.from(interestedWebtoon);
     }
 
     public List<InterestedWebtoonResponse> getAllFavoriteWebtoon(Long memberId) {
@@ -59,7 +64,23 @@ public class MemberService {
             memberId);
 
         return favoriteWebtoons.stream()
-            .map(InterestedWebtoonResponse::from)
+            .map(interestedWebtoon -> {
+                Webtoon webtoon = interestedWebtoon.getWebtoon();
+                Member author = webtoon.getMember();
+
+                List<String> genres = webtoonGenreRepository.findByWebtoon(webtoon)
+                    .stream()
+                    .map(WebtoonGenre -> WebtoonGenre.getGenre().getName())
+                    .collect(Collectors.toList());
+
+                return InterestedWebtoonResponse.from(
+                    interestedWebtoon,
+                    author.getNickname(),
+                    webtoon.getEpisodeCount(),
+                    webtoon.getUpdatedAt(),
+                    genres
+                );
+            })
             .toList();
     }
 

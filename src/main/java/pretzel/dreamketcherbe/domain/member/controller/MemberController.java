@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
+import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonSimpleResponse;
 import pretzel.dreamketcherbe.domain.member.dto.NicknameRequest;
 import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
@@ -44,7 +45,7 @@ public class MemberController {
     }
 
     @GetMapping("/favorite/{WebtoonId}")
-    public ResponseEntity<InterestedWebtoonResponse> getFavoriteWebtoon(
+    public ResponseEntity<InterestedWebtoonSimpleResponse> getFavoriteWebtoon(
         @Auth Long memberId,
         @PathVariable Long WebtoonId) {
         return ResponseEntity.ok(memberService.getFavoriteWebtoon(memberId, WebtoonId));
