@@ -73,11 +73,11 @@ logging:
   cloud:
     aws:
       s3:
-        bucket: ${AWS_S3_BUCKET_NAME}
+        bucket: ENC(k2aSnQ0AKpPpIJGRA5uBwUFZkUvm6KX6uoqB0BQb/IE=)
       credentials:
-        access-key: ${AWS_ACCESS_KEY}
-        secret-key: ${AWS_SECRET_KEY}
+        access-key: ENC(x9QC5FlC/goCrSn/dgD9jSuGAImvMhUiCT8TrZY9GpQ=)
+        secret-key: ENC(qTE0mzLuPWlDvzkOAbcr4OKYBGImnCYLVZzi3K52tLwxMFftzx9QKbud1J2QAZvbvNrzldM20b8=)
       region:
-        static: ${AWS_REGION}
+        static: ENC(eoFeA5Pjie9aTfsfw/9wD0NLrVO8fk9y)
       stack:
         auto: false
