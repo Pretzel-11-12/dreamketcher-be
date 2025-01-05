@@ -6,6 +6,7 @@ import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 @Builder
 public record EpisodeResDto(
     Long id,
+    int no,
     String title,
     String thumbnail,
     String content,
@@ -17,6 +18,7 @@ public record EpisodeResDto(
         return EpisodeResDto.builder()
             .id(episode.getId())
             .title(episode.getTitle())
+            .no(episode.getNo())
             .thumbnail(episode.getThumbnail())
             .content(episode.getContent())
             .authorNote(episode.getAuthorNote())
