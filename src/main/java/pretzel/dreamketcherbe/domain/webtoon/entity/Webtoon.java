@@ -66,12 +66,11 @@ public class Webtoon extends BaseTimeEntity {
         this.member = member;
     }
 
-    public static Webtoon addOf(CreateWebtoonReqDto dto, Member member, String thumbnailUrl,
-        List<String> prologueUrls) {
+    public static Webtoon addOf(CreateWebtoonReqDto dto, Member member) {
         return Webtoon.builder()
             .title(dto.title())
-            .thumbnail(thumbnailUrl)
-            .prologue(prologueUrls)
+            .thumbnail(dto.thumbnail())
+            .prologue(dto.prologue())
             .story(dto.story())
             .description(dto.description())
             .member(member)
@@ -94,11 +93,10 @@ public class Webtoon extends BaseTimeEntity {
         this.story = story;
     }
 
-    public void updateOf(UpdateWebtoonReqDto dto, String thumbnailUrl,
-        List<String> prologueUrls) {
+    public void updateOf(UpdateWebtoonReqDto dto) {
         this.title = dto.title();
-        this.thumbnail = thumbnailUrl;
-        this.prologue = prologueUrls;
+        this.thumbnail = dto.thumbnail();
+        this.prologue = dto.prologue();
         this.story = dto.story();
         this.description = dto.description();
     }

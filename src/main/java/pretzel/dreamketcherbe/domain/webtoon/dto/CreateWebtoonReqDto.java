@@ -6,8 +6,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 public record CreateWebtoonReqDto(
     @NotBlank String title,
-    MultipartFile thumbnail,
-    List<MultipartFile> prologue,
+    String thumbnail,
+    List<String> prologue,
     @NotBlank String story,
     @NotBlank String description
 ) {

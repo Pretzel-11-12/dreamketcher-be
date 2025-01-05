@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
@@ -74,6 +75,60 @@ public class WebtoonController {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(webtoonService.createWebtoon(memberId, request));
     }
+
+    /**
+     * 웹툰 썸네일 등록
+     */
+    @PostMapping("/upload/thumbnail")
+    public ResponseEntity<String> uploadWebtoonThumbnail(@Auth Long memberId,
+        @RequestParam("image") MultipartFile thumbnail) {
+        String thumbnailUrl = webtoonService.uploadThumbnail(memberId, thumbnail);
+
+        return ResponseEntity.ok(thumbnailUrl);
+    }
+
+    /**
+     * 웹툰 썸네일 수정
+     */
+    @PutMapping("/{webtoonId}/thumbnail")
+    public ResponseEntity<String> updateWebtoonThumbnail(@Auth Long memberId,
+        @PathVariable Long webtoonId,
+        @RequestParam("oldThumbnail") String oldThumbnail,
+        @RequestParam("newThumbnail") MultipartFile newThumbnail,
+        @RequestParam("folderName") String folderName) {
+        String updatedThumbnailUrl = webtoonService.updateThumbnail(oldThumbnail, newThumbnail,
+            folderName);
+
+        return ResponseEntity.ok(updatedThumbnailUrl);
+    }
+
+    /**
+     * 웹툰 프롤로그 등록
+     */
+    @RequestMapping("/upload/prologue")
+    public ResponseEntity<List<String>> uploadWebtoonPrologue(@Auth Long memberId,
+        @RequestParam("images") List<MultipartFile> images) {
+        List<String> prologueUrls = webtoonService.uploadPrologue(memberId, images);
+
+        return ResponseEntity.ok(prologueUrls);
+    }
+
+    /**
+     * 웹툰 프롤로그 수정
+     */
+    @PutMapping("/{webtoonId}/prologue")
+    public ResponseEntity<List<String>> updateWebtoonPrologue(@Auth Long memberId,
+        @PathVariable Long webtoonId,
+        @RequestParam("existingUrls") List<String> existingUrls,
+        @RequestParam("newImages") List<MultipartFile> newImages,
+        @RequestParam("replaceIndices") List<Integer> replaceIndices,
+        @RequestParam("folderName") String folderName) {
+        List<String> updatedPrologueUrls = webtoonService.updatePrologue(existingUrls, newImages,
+            replaceIndices, folderName);
+
+        return ResponseEntity.ok(updatedPrologueUrls);
+    }
+
 
     /**
      * 관심 웹툰 추가
