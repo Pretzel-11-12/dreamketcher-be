@@ -31,6 +31,13 @@ public class PageReqDto {
             .build();
     }
 
+    public static PageReqDto of(int page, int size) {
+        return PageReqDto.builder()
+                .page(page)
+                .size(size)
+                .build();
+    }
+
     public long getFirstIndex() {
         return (long) this.page * this.size;
     }

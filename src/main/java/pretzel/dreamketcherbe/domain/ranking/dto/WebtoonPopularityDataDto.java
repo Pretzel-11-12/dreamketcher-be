@@ -15,40 +15,31 @@ import java.util.List;
 @NoArgsConstructor
 public class WebtoonPopularityDataDto {
 
+    private Long id;
     private String title;
     private String thumbnail;
     private List<String> genres;
     private int lastEpisode;
     private float averageStar;
-    private int numOfStars;
-    private int likeCount;
-    private int viewCount;
-    private int interestedCount;
+    private Long numOfStars;
+    private Long likeCount;
+    private Long viewCount;
+    private Long interestedCount;
     private float popularity;
 
-    public static WebtoonPopularityDataDto of(Object[] record) {
-        return WebtoonPopularityDataDto.builder()
-            .title((String) record[0])
-            .thumbnail((String) record[1])
-            .genres(record[2] != null
-                ? Arrays.asList(((String) record[2]).split(","))
-                : Collections.emptyList())
-            .lastEpisode(((Number) record[3]).intValue())
-            .averageStar(((Number) record[4]).floatValue())
-            .numOfStars(((Number) record[5]).intValue())
-            .likeCount(((Number) record[6]).intValue())
-            .viewCount(record[7] != null ? ((Number) record[7]).intValue() : 0)
-            .interestedCount(((Number) record[8]).intValue())
-            .popularity(calculatePopularity(
-                ((Number) record[4]).floatValue(),
-                ((Number) record[6]).intValue(),
-                record[7] != null ? ((Number) record[7]).intValue() : 0,
-                record[8] != null ? ((Number) record[8]).intValue() : 0
-            ))
-            .build();
-    }
-
-    private static float calculatePopularity(float averageStar, int likeCount, int viewCount, int interestedCount) {
-        return (float) ((averageStar * 0.3) + (likeCount * 0.3) + (viewCount * 0.1) + (interestedCount * 0.1));
+    public WebtoonPopularityDataDto(Long id, String title, String thumbnail, String genres, int lastEpisode,
+                                    float averageStar, Long numOfStars, Long likeCount, Long viewCount,
+                                    Long interestedCount, float popularity) {
+        this.id = id;
+        this.title = title;
+        this.thumbnail = thumbnail;
+        this.genres = genres != null ? Arrays.asList(genres.split(",")) : Collections.emptyList();
+        this.lastEpisode = lastEpisode;
+        this.averageStar = averageStar;
+        this.numOfStars = numOfStars;
+        this.likeCount = likeCount;
+        this.viewCount = viewCount;
+        this.interestedCount = interestedCount;
+        this.popularity = popularity;
     }
 }

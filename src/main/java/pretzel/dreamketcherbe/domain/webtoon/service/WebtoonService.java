@@ -58,6 +58,11 @@ public class WebtoonService {
      * 웹툰 완결 전체 목록 조회
      */
     public PageResDto<WebtoonResDto> getWebtoonsByFinish(PageReqDto pageReqDto) {
+        if (!pageReqDto.getGenre().equals("none")) {
+            genreRepository.findByName(pageReqDto.getGenre())
+                    .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
+        }
+
         return webtoonRepository.findWebtoonsWithPage(WebtoonStatus.FINISH.getStatus(), pageReqDto);
     }
 
@@ -65,6 +70,11 @@ public class WebtoonService {
      * 웹툰 신작 전체 목록 조회
      */
     public PageResDto<WebtoonResDto> getWebtoonsByNew(PageReqDto pageReqDto) {
+        if (!pageReqDto.getGenre().equals("none")) {
+            genreRepository.findByName(pageReqDto.getGenre())
+                    .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
+        }
+        
         return webtoonRepository.findWebtoonsWithPage(WebtoonStatus.NEW.getStatus(), pageReqDto);
     }
 
