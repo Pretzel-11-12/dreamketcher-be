@@ -129,19 +129,11 @@ public class EpisodeService {
             Member findMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-            String folderName = "episode/" + memberId + "/" + request.title();
-
-            String thumbnailUrl = s3Service.imageUpload(request.thumbnail(),
-                folderName + "/thumbnail");
-
-            List<String> contentUrl = s3Service.imagesUpload(request.content(),
-                folderName + "/content");
-
             Episode newEpisode = Episode.builder()
                 .member(findMember)
                 .title(request.title())
-                .thumbnail(thumbnailUrl)
-                .content(contentUrl)
+                .thumbnail(request.thumbnail())
+                .content(request.content())
                 .authorNote(request.authorNote())
                 .build();
 

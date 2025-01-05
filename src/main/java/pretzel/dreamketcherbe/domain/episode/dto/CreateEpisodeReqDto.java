@@ -8,8 +8,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 public record CreateEpisodeReqDto(
     @NotBlank String title,
-    @NotBlank MultipartFile thumbnail,
-    @NotBlank List<MultipartFile> content,
+    @NotBlank String thumbnail,
+    @NotBlank List<String> content,
     @NotBlank String authorNote,
     @NotBlank @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate publishedAt
 ) {
