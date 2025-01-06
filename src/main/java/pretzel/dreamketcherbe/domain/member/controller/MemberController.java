@@ -8,6 +8,7 @@ import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
+import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonSimpleResponse;
 import pretzel.dreamketcherbe.domain.member.dto.NicknameRequest;
 import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
 import pretzel.dreamketcherbe.domain.member.dto.WorkResDto;
@@ -41,16 +42,23 @@ public class MemberController {
         return ResponseEntity.ok(members);
     }
 
-    @GetMapping("/favorite")
-    public ResponseEntity<List<InterestedWebtoonResponse>> getFavoriteWebtoon(
-        @Auth Long memberId) {
-        return ResponseEntity.ok(memberService.getFavoriteWebtoon(memberId));
+    @GetMapping("/favorite/{WebtoonId}")
+    public ResponseEntity<InterestedWebtoonSimpleResponse> getFavoriteWebtoon(
+        @Auth Long memberId,
+        @PathVariable Long WebtoonId) {
+        return ResponseEntity.ok(memberService.getFavoriteWebtoon(memberId, WebtoonId));
     }
 
-    @DeleteMapping("/favorite/{InterestedWebtoonId}")
+    @GetMapping("/favorite")
+    public ResponseEntity<List<InterestedWebtoonResponse>> getAllFavoriteWebtoon(
+        @Auth Long memberId) {
+        return ResponseEntity.ok(memberService.getAllFavoriteWebtoon(memberId));
+    }
+
+    @DeleteMapping("/favorite/{WebtoonId}")
     public ResponseEntity<Void> deleteFavoriteWebtoon(@Auth Long memberId,
-        @PathVariable Long InterestedWebtoonId) {
-        memberService.deleteFavoriteWebtoon(memberId, InterestedWebtoonId);
+        @PathVariable Long WebtoonId) {
+        memberService.deleteFavoriteWebtoon(memberId, WebtoonId);
         return ResponseEntity.ok().build();
     }
 

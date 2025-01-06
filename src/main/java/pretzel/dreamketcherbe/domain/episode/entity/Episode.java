@@ -1,6 +1,7 @@
 package pretzel.dreamketcherbe.domain.episode.entity;
 
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,8 +37,9 @@ public class Episode extends BaseTimeEntity {
     @Column(nullable = false)
     private String thumbnail;
 
+    @ElementCollection
     @Column(nullable = false)
-    private String content;
+    private List<String> content;
 
     @Column(nullable = false, name = "author_note")
     private String authorNote;
@@ -73,7 +75,7 @@ public class Episode extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    public Episode(int no, String title, String thumbnail, String content, String authorNote,
+    public Episode(int no, String title, String thumbnail, List<String> content, String authorNote,
         int likeCount, LocalDate publishedAt,
         Webtoon webtoon, Member member) {
         this.no = no;

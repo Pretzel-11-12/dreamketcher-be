@@ -37,12 +37,12 @@ spring:
     allowed-origins: ${ALLOWED_ORIGINS}
     allowed-methods: ${ALLOWED_METHODS}
 
-  springdoc:
-    swagger-ui:
-      display-request-duration: true
-    api-docs:
-      path: /api-docs
-      show-actuator: true
+springdoc:
+  swagger-ui:
+    display-request-duration: true
+  api-docs:
+    path: /api-docs
+    show-actuator: true
 
 oauth2:
   google:
@@ -54,8 +54,9 @@ oauth2:
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
-  access-exp: 7200000
-  refresh-exp: 604800000
+  access-exp: 12345678
+  refresh-exp: 12345678
+  expiration: 12345678
 
 management:
   endpoints:
@@ -70,14 +71,14 @@ logging:
     org.springframework: info
     org.hibernate: info
 
-  cloud:
-    aws:
-      s3:
-        bucket: ${AWS_S3_BUCKET_NAME}
-      credentials:
-        access-key: ${AWS_ACCESS_KEY}
-        secret-key: ${AWS_SECRET_KEY}
-      region:
-        static: ${AWS_REGION}
-      stack:
-        auto: false
+cloud:
+  aws:
+    s3:
+      bucket: ${AWS_S3_BUCKET_NAME}
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ${AWS_REGION}
+    stack:
+      auto: false

@@ -14,6 +14,10 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import pretzel.dreamketcherbe.S3Utils.S3Service;
+import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
+import pretzel.dreamketcherbe.S3Utils.exception.S3ExceptionType;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeLikeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
@@ -51,6 +55,7 @@ public class EpisodeService {
     private final WebtoonGenreRepository webtoonGenreRepository;
     private final EpisodeLikeRepository episodeLikeRepository;
     private final EpisodeStarRepository episodeStarRepository;
+    private final S3Service s3Service;
     public final RedisTemplate<String, String> redisTemplate;
 
     public static final String EPISODE_LIKE_COUNT_KEY_PREFIX = "episode:likeCount:";
@@ -119,10 +124,10 @@ public class EpisodeService {
      * 에피소드 등록
      */
     @Transactional
-    public CreateEpisodeResDto createEpisode(Long memberId, Long webtoonId,
-        CreateEpisodeReqDto request) {
-        Member findMember = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+    public CreateEpisodeResDto createEpisode(Long memberId, Long webtoonId, CreateEpisodeReqDto request) {
+        try {
+            Member findMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
@@ -132,9 +137,67 @@ public class EpisodeService {
 
         Episode newEpisode = Episode.addOf(request, nextEpisodeNo, findWebtoon, findMember);
 
-        episodeRepository.save(newEpisode);
+            episodeRepository.save(newEpisode);
 
-        return CreateEpisodeResDto.of(newEpisode);
+            return CreateEpisodeResDto.of(newEpisode);
+        } catch (Exception e) {
+            throw new EpisodeException(EpisodeExceptionType.CREATE_EPISODE_FAILED);
+        }
+    }
+
+    /**
+     * 에피소드 썸네일 등록
+     */
+    public String uploadThumbnail(Long webtoonId, Long memberId,
+        MultipartFile thumbnail) {
+        try {
+            String folderName =
+                "episode/" + memberId + "/" + webtoonId + "/" + "/thumbnail";
+
+            return s3Service.imageUpload(thumbnail, folderName);
+        } catch (Exception e) {
+            throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
+        }
+    }
+
+    /**
+     * 에피소드 썸네일 수정
+     */
+    public String updateThumbnail(String oldThumbnail, MultipartFile newThumbnail,
+        String folderName) {
+        try {
+            return s3Service.imageUpdate(oldThumbnail, newThumbnail, folderName);
+        } catch (Exception e) {
+            throw new S3Exception(S3ExceptionType.IMAGE_NOT_FOUND);
+        }
+    }
+
+    /**
+     * 에피소드 컨텐츠 등록
+     */
+    public List<String> uploadContent(Long webtoonId, Long memberId,
+        List<MultipartFile> content) {
+        try {
+            String folderName =
+                "episode/" + memberId + "/" + webtoonId + "/" + "/content";
+
+            return s3Service.imagesUpload(content, folderName);
+        } catch (Exception e) {
+            throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
+        }
+    }
+
+    /**
+     * 에피소드 컨텐츠 수정
+     */
+    public List<String> updateContent(List<String> existingUrls, List<MultipartFile> newImages,
+        List<Integer> replaceIndices, String folderName) {
+        try {
+            return s3Service.updatePartialImages(existingUrls, newImages, replaceIndices,
+                folderName);
+        } catch (Exception e) {
+            throw new S3Exception(S3ExceptionType.IMAGE_NOT_FOUND);
+        }
     }
 
     /**
@@ -229,7 +292,6 @@ public class EpisodeService {
     public void increaseViewCount(Long episodeId) {
         episodeRepository.increaseViewCount(episodeId);
     }
-
 
     /**
      * 에피소드 좋아요
