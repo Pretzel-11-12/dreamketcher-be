@@ -15,8 +15,6 @@ import pretzel.dreamketcherbe.domain.webtoon.dto.*;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/webtoons")
 @AllArgsConstructor
