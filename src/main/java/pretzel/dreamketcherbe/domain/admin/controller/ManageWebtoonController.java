@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pretzel.dreamketcherbe.domain.admin.dto.ManageWebtoonResDto;
+import pretzel.dreamketcherbe.domain.admin.dto.UpdateWebtoonApprovalReqDto;
 import pretzel.dreamketcherbe.domain.admin.dto.UpdateWebtoonStatusReqDto;
 import pretzel.dreamketcherbe.domain.admin.service.ManageWebtoonService;
 
@@ -27,6 +28,14 @@ public class ManageWebtoonController {
         return ResponseEntity.ok(manageWebtoonService.getWebtoons(pageable));
     }
 
+    /**
+     * 작품 승인 여부 변경
+     */
+    @PutMapping("/approval")
+    public ResponseEntity<Void> updateWebtoonApproval(@RequestBody UpdateWebtoonApprovalReqDto updateWebtoonApprovalReqDto) {
+        manageWebtoonService.updateWebtoonApproval(updateWebtoonApprovalReqDto);
+        return ResponseEntity.ok().build();
+    }
     /**
      * 작품 상태 변경
      */
