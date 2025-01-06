@@ -1,13 +1,19 @@
 package pretzel.dreamketcherbe.domain.member.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
-@Table(name = "interested_webtoons")
+@Table(name = "interested_webtoon")
 @Getter
 @Entity
 @NoArgsConstructor

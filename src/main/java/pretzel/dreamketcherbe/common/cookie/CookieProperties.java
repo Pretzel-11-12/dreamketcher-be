@@ -10,4 +10,5 @@ public record CookieProperties(
     boolean httpOnly,
     boolean secure
 ) {
+
 }

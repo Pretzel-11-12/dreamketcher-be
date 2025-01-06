@@ -1,32 +1,32 @@
 package pretzel.dreamketcherbe.domain.episode.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import java.time.LocalDate;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
+import java.time.LocalDate;
+
 @Table(name = "episodes")
 @Getter
 @Entity
+@DynamicInsert
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Episode extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    private int no;
 
     @Column(nullable = false)
     private String title;
@@ -47,8 +47,20 @@ public class Episode extends BaseTimeEntity {
     private boolean published;
 
     @ColumnDefault("0")
-    @Column(name = "view_count")
+    @Column(nullable = false, name = "view_count")
     private Long viewCount;
+
+    @ColumnDefault("0")
+    @Column(nullable = false, name = "like_count")
+    @Setter
+    private int likeCount;
+
+    @ColumnDefault("0.0")
+    @Column(nullable = false, name = "average_star")
+    private float averageStar;
+
+    @ColumnDefault("'NOT_APPROVAL'")
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
@@ -59,21 +71,21 @@ public class Episode extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    public Episode(String title, String thumbnail, String content, String authorNote,
+    public Episode(String title, String thumbnail, String content, String authorNote, int likeCount,
         Webtoon webtoon, Member member) {
         this.title = title;
         this.thumbnail = thumbnail;
         this.content = content;
         this.authorNote = authorNote;
+        this.likeCount = likeCount;
         this.webtoon = webtoon;
         this.member = member;
     }
 
     public void isAuthor(Long memberId) {
-        if (member.getId().equals(memberId)) {
-            return;
+        if (!member.getId().equals(memberId)) {
+            throw new IllegalStateException(memberId + ", 작성자가 아닙니다.");
         }
-        throw new IllegalStateException("작성자만 수정할 수 있습니다.");
     }
 
     public void updateTitle(String title) {
@@ -91,4 +103,5 @@ public class Episode extends BaseTimeEntity {
     public void updateAuthorNote(String authorNote) {
         this.authorNote = authorNote;
     }
+    
 }

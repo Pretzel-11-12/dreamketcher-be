@@ -11,6 +11,7 @@ public record GoogleUserInfo(
     @JsonProperty("name") String name,
     @JsonProperty("picture") String imageUrl
 ) {
+
     public Member toMember(String nickname) {
         return Member.builder()
                    .socialType(SocialType.GOOGLE)
