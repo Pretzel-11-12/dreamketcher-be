@@ -1,6 +1,7 @@
 package pretzel.dreamketcherbe.domain.webtoon.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +14,6 @@ import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.*;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/webtoons")
@@ -139,6 +138,8 @@ public class WebtoonController {
         webtoonService.addFavoriteWebtoon(memberId, webtoonId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    // TODO: Redis 적용 후 관심 웹툰 삭제 메서드 추가
 
     /**
      * 웹툰 수정

@@ -10,6 +10,8 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
+import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
@@ -73,36 +75,45 @@ public class Episode extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    public Episode(String title, String thumbnail, List<String> content, String authorNote,
-        int likeCount, Webtoon webtoon, Member member) {
+    public Episode(int no, String title, String thumbnail, List<String> content, String authorNote,
+        int likeCount, LocalDate publishedAt,
+        Webtoon webtoon, Member member) {
+        this.no = no;
         this.title = title;
         this.thumbnail = thumbnail;
         this.content = content;
         this.authorNote = authorNote;
+        this.publishedAt = publishedAt;
         this.likeCount = likeCount;
         this.webtoon = webtoon;
         this.member = member;
+    }
+
+    public static Episode addOf(CreateEpisodeReqDto dto, int nextEpisodeNo,
+        Webtoon webtoon, Member member) {
+        return Episode.builder()
+            .no(nextEpisodeNo)
+            .title(dto.title())
+            .thumbnail(dto.thumbnail())
+            .content(dto.content())
+            .authorNote(dto.authorNote())
+            .publishedAt(dto.publishedAt())
+            .webtoon(webtoon)
+            .member(member)
+            .build();
+    }
+
+    public void updateOf(UpdateEpisodeReqDto dto) {
+        this.title = dto.title();
+        this.thumbnail = dto.thumbnail();
+        this.content = dto.content();
+        this.authorNote = dto.authorNote();
+        this.publishedAt = dto.publishedAt();
     }
 
     public void isAuthor(Long memberId) {
         if (!member.getId().equals(memberId)) {
             throw new IllegalStateException(memberId + ", 작성자가 아닙니다.");
         }
-    }
-
-    public void updateTitle(String title) {
-        this.title = title;
-    }
-
-    public void updateThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
-    }
-
-    public void updateContent(List<String> content) {
-        this.content = content;
-    }
-
-    public void updateAuthorNote(String authorNote) {
-        this.authorNote = authorNote;
     }
 }
