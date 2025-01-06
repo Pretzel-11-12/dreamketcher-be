@@ -9,8 +9,8 @@ import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
 import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonSimpleResponse;
-import pretzel.dreamketcherbe.domain.member.dto.NicknameRequest;
 import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
+import pretzel.dreamketcherbe.domain.member.dto.UpdateProfileRequest;
 import pretzel.dreamketcherbe.domain.member.dto.WorkResDto;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
@@ -38,17 +38,39 @@ public class MemberService {
     }
 
     @Transactional
-    public Object updateProfile(Long memberId, NicknameRequest nicknameRequest) {
+    public void updateProfile(Long memberId, UpdateProfileRequest updateProfileRequest) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        if (memberRepository.existsByNickname(nicknameRequest.nickname())) {
-            throw new MemberException(MemberExceptionType.NICKNAME_ALREADY_EXISTS);
+        String newNickname = updateProfileRequest.nickname();
+        String newBusinessEmail = updateProfileRequest.businessEmail();
+        String newShortIntroduction = updateProfileRequest.shortIntroduction();
+        String newImageUrl = updateProfileRequest.imageUrl();
+
+        if (!newNickname.equals(member.getNickname())) {
+            if (memberRepository.existsByNicknameAndIdNot(newNickname, memberId)) {
+                throw new MemberException(MemberExceptionType.NICKNAME_ALREADY_EXISTS);
+            }
+            member.updateNickname(newNickname);
         }
 
-        member.updateNickname(nicknameRequest.nickname());
+        if (newBusinessEmail != null && !newBusinessEmail.isBlank()
+            && !newBusinessEmail.equals(member.getBusinessEmail())) {
+            if (memberRepository.existsByBusinessEmailAndIdNot(newBusinessEmail, memberId)) {
+                throw new MemberException(MemberExceptionType.BUSINESS_EMAIL_ALREADY_EXISTS);
+            }
+            member.updateBusinessEmail(newBusinessEmail);
+        }
 
-        return memberRepository.save(member);
+        if (newShortIntroduction != null) {
+            member.updateShortIntroduction(newShortIntroduction);
+        }
+
+        if (newImageUrl != null) {
+            member.updateImageUrl(newImageUrl);
+        }
+
+        memberRepository.save(member);
     }
 
     public InterestedWebtoonSimpleResponse getFavoriteWebtoon(Long memberId, Long WebtoonId) {
@@ -109,7 +131,8 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public PageResDto<WorkResDto> getAllWorks(final Long memberId, final String status, final PageReqDto pageReqDto) {
+    public PageResDto<WorkResDto> getAllWorks(final Long memberId, final String status,
+        final PageReqDto pageReqDto) {
         return memberRepository.findAllWorkWithPage(memberId, status, pageReqDto);
     }
 }
