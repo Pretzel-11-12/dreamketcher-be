@@ -12,6 +12,7 @@ public record WebtoonEpisodeListResDto(
     String webtoonStory,
     String AuthorNickname,
     int episode_count,
+    int interestCount,
     List<String> genreNames,
     int currentPage,
     int totalPages,
@@ -51,6 +52,7 @@ public record WebtoonEpisodeListResDto(
         String webtoonThumbnail,
         String webtoonStory,
         String AuthorNickname,
+        int interestCount,
         int episode_count,
         List<String> genreNames,
         int currentPage,
@@ -63,6 +65,7 @@ public record WebtoonEpisodeListResDto(
             .webtoonThumbnail(webtoonThumbnail)
             .webtoonStory(webtoonStory)
             .AuthorNickname(AuthorNickname)
+            .interestCount(interestCount)
             .episode_count(episode_count)
             .genreNames(genreNames)
             .currentPage(currentPage)

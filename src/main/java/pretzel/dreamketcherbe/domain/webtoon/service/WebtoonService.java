@@ -1,6 +1,9 @@
 package pretzel.dreamketcherbe.domain.webtoon.service;
 
 import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
@@ -13,7 +16,11 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
-import pretzel.dreamketcherbe.domain.webtoon.dto.*;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
@@ -22,24 +29,15 @@ import pretzel.dreamketcherbe.domain.webtoon.repository.GenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 @Service
 @AllArgsConstructor
 public class WebtoonService {
 
     private final WebtoonRepository webtoonRepository;
-
     private final WebtoonGenreRepository webtoonGenreRepository;
-
     private final GenreRepository genreRepository;
-
     private final MemberRepository memberRepository;
-
     private final InterestedWebtoonRepository interestedWebtoonRepository;
-
     private final ManagementWebtoonRespository managementWebtoonRespository;
 
     /**
@@ -51,7 +49,8 @@ public class WebtoonService {
                 .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
         }
 
-        return webtoonRepository.findWebtoonsWithPage(WebtoonStatus.IN_SERIES.getStatus(), pageReqDto);
+        return webtoonRepository.findWebtoonsWithPage(WebtoonStatus.IN_SERIES.getStatus(),
+            pageReqDto);
     }
 
     /**
@@ -68,7 +67,7 @@ public class WebtoonService {
         return webtoonRepository.findWebtoonsWithPage(WebtoonStatus.NEW.getStatus(), pageReqDto);
     }
 
-    /*
+    /**
      * 웹툰 등록
      */
     @Transactional
@@ -85,7 +84,7 @@ public class WebtoonService {
         return CreateWebtoonResDto.of(newWebtoon);
     }
 
-    /*
+    /**
      * 관심 웹툰 추가
      */
     @Transactional
@@ -105,6 +104,7 @@ public class WebtoonService {
             .webtoon(webtoon)
             .build();
 
+        webtoon.incrementInterestCount(1);
         interestedWebtoonRepository.save(interestedWebtoon);
     }
 
@@ -149,11 +149,11 @@ public class WebtoonService {
 
     private List<Long> getWebtoonIdsInGenre(String genre) {
         Long genreId = genreRepository.findByName(genre)
-                .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND))
-                .getId();
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND))
+            .getId();
 
-         return webtoonGenreRepository.findAllByGenreId(genreId).stream()
-                .map(webtoonGenre -> webtoonGenre.getWebtoon().getId())
-                .toList();
+        return webtoonGenreRepository.findAllByGenreId(genreId).stream()
+            .map(webtoonGenre -> webtoonGenre.getWebtoon().getId())
+            .toList();
     }
 }
