@@ -1,6 +1,7 @@
 package pretzel.dreamketcherbe.domain.webtoon.entity;
 
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,8 +28,9 @@ public class Webtoon extends BaseTimeEntity {
     @Column(nullable = false)
     private String thumbnail;
 
+    @ElementCollection
     @Column(nullable = false)
-    private String prologue;
+    private List<String> prologue;
 
     @Column(nullable = false)
     private String story;
@@ -52,7 +54,9 @@ public class Webtoon extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    private Webtoon(String title, String thumbnail, String prologue, String story, String status, String description, Member member) {
+    private Webtoon(String title, String thumbnail, List<String> prologue, String story,
+        String status,
+        String description, Member member) {
         this.title = title;
         this.thumbnail = thumbnail;
         this.prologue = prologue;
@@ -64,13 +68,29 @@ public class Webtoon extends BaseTimeEntity {
 
     public static Webtoon addOf(CreateWebtoonReqDto dto, Member member) {
         return Webtoon.builder()
-                .title(dto.title())
-                .thumbnail(dto.thumbnail())
-                .prologue(dto.prologue())
-                .story(dto.story())
-                .description(dto.description())
-                .member(member)
-                .build();
+            .title(dto.title())
+            .thumbnail(dto.thumbnail())
+            .prologue(dto.prologue())
+            .story(dto.story())
+            .description(dto.description())
+            .member(member)
+            .build();
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public void updatePrologue(List<String> prologue) {
+        this.prologue = prologue;
+    }
+
+    public void updateStory(String story) {
+        this.story = story;
     }
 
     public void updateOf(UpdateWebtoonReqDto dto) {
