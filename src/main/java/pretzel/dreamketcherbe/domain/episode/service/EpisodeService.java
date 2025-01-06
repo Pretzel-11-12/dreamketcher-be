@@ -97,7 +97,8 @@ public class EpisodeService {
         int episodeCount = (int) episodePage.getTotalElements();
 
         return WebtoonEpisodeListResDto.of(webtoon.getId(), webtoon.getTitle(),
-            webtoon.getThumbnail(), webtoon.getStory(), AuthorNickname, episodeCount, genreNames,
+            webtoon.getThumbnail(), webtoon.getStory(), AuthorNickname,
+            webtoon.getInterestCount(), episodeCount, genreNames,
             episodePage.getNumber(), episodePage.getTotalPages(), episodes);
     }
 
