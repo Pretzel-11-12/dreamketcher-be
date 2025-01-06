@@ -105,7 +105,7 @@ public class WebtoonController {
     /**
      * 웹툰 프롤로그 등록
      */
-    @RequestMapping("/upload/prologue")
+    @PostMapping("/upload/prologue")
     public ResponseEntity<List<String>> uploadWebtoonPrologue(@Auth Long memberId,
         @RequestParam("images") List<MultipartFile> images) {
         List<String> prologueUrls = webtoonService.uploadPrologue(memberId, images);

@@ -22,7 +22,6 @@ import pretzel.dreamketcherbe.S3Utils.exception.S3ExceptionType;
 
 @Slf4j
 @RequiredArgsConstructor
-@Component
 @Service
 public class S3Service {
 

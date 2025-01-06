@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,7 +73,7 @@ public class S3Controller {
     /*
      * 이미지 파일 삭제
      */
-    @GetMapping("/delete/{folderName}")
+    @DeleteMapping("/delete/{folderName}")
     public ResponseEntity<Void> s3Delete(@PathVariable String folderName,
         @RequestParam("image") String imageUrl) {
         s3Service.deleteImage(imageUrl);
