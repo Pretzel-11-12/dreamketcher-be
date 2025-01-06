@@ -81,9 +81,25 @@ public class S3Service {
      * 이미지 파일 수정
      */
     public String imageUpdate(String oldImage, MultipartFile newImage, String folderName) {
-        deleteImage(oldImage);
+        String newImageUrl = null;
+        String newImageKey = null;
+        try {
+            newImageUrl = imageUpload(newImage, folderName);
+            newImageKey = extractObjectKey(newImageUrl);
 
-        return imageUpload(newImage, folderName);
+            deleteImage(oldImage);
+        } catch (S3Exception e) {
+            if (newImageKey != null) {
+                try {
+                    deleteImage(newImageKey);
+                } catch (S3Exception cleanupException) {
+                    log.error("Failed to clean up the new image: {}", cleanupException.getMessage(),
+                        cleanupException);
+                }
+            }
+            throw new S3Exception(S3ExceptionType.UPDATE_FAILED);
+        }
+        return newImageUrl;
     }
 
     /**
@@ -97,23 +113,46 @@ public class S3Service {
 
         if (newImages.size() != replaceIndices.size()) {
             throw new IllegalArgumentException(
-                "The number of new images and replace indices must match.");
+                "기존 이미지 수와 대치 이미지수가 맞지 않습니다.");
         }
 
         List<String> updatedImageUrls = new ArrayList<>(existingImageUrls);
+        List<String> successUploadedUrls = new ArrayList<>(); // 업로드 성공한 파일 저장
+        List<Integer> successUpdatedIndices = new ArrayList<>(); // 성공적으로 대치된 인덱스 저장
 
-        for (int i = 0; i < newImages.size(); i++) {
-            int replaceIndex = replaceIndices.get(i);
+        try {
+            for (int i = 0; i < newImages.size(); i++) {
+                int replaceIndex = replaceIndices.get(i);
 
-            if (replaceIndex < 0 || replaceIndex >= existingImageUrls.size()) {
-                throw new IllegalArgumentException("Invalid index: " + replaceIndex);
+                if (replaceIndex < 0 || replaceIndex >= existingImageUrls.size()) {
+                    throw new IllegalArgumentException("Invalid index: " + replaceIndex);
+                }
+
+                String newImageUrl = imageUpload(newImages.get(i), folderName);
+                successUploadedUrls.add(newImageUrl);
+                successUpdatedIndices.add(replaceIndex);
+
+                updatedImageUrls.set(replaceIndex, newImageUrl);
             }
 
-            deleteImage(existingImageUrls.get(replaceIndex));
+            for (int i = 0; i < successUpdatedIndices.size(); i++) {
+                int replaceIndex = successUpdatedIndices.get(i);
+                deleteImage(existingImageUrls.get(replaceIndex));
+            }
+        } catch (Exception e) {
+            log.error("이미지 부분 수정에 실패했습니다.: {}", e.getMessage(), e);
 
-            String newImageUrl = imageUpload(newImages.get(i), folderName);
+            // 업로드된 새 이미지 삭제
+            for (String uploadedUrl : successUploadedUrls) {
+                try {
+                    deleteImage(extractObjectKey(uploadedUrl));
+                } catch (Exception cleanupException) {
+                    log.error("이미지 삭제에 실패했습니다.: {}", cleanupException.getMessage(),
+                        cleanupException);
+                }
+            }
 
-            updatedImageUrls.set(replaceIndex, newImageUrl);
+            throw new S3Exception(S3ExceptionType.UPDATE_FAILED);
         }
 
         return updatedImageUrls;

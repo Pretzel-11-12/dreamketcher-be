@@ -11,6 +11,7 @@ public enum S3ExceptionType implements ExceptionType {
     INVALID_FILE_EXTENSION(HttpStatus.BAD_REQUEST, "지원하지 않는 파일 확장자입니다."),
     INVALID_FILE_SIZE(HttpStatus.INSUFFICIENT_STORAGE, "파일 크기가 너무 큽니다."),
     UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
+    UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 수정에 실패했습니다."),
     DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 삭제에 실패했습니다."),
     DUPLICATED_FILE(HttpStatus.BAD_REQUEST, "중복된 파일이 존재합니다."),
     EMPTY_FILE(HttpStatus.BAD_REQUEST, "파일이 비어있습니다.");
