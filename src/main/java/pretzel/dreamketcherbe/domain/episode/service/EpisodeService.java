@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -44,7 +43,6 @@ import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
-@Slf4j
 @Service
 @AllArgsConstructor
 public class EpisodeService {
@@ -127,18 +125,19 @@ public class EpisodeService {
      * 에피소드 등록
      */
     @Transactional
-    public CreateEpisodeResDto createEpisode(Long memberId, Long webtoonId, CreateEpisodeReqDto request) {
+    public CreateEpisodeResDto createEpisode(Long memberId, Long webtoonId,
+        CreateEpisodeReqDto request) {
         try {
             Member findMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
-            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+            Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+                .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-        Long episodeCount = episodeRepository.countByWebtoonId(webtoonId);
-        int nextEpisodeNo = episodeCount.intValue() + 1;
+            Long episodeCount = episodeRepository.countByWebtoonId(webtoonId);
+            int nextEpisodeNo = episodeCount.intValue() + 1;
 
-        Episode newEpisode = Episode.addOf(request, nextEpisodeNo, findWebtoon, findMember);
+            Episode newEpisode = Episode.addOf(request, nextEpisodeNo, findWebtoon, findMember);
 
             episodeRepository.save(newEpisode);
 
