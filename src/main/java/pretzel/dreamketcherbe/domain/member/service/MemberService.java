@@ -19,6 +19,9 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
+import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
+import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
+import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 
 @Service
@@ -28,6 +31,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final InterestedWebtoonRepository interestedWebtoonRepository;
+    private final WebtoonRepository webtoonRepository;
     private final WebtoonGenreRepository webtoonGenreRepository;
 
     public SelfInfoResponse getSelfInfo(Long memberId) {
@@ -101,11 +105,17 @@ public class MemberService {
             .orElseThrow(
                 () -> new MemberException(MemberExceptionType.INTERESTED_WEBTOON_NOT_FOUND));
 
+        Webtoon webtoon = webtoonRepository.findById(interestedWebtoon.getWebtoon().getId())
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
         if (!interestedWebtoon.getMember().getId().equals(memberId)) {
             throw new MemberException(MemberExceptionType.MEMBER_NOT_AUTHORIZED);
         }
 
         interestedWebtoonRepository.delete(interestedWebtoon);
+
+        webtoon.decrementInterestCount(1);
+        webtoonRepository.save(webtoon);
     }
 
     @Transactional(readOnly = true)

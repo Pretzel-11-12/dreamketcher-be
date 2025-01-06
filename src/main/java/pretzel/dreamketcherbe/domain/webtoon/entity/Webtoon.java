@@ -49,6 +49,10 @@ public class Webtoon extends BaseTimeEntity {
     @ColumnDefault("0")
     private int episodeCount;
 
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private int interestCount;
+
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
@@ -68,13 +72,13 @@ public class Webtoon extends BaseTimeEntity {
 
     public static Webtoon addOf(CreateWebtoonReqDto dto, Member member) {
         return Webtoon.builder()
-            .title(dto.title())
-            .thumbnail(dto.thumbnail())
-            .prologue(dto.prologue())
-            .story(dto.story())
-            .description(dto.description())
-            .member(member)
-            .build();
+                .title(dto.title())
+                .thumbnail(dto.thumbnail())
+                .prologue(dto.prologue())
+                .story(dto.story())
+                .description(dto.description())
+                .member(member)
+                .build();
     }
 
     public void updateOf(UpdateWebtoonReqDto dto) {
@@ -87,5 +91,13 @@ public class Webtoon extends BaseTimeEntity {
 
     public void updateStatus(String status) {
         this.status = status;
+    }
+
+    public void incrementInterestCount(int count) {
+        this.interestCount += count;
+    }
+
+    public void decrementInterestCount(int count) {
+        this.interestCount -= count;
     }
 }

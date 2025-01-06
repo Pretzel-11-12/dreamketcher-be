@@ -84,6 +84,8 @@ public class EpisodeService {
         Webtoon webtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
+        String AuthorNickname = webtoon.getMember().getNickname();
+
         List<WebtoonGenre> webtoonGenres = webtoonGenreRepository.findByWebtoonId(webtoonId);
 
         List<String> genreNames = webtoonGenres.stream().map(wg -> wg.getGenre().getName())
@@ -100,7 +102,8 @@ public class EpisodeService {
         int episodeCount = (int) episodePage.getTotalElements();
 
         return WebtoonEpisodeListResDto.of(webtoon.getId(), webtoon.getTitle(),
-            webtoon.getThumbnail(), webtoon.getStory(), episodeCount, genreNames,
+            webtoon.getThumbnail(), webtoon.getStory(), AuthorNickname,
+            webtoon.getInterestCount(), episodeCount, genreNames,
             episodePage.getNumber(), episodePage.getTotalPages(), episodes);
     }
 
