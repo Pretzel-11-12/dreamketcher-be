@@ -1,6 +1,13 @@
 package pretzel.dreamketcherbe.domain.webtoon.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -47,12 +54,17 @@ public class Webtoon extends BaseTimeEntity {
     @ColumnDefault("0")
     private int episodeCount;
 
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private int interestCount;
+
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
 
     @Builder
-    private Webtoon(String title, String thumbnail, String prologue, String story, String status, String description, Member member) {
+    private Webtoon(String title, String thumbnail, String prologue, String story, String status,
+        String description, Member member) {
         this.title = title;
         this.thumbnail = thumbnail;
         this.prologue = prologue;
@@ -64,13 +76,13 @@ public class Webtoon extends BaseTimeEntity {
 
     public static Webtoon addOf(CreateWebtoonReqDto dto, Member member) {
         return Webtoon.builder()
-                .title(dto.title())
-                .thumbnail(dto.thumbnail())
-                .prologue(dto.prologue())
-                .story(dto.story())
-                .description(dto.description())
-                .member(member)
-                .build();
+            .title(dto.title())
+            .thumbnail(dto.thumbnail())
+            .prologue(dto.prologue())
+            .story(dto.story())
+            .description(dto.description())
+            .member(member)
+            .build();
     }
 
     public void updateOf(UpdateWebtoonReqDto dto) {
@@ -81,7 +93,16 @@ public class Webtoon extends BaseTimeEntity {
         this.description = dto.description();
     }
 
+
     public void updateStatus(String status) {
         this.status = status;
+    }
+
+    public void incrementInterestCount(int count) {
+        this.interestCount += count;
+    }
+
+    public void decrementInterestCount(int count) {
+        this.interestCount -= count;
     }
 }
