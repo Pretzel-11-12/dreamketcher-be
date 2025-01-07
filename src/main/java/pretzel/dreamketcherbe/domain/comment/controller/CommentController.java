@@ -2,7 +2,6 @@ package pretzel.dreamketcherbe.domain.comment.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
@@ -50,11 +50,26 @@ public class CommentController {
     /**
      * 댓글 삭제
      */
-    @PostMapping("/delete")
+    @PostMapping("/{commentId}/delete")
     public ResponseEntity<Void> deleteComment(@Auth Long memberId, @PathVariable Long episodeId,
         @PathVariable Long commentId) {
         commentService.deleteComment(memberId, episodeId, commentId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 댓글 목록 조회
+     */
+    @GetMapping
+    public ResponseEntity<PageResDto<CommentResDto>> getComments(@PathVariable Long episodeId,
+        @RequestParam int page,
+        @RequestParam int size, @RequestParam(defaultValue = "DESC") String order) {
+
+        PageReqDto pageReqDto = PageReqDto.of(null, page, size, order);
+
+        PageResDto<CommentResDto> response = commentService.getComments(episodeId, pageReqDto);
+
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -71,7 +86,7 @@ public class CommentController {
     /**
      * 대댓글 삭제
      */
-    @PostMapping("/{commentId}/recomment/delete")
+    @PostMapping("/{commentId}/recomment/{recommentId}/delete")
     public ResponseEntity<Void> deleteRecomment(@Auth Long memberId, @PathVariable Long episodeId,
         @PathVariable Long commentId, @PathVariable Long recommentId) {
         commentService.deleteRecomment(memberId, episodeId, commentId, recommentId);

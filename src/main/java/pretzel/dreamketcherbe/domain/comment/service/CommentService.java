@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
@@ -52,8 +53,12 @@ public class CommentService {
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
-        Comment newComment = Comment.builder().member(findMember).episode(findEpisode)
-            .content(request.content()).build();
+        Comment newComment = Comment
+            .builder()
+            .member(findMember)
+            .episode(findEpisode)
+            .content(request.content())
+            .build();
 
         return CreateCommentResDto.of(newComment);
     }
@@ -70,6 +75,31 @@ public class CommentService {
 
         findComment.softDelete();
         commentRepository.save(findComment);
+    }
+
+    /**
+     * 댓글 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public PageResDto<CommentResDto> getComments(Long episodeId, PageReqDto pageReqDto) {
+        Episode findEpisode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        Pageable pageable = PageRequest.of(
+            pageReqDto.getPage(),
+            pageReqDto.getSize(),
+            Sort.by(Sort.Direction.fromString(pageReqDto.getOrder()), "createAt")
+        );
+
+        Page<Comment> comments = commentRepository.findByEpisodeId(episodeId,
+            pageable);
+
+        return new PageResDto<>(
+            comments.getContent().stream()
+                .map(CommentResDto::of)
+                .toList(),
+            comments.getTotalElements()
+        );
     }
 
     /**
@@ -90,9 +120,14 @@ public class CommentService {
         long commentOrder =
             recommentRepository.countByParentCommentIdAndIsDeletedFalse(findComment.getId()) + 1;
 
-        Recomment newRecomment = Recomment.builder().member(findMember).episode(findEpisode)
-            .content(request.content()).parentCommentId(findComment.getId())
-            .commentOrder(commentOrder).build();
+        Recomment newRecomment = Recomment
+            .builder()
+            .member(findMember)
+            .episode(findEpisode)
+            .content(request.content())
+            .parentCommentId(findComment.getId())
+            .commentOrder(commentOrder)
+            .build();
 
         int childCommentCount = (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(
             findComment.getId());
@@ -149,5 +184,4 @@ public class CommentService {
             recomments.getTotalElements()
         );
     }
-
 }

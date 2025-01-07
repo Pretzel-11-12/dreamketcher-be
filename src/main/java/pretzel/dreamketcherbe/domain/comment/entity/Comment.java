@@ -67,8 +67,10 @@ public class Comment extends BaseTimeEntity {
     }
 
     public void softDelete() {
-        this.isDeleted = true;
-        this.deletedAt = LocalDateTime.now();
+        if (!this.isDeleted) {
+            this.isDeleted = true;
+            this.deletedAt = LocalDateTime.now();
+        }
     }
 
     public void updateChildCommentCount(int count) {
