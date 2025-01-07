@@ -1,12 +1,19 @@
 package pretzel.dreamketcherbe.domain.webtoon.service;
 
 import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
+import pretzel.dreamketcherbe.S3Utils.exception.S3ExceptionType;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.admin.entity.ManagementWebtoon;
 import pretzel.dreamketcherbe.domain.admin.repository.ManagementWebtoonRespository;
+import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
@@ -22,10 +29,6 @@ import pretzel.dreamketcherbe.domain.webtoon.repository.GenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 @Service
 @AllArgsConstructor
 public class WebtoonService {
@@ -39,6 +42,7 @@ public class WebtoonService {
     private final MemberRepository memberRepository;
 
     private final InterestedWebtoonRepository interestedWebtoonRepository;
+    private final S3Service s3Service;
 
     private final ManagementWebtoonRespository managementWebtoonRespository;
 
@@ -58,6 +62,11 @@ public class WebtoonService {
      * 웹툰 완결 전체 목록 조회
      */
     public PageResDto<WebtoonResDto> getWebtoonsByFinish(PageReqDto pageReqDto) {
+        if (!pageReqDto.getGenre().equals("none")) {
+            genreRepository.findByName(pageReqDto.getGenre())
+                    .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
+        }
+
         return webtoonRepository.findWebtoonsWithPage(WebtoonStatus.FINISH.getStatus(), pageReqDto);
     }
 
@@ -65,10 +74,15 @@ public class WebtoonService {
      * 웹툰 신작 전체 목록 조회
      */
     public PageResDto<WebtoonResDto> getWebtoonsByNew(PageReqDto pageReqDto) {
+        if (!pageReqDto.getGenre().equals("none")) {
+            genreRepository.findByName(pageReqDto.getGenre())
+                    .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
+        }
+        
         return webtoonRepository.findWebtoonsWithPage(WebtoonStatus.NEW.getStatus(), pageReqDto);
     }
 
-    /*
+    /**
      * 웹툰 등록
      */
     @Transactional
@@ -85,7 +99,66 @@ public class WebtoonService {
         return CreateWebtoonResDto.of(newWebtoon);
     }
 
-    /*
+    /**
+     * 웹툰 썸네일 등록
+     */
+    public String uploadThumbnail(Long memberId, MultipartFile thumbnail) {
+        try {
+            Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+            String folderName = "/webtoon" + memberId + "/thumbnail";
+
+            return s3Service.imageUpload(thumbnail, folderName);
+        } catch (Exception e) {
+            throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
+        }
+    }
+
+    /**
+     * 웹툰 썸네일 수정
+     */
+    public String updateThumbnail(String oldThumbnail, MultipartFile newThumbnail,
+        String folderName) {
+        try {
+            s3Service.imageUpdate(oldThumbnail, newThumbnail, folderName);
+
+            return s3Service.imageUpload(newThumbnail, folderName);
+        } catch (Exception e) {
+            throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
+        }
+    }
+
+    /**
+     * 웹툰 프롤로그 등록
+     */
+    public List<String> uploadPrologue(Long memberId, List<MultipartFile> prologue) {
+        try {
+            Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+            String folderName = "/webtoon" + memberId + "/prologue";
+
+            return s3Service.imagesUpload(prologue, folderName);
+        } catch (Exception e) {
+            throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
+        }
+    }
+
+    /**
+     * 웹툰 프롤로그 수정
+     */
+    public List<String> updatePrologue(List<String> oldPrologue, List<MultipartFile> newPrologue,
+        List<Integer> replaceIndex, String folderName) {
+        try {
+            return s3Service.updatePartialImages(oldPrologue, newPrologue, replaceIndex,
+                folderName);
+        } catch (Exception e) {
+            throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
+        }
+    }
+
+    /**
      * 관심 웹툰 추가
      */
     @Transactional
@@ -105,6 +178,7 @@ public class WebtoonService {
             .webtoon(webtoon)
             .build();
 
+        webtoon.incrementInterestCount(1);
         interestedWebtoonRepository.save(interestedWebtoon);
     }
 
@@ -112,10 +186,14 @@ public class WebtoonService {
      * 웹툰 수정
      */
     public void updateWebtoon(Long memberId, Long webtoonId, UpdateWebtoonReqDto request) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         findWebtoon.updateOf(request);
+
         webtoonRepository.save(findWebtoon);
     }
 
@@ -123,6 +201,10 @@ public class WebtoonService {
      * 웹툰 삭제
      */
     public void deleteWebtoon(Long memberId, Long webtoonId) {
+
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
@@ -152,7 +234,7 @@ public class WebtoonService {
                 .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND))
                 .getId();
 
-         return webtoonGenreRepository.findAllByGenreId(genreId).stream()
+        return webtoonGenreRepository.findAllByGenreId(genreId).stream()
                 .map(webtoonGenre -> webtoonGenre.getWebtoon().getId())
                 .toList();
     }
