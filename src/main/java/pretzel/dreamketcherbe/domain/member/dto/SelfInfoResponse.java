@@ -21,8 +21,8 @@ public record SelfInfoResponse(
             member.getBusinessEmail(),
             member.getName(),
             member.getNickname(),
-            member.getImageUrl(),
             member.getShortIntroduction(),
+            member.getImageUrl(),
             member.getRole()
         );
     }
