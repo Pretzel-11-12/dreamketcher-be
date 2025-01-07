@@ -9,7 +9,7 @@ import pretzel.dreamketcherbe.domain.comment.entity.Recomment;
 
 public interface RecommentRepository extends JpaRepository<Recomment, Long> {
 
-    @Query("SELECT r FROM Recomment r WHERE r.parentCommentId = :parentCommentId AND r.isDeleted = false")
+    @Query("SELECT r FROM Recomment r WHERE r.parentCommentId = :parentCommentId AND r.isDeleted = false ORDER BY r.commentOrder ASC")
     Page<Recomment> findActiveRecommentsByParentCommentId(Long parentCommentId, Pageable pageable);
 
     long countByParentCommentIdAndIsDeletedFalse(Long parentCommentId);

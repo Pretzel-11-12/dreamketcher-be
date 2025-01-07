@@ -171,8 +171,7 @@ public class CommentService {
         Comment findComment = commentRepository.findById(commentId)
             .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
 
-        Pageable pageable = PageRequest.of(pageReqDto.getPage(), pageReqDto.getSize(),
-            Sort.by(Sort.Direction.fromString(pageReqDto.getOrder()), "commentOrder"));
+        Pageable pageable = PageRequest.of(pageReqDto.getPage(), pageReqDto.getSize());
 
         Page<Recomment> recomments = recommentRepository.findActiveRecommentsByParentCommentId(
             episodeId, pageable);
