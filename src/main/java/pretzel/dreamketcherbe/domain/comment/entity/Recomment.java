@@ -47,9 +47,6 @@ public class Recomment extends BaseTimeEntity {
     @ColumnDefault("false")
     private Boolean isDeleted;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
@@ -77,7 +74,6 @@ public class Recomment extends BaseTimeEntity {
     public void softDelete() {
         if (!isDeleted) {
             this.isDeleted = true;
-            this.deletedAt = LocalDateTime.now();
         }
     }
 }
