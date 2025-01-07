@@ -13,6 +13,5 @@ public interface InterestedWebtoonRepository extends JpaRepository<InterestedWeb
 
     Optional<InterestedWebtoon> findByMemberAndWebtoon(Member member, Webtoon webtoon);
 
-    Optional<InterestedWebtoon> findByIdAndMemberId(Long id, Long memberId);
-
+    Optional<InterestedWebtoon> findByWebtoonIdAndMemberId(Long webtoonId, Long memberId);
 }

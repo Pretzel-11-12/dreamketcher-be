@@ -35,28 +35,33 @@ public class Member extends BaseTimeEntity {
     @Column(unique = true)
     private String email;
 
+    @Column(name = "business_email", unique = true)
+    private String businessEmail;
+
     @Column(nullable = false)
     private String name;
 
     @Column(name = "nickname", unique = true, nullable = false)
     private String nickname;
 
+    @Column(name = "short_introduction", length = 255)
+    private String shortIntroduction;
+
     @Column(name = "image_uri")
-    private String imageUri;
+    private String imageUrl;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
     @Builder
     public Member(SocialType socialType, String socialId, String email, String name,
-        String nickname,
-        String imageUri, Role role) {
+        String nickname, String imageUrl, Role role) {
         this.socialType = socialType;
         this.socialId = socialId;
         this.name = name;
         this.nickname = nickname;
         this.email = email;
-        this.imageUri = imageUri;
+        this.imageUrl = imageUrl;
         this.role = role;
     }
 
@@ -68,8 +73,16 @@ public class Member extends BaseTimeEntity {
         this.nickname = nickname;
     }
 
-    public void updateName(String name) {
-        this.name = name;
+    public void updateBusinessEmail(String businessEmail) {
+        this.businessEmail = businessEmail;
+    }
+
+    public void updateShortIntroduction(String shortIntroduction) {
+        this.shortIntroduction = shortIntroduction;
+    }
+
+    public void updateImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public void updateRole(Role role) {

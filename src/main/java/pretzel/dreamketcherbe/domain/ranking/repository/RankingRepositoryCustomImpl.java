@@ -33,6 +33,8 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
                 Projections.constructor(WebtoonPopularityDataDto.class,
                     webtoon.id,
                     webtoon.title,
+                    webtoon.member.name,
+                    webtoon.description,
                     webtoon.thumbnail,
                     ExpressionUtils.as(
                         JPAExpressions.select(Expressions.stringTemplate("GROUP_CONCAT(DISTINCT {0})", genre.name))
