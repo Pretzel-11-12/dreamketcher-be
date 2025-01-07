@@ -1,10 +1,12 @@
 package pretzel.dreamketcherbe.domain.admin.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 import java.util.List;
 
 public record UpdateWebtoonStatusReqDto(
-    List<Long> webtoonIds,
-    String status
+    @NotBlank List<Long> webtoonIds,
+    @NotBlank String status
 ) {
 
 }
