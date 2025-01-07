@@ -150,15 +150,13 @@ public class EpisodeController {
      * 에피소드 상세 조회
      */
     @GetMapping("/{episodeId}")
-    public String getEpisode(@PathVariable("episodeId") Long episodeId,
+    public ResponseEntity<EpisodeResDto> getEpisode(@PathVariable("episodeId") Long episodeId,
         @PathVariable("webtoonId") Long webtoonId
         , Model model,
         HttpServletRequest request, HttpServletResponse response) {
         EpisodeResDto episode = episodeService.getEpisode(webtoonId, episodeId, request, response);
-
-        model.addAttribute("episode", episode);
-
-        return "episode-view";
+        
+        return ResponseEntity.ok(episode);
     }
 
     /**

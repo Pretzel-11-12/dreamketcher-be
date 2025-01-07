@@ -6,8 +6,11 @@ import pretzel.dreamketcherbe.domain.member.entity.Role;
 public record SelfInfoResponse(
     Long id,
     String email,
+    String businessEmail,
     String name,
-    String imageUri,
+    String nickname,
+    String shortIntroduction,
+    String imageUrl,
     Role role
 ) {
 
@@ -15,8 +18,11 @@ public record SelfInfoResponse(
         return new SelfInfoResponse(
             member.getId(),
             member.getEmail(),
+            member.getBusinessEmail(),
             member.getName(),
-            member.getImageUri(),
+            member.getNickname(),
+            member.getShortIntroduction(),
+            member.getImageUrl(),
             member.getRole()
         );
     }
