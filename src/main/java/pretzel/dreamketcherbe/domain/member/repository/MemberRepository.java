@@ -1,9 +1,8 @@
 package pretzel.dreamketcherbe.domain.member.repository;
 
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
-
-import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 
@@ -12,4 +11,8 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     boolean existsByNickname(String uniqueNickname);
 
     Optional<Member> findById(Long memberId);
+
+    boolean existsByBusinessEmailAndIdNot(String newBusinessEmail, Long memberId);
+
+    boolean existsByNicknameAndIdNot(String newNickname, Long memberId);
 }

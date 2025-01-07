@@ -6,8 +6,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pretzel.dreamketcherbe.common.dto.PageReqDto;
+import pretzel.dreamketcherbe.common.dto.PageResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommendationResDto;
@@ -15,6 +22,7 @@ import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentNotRecommendatio
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.RecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.NotRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 import pretzel.dreamketcherbe.domain.comment.entity.NotRecommendation;
@@ -130,6 +138,31 @@ public class CommentService {
     }
 
     /**
+     * 댓글 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public PageResDto<CommentResDto> getComments(Long episodeId, PageReqDto pageReqDto) {
+        Episode findEpisode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        Pageable pageable = PageRequest.of(
+            pageReqDto.getPage(),
+            pageReqDto.getSize(),
+            Sort.by(Sort.Direction.fromString(pageReqDto.getOrder()), "createdAt")
+        );
+
+        Page<Comment> comments = commentRepository.findByEpisodeId(episodeId,
+            pageable);
+
+        return new PageResDto<>(
+            comments.getContent().stream()
+                .map(CommentResDto::of)
+                .toList(),
+            comments.getTotalElements()
+        );
+    }
+
+    /**
      * 답글 생성
      */
     @Transactional
@@ -186,6 +219,30 @@ public class CommentService {
         commentRepository.save(findComment);
     }
 
+    /**
+     * 답글 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public PageResDto<RecommentResDto> getRecomments(Long episodeId, Long commentId,
+        PageReqDto pageReqDto) {
+        Episode findEpisode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        Comment findComment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
+
+        Pageable pageable = PageRequest.of(pageReqDto.getPage(), pageReqDto.getSize());
+
+        Page<Recomment> recomments = recommentRepository.findActiveRecommentsByParentCommentId(
+            episodeId, pageable);
+
+        return new PageResDto<>(
+            recomments.getContent().stream()
+                .map(RecommentResDto::of)
+                .toList(),
+            recomments.getTotalElements()
+        );
+    }
     /**
      * 댓글 추천
      */

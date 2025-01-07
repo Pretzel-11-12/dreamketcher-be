@@ -1,15 +1,18 @@
 package pretzel.dreamketcherbe.domain.episode.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public record CreateEpisodeReqDto(
     @NotBlank String title,
     @NotBlank String thumbnail,
-    @NotBlank String content,
+    @NotEmpty List<String> content,
     @NotBlank String authorNote,
-    @NotBlank @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate publishedAt
+    @NotNull @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate publishedAt
 ) {
 
 }
