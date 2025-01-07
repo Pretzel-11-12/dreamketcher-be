@@ -1,11 +1,11 @@
 package pretzel.dreamketcherbe.domain.episode.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 
 public record EpisodeStarReqDto(
     Long episodeId,
     Long memberId,
-    @NotNull float point
+    @NotEmpty float point
 ) {
 
 }

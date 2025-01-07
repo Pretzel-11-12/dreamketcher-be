@@ -88,7 +88,7 @@ public class CommentService {
         Pageable pageable = PageRequest.of(
             pageReqDto.getPage(),
             pageReqDto.getSize(),
-            Sort.by(Sort.Direction.fromString(pageReqDto.getOrder()), "createAt")
+            Sort.by(Sort.Direction.fromString(pageReqDto.getOrder()), "createdAt")
         );
 
         Page<Comment> comments = commentRepository.findByEpisodeId(episodeId,

@@ -6,7 +6,7 @@ import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 @Builder
 public record CommentResDto(
     Long id,
-    Long memberId,
+    String nickname,
     String content,
     int childCommentCount
 
@@ -15,7 +15,7 @@ public record CommentResDto(
     public static CommentResDto of(Comment comment) {
         return CommentResDto.builder()
             .id(comment.getId())
-            .memberId(comment.getMember().getId())
+            .nickname(comment.getMember().getNickname())
             .content(comment.getContent())
             .childCommentCount(comment.getChildCommentCount())
             .build();

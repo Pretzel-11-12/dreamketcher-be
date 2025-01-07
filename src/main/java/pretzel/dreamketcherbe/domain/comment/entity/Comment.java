@@ -19,6 +19,7 @@ import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
+import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
 @Table(name = "comments")
 @Getter
@@ -42,9 +43,6 @@ public class Comment extends BaseTimeEntity {
     @ColumnDefault("false")
     private boolean isDeleted;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
@@ -53,9 +51,14 @@ public class Comment extends BaseTimeEntity {
     @JoinColumn(name = "episode_id")
     private Episode episode;
 
+    @ManyToOne
+    @JoinColumn(name = "webtoon_id")
+    private Webtoon webtoon;
+
     @Builder
-    public Comment(String content, Member member, Episode episode) {
+    public Comment(String content, int childCommentCount, Member member, Episode episode) {
         this.content = content;
+        this.childCommentCount = childCommentCount;
         this.member = member;
         this.episode = episode;
     }
@@ -69,7 +72,6 @@ public class Comment extends BaseTimeEntity {
     public void softDelete() {
         if (!this.isDeleted) {
             this.isDeleted = true;
-            this.deletedAt = LocalDateTime.now();
         }
     }
 
