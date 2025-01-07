@@ -45,11 +45,11 @@ public class Webtoon extends BaseTimeEntity {
     @Column(nullable = false, name = "average_star")
     private float averageStar;
 
-    @Column(nullable = false)
+    @Column(name = "episode_count", nullable = false)
     @ColumnDefault("0")
     private int episodeCount;
 
-    @Column(nullable = false)
+    @Column(name = "interest_count", nullable = false)
     @ColumnDefault("0")
     private int interestCount;
 
@@ -72,13 +72,13 @@ public class Webtoon extends BaseTimeEntity {
 
     public static Webtoon addOf(CreateWebtoonReqDto dto, Member member) {
         return Webtoon.builder()
-                .title(dto.title())
-                .thumbnail(dto.thumbnail())
-                .prologue(dto.prologue())
-                .story(dto.story())
-                .description(dto.description())
-                .member(member)
-                .build();
+            .title(dto.title())
+            .thumbnail(dto.thumbnail())
+            .prologue(dto.prologue())
+            .story(dto.story())
+            .description(dto.description())
+            .member(member)
+            .build();
     }
 
     public void updateOf(UpdateWebtoonReqDto dto) {

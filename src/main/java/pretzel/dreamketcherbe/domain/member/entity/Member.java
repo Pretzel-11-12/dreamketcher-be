@@ -50,6 +50,7 @@ public class Member extends BaseTimeEntity {
     @Column(name = "image_uri")
     private String imageUrl;
 
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Role role;
 

@@ -6,6 +6,7 @@ import org.hibernate.annotations.ColumnDefault;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 
+@Table(name = "management_episode")
 @Entity
 @Getter
 public class ManagementEpisode extends BaseTimeEntity {

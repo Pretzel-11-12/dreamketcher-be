@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 
+@Table(name = "reason")
 @Entity
 @Getter
 public class Reason extends BaseTimeEntity {
