@@ -1,11 +1,8 @@
 package pretzel.dreamketcherbe.domain.comment.controller;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.query.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,7 +49,7 @@ public class CommentController {
     /**
      * 댓글 삭제
      */
-    @PostMapping("/delete")
+    @PostMapping("/{commentId}/delete")
     public ResponseEntity<Void> deleteComment(@Auth Long memberId, @PathVariable Long episodeId,
         @PathVariable Long commentId) {
         commentService.deleteComment(memberId, episodeId, commentId);
@@ -88,7 +85,7 @@ public class CommentController {
     /**
      * 대댓글 삭제
      */
-    @PostMapping("/{commentId}/recomment/delete")
+    @PostMapping("/{commentId}/recomment/{recommentId}/delete")
     public ResponseEntity<Void> deleteRecomment(@Auth Long memberId, @PathVariable Long episodeId,
         @PathVariable Long commentId, @PathVariable Long recommentId) {
         commentService.deleteRecomment(memberId, episodeId, commentId, recommentId);
