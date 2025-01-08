@@ -24,9 +24,6 @@ public class SerializationPeriod {
     private Long id;
 
     @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false)
     private LocalDate startDate;
 
     @Column(nullable = false)
