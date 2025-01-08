@@ -48,7 +48,7 @@ oauth2:
   google:
     client-id: ENC(vhNdqJPdy0LD2kh0vNUeslcDhzb544FsK21PdaAWS88/qRc2+VQ3Yzet7Di3pmeqo9OdsdPDc/Ztrd7f7bEKPYAAMwWostDKXAbDx0tQvbZR/p1Y2+vG7Q==)
     client-secret: ENC(MAr5Iz2rjVyZTXlVuH8NJGKi1bGtOKNUPTVn1f2DsvHbTd9ep+Dd7PylgadG4AVe)
-    redirect-uri: ENC(As1+r3EPOcoQpyrVQ7/LURksyRL6yUSa9Ac0HFgLnQm4MghgVbCuPoSZia9DdVhN)
+    redirect-uri: ENC(X/jOs+7oDGhp9FNAi4NrwjwPYcKD0YnkViBTzcjs/vAsdIyDeENLQJkIYzvWYYos)
     grant-type: authorization_code
     scope: email
 
