@@ -1,5 +1,7 @@
 package pretzel.dreamketcherbe.domain.episode.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -96,10 +98,11 @@ public class EpisodeController {
      * 에피소드 컨텐츠 등록
      */
     @PostMapping("/content")
-    public ResponseEntity<?> uploadEpisodeContent(@Auth Long memberId,
+    public ResponseEntity<String> uploadEpisodeContent(@Auth Long memberId,
         @PathVariable Long webtoonId,
-        @RequestParam("content") List<MultipartFile> content) {
-        List<String> contentUrl = episodeService.uploadContent(webtoonId, memberId, content);
+        @RequestParam("content") List<MultipartFile> content, ObjectMapper objectMapper) {
+        String contentUrl = episodeService.uploadContent(webtoonId, memberId, content,
+            objectMapper);
 
         return ResponseEntity.ok(contentUrl);
     }
@@ -108,14 +111,15 @@ public class EpisodeController {
      * 에피소드 컨텐츠 수정
      */
     @PutMapping("/{episodeId}/content")
-    public ResponseEntity<List<String>> updateEpisodeContent(@Auth Long memberId,
+    public ResponseEntity<String> updateEpisodeContent(@Auth Long memberId,
         @PathVariable("episodeId") Long episodeId,
-        @RequestParam("existingUrls") List<String> existingUrls,
+        @RequestParam("existingUrls") String existingUrls,
         @RequestParam("newImages") List<MultipartFile> newImages,
         @RequestParam("replaceIndices") List<Integer> replaceIndices,
-        @RequestParam("folderName") String folderName) {
-        List<String> updatedContentUrls = episodeService.updateContent(existingUrls, newImages,
-            replaceIndices, folderName);
+        @RequestParam("folderName") String folderName,
+        ObjectMapper objectMapper) {
+        String updatedContentUrls = episodeService.updateContent(existingUrls, newImages,
+            replaceIndices, folderName, objectMapper);
 
         return ResponseEntity.ok(updatedContentUrls);
     }
@@ -128,7 +132,7 @@ public class EpisodeController {
     public ResponseEntity<Void> updateEpisode(@Auth Long memberId,
         @PathVariable("webtoonId") Long webtoonId,
         @PathVariable("episodeId") Long episodeId,
-        @RequestBody @Valid UpdateEpisodeReqDto request) {
+        @RequestBody @Valid UpdateEpisodeReqDto request) throws JsonProcessingException {
         episodeService.updateEpisode(memberId, webtoonId, episodeId, request);
 
         return ResponseEntity.ok().build();
@@ -155,7 +159,7 @@ public class EpisodeController {
         , Model model,
         HttpServletRequest request, HttpServletResponse response) {
         EpisodeResDto episode = episodeService.getEpisode(webtoonId, episodeId, request, response);
-        
+
         return ResponseEntity.ok(episode);
     }
 
