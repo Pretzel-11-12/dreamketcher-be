@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static pretzel.dreamketcherbe.domain.episode.entity.QEpisode.episode;
+import static pretzel.dreamketcherbe.domain.episode.entity.QEpisodeStar.episodeStar;
 import static pretzel.dreamketcherbe.domain.member.entity.QInterestedWebtoon.interestedWebtoon;
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QGenre.genre;
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QLike.like;
@@ -45,7 +46,12 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
                     ),
                     webtoon.episodeCount,
                     webtoon.averageStar,
-                    episode.id.countDistinct().as("numOfStars"),
+                    ExpressionUtils.as(
+                        JPAExpressions.select(episodeStar.id.countDistinct())
+                            .from(episodeStar)
+                            .where(episodeStar.webtoon.id.eq(webtoon.id)),
+                        "numOfStars"
+                    ),
                     like.id.countDistinct().as("likeCount"),
                     episode.viewCount.sum().as("viewCount"),
                     interestedWebtoon.id.countDistinct().as("interestedCount"),

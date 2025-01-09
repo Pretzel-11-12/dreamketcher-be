@@ -16,19 +16,19 @@ public class GoogleOAuthClient {
     private final GoogleProperties googleProperties;
     private final GoogleApiClient googleApiClient;
 
-    public GoogleUserInfo getOAuthInfo(String code) {
-        GoogleToken googleToken = googleApiClient.fetchToken(params(code));
+    public GoogleUserInfo getOAuthInfo(String code, String redirectUri) {
+        GoogleToken googleToken = googleApiClient.fetchToken(params(code, redirectUri));
         GoogleUserInfo googleUserInfo = googleApiClient.fetchUserInfo(
             "Bearer " + googleToken.accessToken());
         return googleUserInfo;
     }
 
-    private MultiValueMap<String, String> params(String code) {
+    private MultiValueMap<String, String> params(String code, String redirectUri) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("code", code);
         params.add("client_id", googleProperties.clientId());
         params.add("client_secret", googleProperties.clientSecret());
-        params.add("redirect_uri", googleProperties.redirectUri());
+        params.add("redirect_uri", redirectUri);
         params.add("grant_type", googleProperties.grantType());
         return params;
     }
