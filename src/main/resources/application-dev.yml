@@ -49,7 +49,7 @@ oauth2:
     client-id: ENC(vhNdqJPdy0LD2kh0vNUeslcDhzb544FsK21PdaAWS88/qRc2+VQ3Yzet7Di3pmeqo9OdsdPDc/Ztrd7f7bEKPYAAMwWostDKXAbDx0tQvbZR/p1Y2+vG7Q==)
     client-secret: ENC(MAr5Iz2rjVyZTXlVuH8NJGKi1bGtOKNUPTVn1f2DsvHbTd9ep+Dd7PylgadG4AVe)
     local-redirect-uri: ENC(pLykbTrYbz6AmYQxPiCarLTv4bjd1rpuZ0p/nTyhH+I7+18EVS9rsW8cbI5hdmiH)
-    dev-redirect-uri: ENC(2blto1QjfWa/IWy/kxETB3sOz1YWMMern5SPhzFOHmMp0XGUgkztBcXCVbHGrzV5)
+    dev-redirect-uri: ENC(E386Q4Dhw2YeoJHzoQQrzl4wg6LOvSLj4Ono7LUrLOC49FIWRaiNVjM7O36QMSEl)
     local-uri: ENC(iGr2gAMAk22Cl6Qt0j31IRw2js0EOR8V74HA2wR8Z6o=)
     grant-type: authorization_code
     scope: email
