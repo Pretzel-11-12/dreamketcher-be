@@ -34,7 +34,7 @@ spring:
     secure: false
 
   cors:
-    allowed-origins: ENC(zJmkIF+qGPgypXK7LWSKAsgerRQX0xFMDmPeCzVAtvmwbYDoIiyXFU8n5sm8VNNCqhCr0cBVuRnCyGGnFK4iHxK46p8baoK1TKlzyYGSFWL6T8EtUPmMqfgXzCyr2ADNxFjlnS6qhVLFH3rfbdN4/Q==zJmkIF+qGPgypXK7LWSKAsgerRQX0xFMDmPeCzVAtvmwbYDoIiyXFU8n5sm8VNNCqhCr0cBVuRnCyGGnFK4iHxK46p8baoK1TKlzyYGSFWL6T8EtUPmMqfgXzCyr2ADNxFjlnS6qhVLFH3rfbdN4/Q==)
+    allowed-origins: ENC(eFXeCNPRsACbbLselIRwZ+e67MA+4JPq89uE9LKWE4Y/srmDKsbYwtRdaRMDyNQsTLI4X6owg7Uh3D8ubK7g/a/eAVgiNybphbFJQWLP2q3Ko/pciOOW+Z4W1DCh/wA7jlH2XPXHsn2Aogmb1wNR0w==)
     allowed-methods: ENC(fn8bwf3CxhfmwR+c4KDZtX8GJ5dm2eEiRDowm3G2W2Fw9hv7Ad4pDHsUu6sU7wzi)
 
   springdoc:
