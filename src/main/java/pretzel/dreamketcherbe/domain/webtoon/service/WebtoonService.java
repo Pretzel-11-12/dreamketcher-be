@@ -159,12 +159,12 @@ public class WebtoonService {
         try {
 
             List<String> oldPrologue = objectMapper.readValue(oldPrologueJson,
-                new TypeReference<List<String>>() {
+                new TypeReference<>() {
                 });
 
             List<String> updatedPrologueUrls = s3Service.updatePartialImages(oldPrologue,
                 newPrologue, replaceIndex, folderName);
-            
+
             return objectMapper.writeValueAsString(updatedPrologueUrls);
         } catch (Exception e) {
             throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
