@@ -1,6 +1,8 @@
 package pretzel.dreamketcherbe.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.auth.dto.TokenResponse;
@@ -14,6 +16,7 @@ import pretzel.dreamketcherbe.domain.auth.utils.NicknameGenerator;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -22,6 +25,9 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final TokenProvider tokenprovider;
     private final TokenRepository tokenRepository;
+
+    @Value("${oauth2.google.local-uri}")
+    private String localUri;
 
     @Transactional
     public TokenResponse loginOrRegister(GoogleUserInfo googleUserInfo) {
@@ -88,5 +94,11 @@ public class AuthService {
             return;
         }
         throw new AuthException(AuthExceptionType.DISMATCHED_AUTHORIZATION);
+    }
+
+    public boolean isLocalBaseUrl(String baseUrl) {
+        log.info("===========================localRedirectUrl: {}===========================",
+            localUri);
+        return baseUrl.trim().equalsIgnoreCase(localUri.trim());
     }
 }

@@ -23,13 +23,10 @@ public class SerializationPeriod {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @Column(nullable = false)
-//    private String name;
-
-    @Column(name = "start_date", nullable = false)
+    @Column(nullable = false)
     private LocalDate startDate;
 
-    @Column(name = "end_date", nullable = false)
+    @Column(nullable = false)
     private LocalDate endDate;
 
     @OneToOne
