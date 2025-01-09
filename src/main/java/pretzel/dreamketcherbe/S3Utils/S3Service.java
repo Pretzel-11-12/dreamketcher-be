@@ -13,7 +13,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -81,7 +80,7 @@ public class S3Service {
      * 이미지 파일 수정
      */
     public String imageUpdate(String oldImage, MultipartFile newImage, String folderName) {
-        String newImageUrl = null;
+        String newImageUrl;
         String newImageKey = null;
         try {
             newImageUrl = imageUpload(newImage, folderName);
@@ -135,8 +134,7 @@ public class S3Service {
                 updatedImageUrls.set(replaceIndex, newImageUrl);
             }
 
-            for (int i = 0; i < successUpdatedIndices.size(); i++) {
-                int replaceIndex = successUpdatedIndices.get(i);
+            for (int replaceIndex : successUpdatedIndices) {
                 deleteImage(existingImageUrls.get(replaceIndex));
             }
         } catch (Exception e) {

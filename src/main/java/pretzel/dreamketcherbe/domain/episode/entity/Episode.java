@@ -37,7 +37,6 @@ public class Episode extends BaseTimeEntity {
     @Column(nullable = false)
     private String thumbnail;
 
-    @ElementCollection
     @Column(nullable = false)
     private List<String> content;
 
