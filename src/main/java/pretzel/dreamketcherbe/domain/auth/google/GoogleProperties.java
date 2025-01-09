@@ -6,8 +6,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record GoogleProperties(
     String clientId,
     String clientSecret,
-    String redirectUri,
-    String grantType
+    String localRedirectUri,
+    String devRedirectUri,
+    String grantType,
+    String scope
 ) {
 
 }
