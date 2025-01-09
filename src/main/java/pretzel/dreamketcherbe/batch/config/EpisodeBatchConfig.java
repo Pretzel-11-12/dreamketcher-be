@@ -41,7 +41,7 @@ public class EpisodeBatchConfig {
         }
 
         return new JpaPagingItemReaderBuilder<BatchEpisodeDto>()
-            .name("episodeItmeReader")
+            .name("episodeItemReader")
             .entityManagerFactory(entityManagerFactoryBean.getObject())
             .queryString(
                 "SELECT e FROM episodes e WHERE e.publishedAt = :today AND e.published = false")
