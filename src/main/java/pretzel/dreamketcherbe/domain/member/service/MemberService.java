@@ -1,18 +1,28 @@
 package pretzel.dreamketcherbe.domain.member.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pretzel.dreamketcherbe.common.dto.PageReqDto;
+import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
-import pretzel.dreamketcherbe.domain.member.dto.NicknameRequest;
+import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonSimpleResponse;
 import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
+import pretzel.dreamketcherbe.domain.member.dto.UpdateProfileRequest;
+import pretzel.dreamketcherbe.domain.member.dto.WorkResDto;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
+import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
+import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
+import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
+import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,6 +31,8 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final InterestedWebtoonRepository interestedWebtoonRepository;
+    private final WebtoonRepository webtoonRepository;
+    private final WebtoonGenreRepository webtoonGenreRepository;
 
     public SelfInfoResponse getSelfInfo(Long memberId) {
         Member member = memberRepository.findById(memberId)
@@ -30,28 +42,74 @@ public class MemberService {
     }
 
     @Transactional
-    public Object updateProfile(Long memberId, NicknameRequest nicknameRequest) {
+    public void updateProfile(Long memberId, UpdateProfileRequest updateProfileRequest) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        if (memberRepository.existsByNickname(nicknameRequest.nickname())) {
-            throw new MemberException(MemberExceptionType.NICKNAME_ALREADY_EXISTS);
+        String newNickname = updateProfileRequest.nickname();
+        String newBusinessEmail = updateProfileRequest.businessEmail();
+        String newShortIntroduction = updateProfileRequest.shortIntroduction();
+        String newImageUrl = updateProfileRequest.imageUrl();
+
+        if (!newNickname.equals(member.getNickname())) {
+            if (memberRepository.existsByNicknameAndIdNot(newNickname, memberId)) {
+                throw new MemberException(MemberExceptionType.NICKNAME_ALREADY_EXISTS);
+            }
+            member.updateNickname(newNickname);
         }
 
-        member.updateNickname(nicknameRequest.nickname());
+        if (newBusinessEmail != null && !newBusinessEmail.isBlank()
+            && !newBusinessEmail.equals(member.getBusinessEmail())) {
+            if (memberRepository.existsByBusinessEmailAndIdNot(newBusinessEmail, memberId)) {
+                throw new MemberException(MemberExceptionType.BUSINESS_EMAIL_ALREADY_EXISTS);
+            }
+            member.updateBusinessEmail(newBusinessEmail);
+        }
 
-        return memberRepository.save(member);
+        if (newShortIntroduction != null) {
+            member.updateShortIntroduction(newShortIntroduction);
+        }
+
+        if (newImageUrl != null) {
+            member.updateImageUrl(newImageUrl);
+        }
+
+        memberRepository.save(member);
     }
 
-    public List<InterestedWebtoonResponse> getFavoriteWebtoon(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+    public InterestedWebtoonSimpleResponse getFavoriteWebtoon(Long memberId, Long WebtoonId) {
+
+        InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findByWebtoonIdAndMemberId(
+                WebtoonId, memberId)
+            .orElseThrow(
+                () -> new MemberException(MemberExceptionType.INTERESTED_WEBTOON_NOT_FOUND));
+
+        return InterestedWebtoonSimpleResponse.from(interestedWebtoon);
+    }
+
+    public List<InterestedWebtoonResponse> getAllFavoriteWebtoon(Long memberId) {
 
         List<InterestedWebtoon> favoriteWebtoons = interestedWebtoonRepository.findAllByMemberId(
-            member);
+            memberId);
 
         return favoriteWebtoons.stream()
-            .map(InterestedWebtoonResponse::from)
+            .map(interestedWebtoon -> {
+                Webtoon webtoon = interestedWebtoon.getWebtoon();
+                Member author = webtoon.getMember();
+
+                List<String> genres = webtoonGenreRepository.findByWebtoon(webtoon)
+                    .stream()
+                    .map(WebtoonGenre -> WebtoonGenre.getGenre().getName())
+                    .collect(Collectors.toList());
+
+                return InterestedWebtoonResponse.from(
+                    interestedWebtoon,
+                    author.getNickname(),
+                    webtoon.getEpisodeCount(),
+                    webtoon.getUpdatedAt(),
+                    genres
+                );
+            })
             .toList();
     }
 
@@ -60,19 +118,31 @@ public class MemberService {
     }
 
     @Transactional
-    public void deleteFavoriteWebtoon(Long memberId, Long interestedWebtoonId) {
+    public void deleteFavoriteWebtoon(Long memberId, Long WebtoonId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findById(
-                interestedWebtoonId)
+        InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findByWebtoonIdAndMemberId(
+                WebtoonId, memberId)
             .orElseThrow(
                 () -> new MemberException(MemberExceptionType.INTERESTED_WEBTOON_NOT_FOUND));
 
-        if (!interestedWebtoon.getMember().equals(member)) {
+        Webtoon webtoon = webtoonRepository.findById(interestedWebtoon.getWebtoon().getId())
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        if (!interestedWebtoon.getMember().getId().equals(memberId)) {
             throw new MemberException(MemberExceptionType.MEMBER_NOT_AUTHORIZED);
         }
 
         interestedWebtoonRepository.delete(interestedWebtoon);
+
+        webtoon.decrementInterestCount(1);
+        webtoonRepository.save(webtoon);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResDto<WorkResDto> getAllWorks(final Long memberId, final String status,
+        final PageReqDto pageReqDto) {
+        return memberRepository.findAllWorkWithPage(memberId, status, pageReqDto);
     }
 }

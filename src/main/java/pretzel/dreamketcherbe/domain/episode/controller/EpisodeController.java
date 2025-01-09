@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.common.annotation.Auth;
+import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeLikeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
@@ -55,20 +58,78 @@ public class EpisodeController {
      */
     @PostMapping("/uploads")
     public ResponseEntity<CreateEpisodeResDto> createEpisode(@Auth Long memberId,
+        @PathVariable("webtoonId") Long webtoonId,
         @RequestBody @Valid CreateEpisodeReqDto request) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(episodeService.createEpisode(memberId, request));
+            .body(episodeService.createEpisode(memberId, webtoonId, request));
     }
+
+    /**
+     * 에피소드 썸네일 등록
+     */
+    @PostMapping("/thumbnail")
+    public ResponseEntity<String> uploadEpisodeThumbnail(@Auth Long memberId,
+        @PathVariable Long webtoonId,
+        @RequestParam("thumbnail") MultipartFile thumbnail) {
+        String thumbnailUrl = episodeService.uploadThumbnail(webtoonId, memberId, thumbnail);
+
+        return ResponseEntity.ok(thumbnailUrl);
+    }
+
+    /**
+     * 에피소드 썸네일 수정
+     */
+    @PutMapping("/{episodeId}/thumbnail")
+    public ResponseEntity<String> updateEpisodeThumbnail(@Auth Long memberId,
+        @PathVariable("episodeId") Long episodeId,
+        @RequestParam("oldThumbnail") String oldThumbnail,
+        @RequestParam("newThumbnail") MultipartFile newThumbnail,
+        @RequestParam("folderName") String folderName) {
+        String thumbnailUrl = episodeService.updateThumbnail(oldThumbnail, newThumbnail,
+            folderName);
+
+        return ResponseEntity.ok(thumbnailUrl);
+    }
+
+    /**
+     * 에피소드 컨텐츠 등록
+     */
+    @PostMapping("/content")
+    public ResponseEntity<?> uploadEpisodeContent(@Auth Long memberId,
+        @PathVariable Long webtoonId,
+        @RequestParam("content") List<MultipartFile> content) {
+        List<String> contentUrl = episodeService.uploadContent(webtoonId, memberId, content);
+
+        return ResponseEntity.ok(contentUrl);
+    }
+
+    /**
+     * 에피소드 컨텐츠 수정
+     */
+    @PutMapping("/{episodeId}/content")
+    public ResponseEntity<List<String>> updateEpisodeContent(@Auth Long memberId,
+        @PathVariable("episodeId") Long episodeId,
+        @RequestParam("existingUrls") List<String> existingUrls,
+        @RequestParam("newImages") List<MultipartFile> newImages,
+        @RequestParam("replaceIndices") List<Integer> replaceIndices,
+        @RequestParam("folderName") String folderName) {
+        List<String> updatedContentUrls = episodeService.updateContent(existingUrls, newImages,
+            replaceIndices, folderName);
+
+        return ResponseEntity.ok(updatedContentUrls);
+    }
+
 
     /**
      * 에피소드 수정
      */
     @PutMapping("/{episodeId}")
     public ResponseEntity<Void> updateEpisode(@Auth Long memberId,
+        @PathVariable("webtoonId") Long webtoonId,
         @PathVariable("episodeId") Long episodeId,
         @RequestBody @Valid UpdateEpisodeReqDto request) {
-        episodeService.updateEpisode(memberId, episodeId, request);
+        episodeService.updateEpisode(memberId, webtoonId, episodeId, request);
 
         return ResponseEntity.ok().build();
     }
@@ -78,8 +139,9 @@ public class EpisodeController {
      */
     @DeleteMapping("/{episodeId}")
     public ResponseEntity<Void> deleteEpisode(@Auth Long memberId,
+        @PathVariable("webtoonId") Long webtoonId,
         @PathVariable("episodeId") Long episodeId) {
-        episodeService.deleteEpisode(memberId, episodeId);
+        episodeService.deleteEpisode(memberId, webtoonId, episodeId);
 
         return ResponseEntity.ok().build();
     }
@@ -88,13 +150,13 @@ public class EpisodeController {
      * 에피소드 상세 조회
      */
     @GetMapping("/{episodeId}")
-    public String getEpisode(@PathVariable("episodeId") Long episodeId, Model model,
+    public ResponseEntity<EpisodeResDto> getEpisode(@PathVariable("episodeId") Long episodeId,
+        @PathVariable("webtoonId") Long webtoonId
+        , Model model,
         HttpServletRequest request, HttpServletResponse response) {
-        EpisodeResDto episode = episodeService.getEpisode(episodeId, request, response);
-        episodeService.increaseViewCount(episodeId);
-        model.addAttribute("episode", episode);
-
-        return "episode-view";
+        EpisodeResDto episode = episodeService.getEpisode(webtoonId, episodeId, request, response);
+        
+        return ResponseEntity.ok(episode);
     }
 
     /**
@@ -118,5 +180,35 @@ public class EpisodeController {
         episodeService.deleteEpisodeStar(memberId, episodeId);
 
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 에피소드 좋아요
+     */
+    @PostMapping("/{episodeId}/like")
+    public ResponseEntity<CreateEpisodeLikeResDto> likeEpisode(@Auth Long memberId,
+        @PathVariable("episodeId") Long episodeId) {
+        CreateEpisodeLikeResDto like = episodeService.likeEpisode(memberId, episodeId);
+
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(like);
+    }
+
+    /**
+     * 좋아요 수 가져오기
+     */
+    @GetMapping("/{episodeId}/like-count")
+    public ResponseEntity<Integer> getLikeCount(@PathVariable("episodeId") Long episodeId) {
+        try {
+            String likeCountKey = EpisodeService.EPISODE_LIKE_COUNT_KEY_PREFIX + episodeId;
+            String likeCount = episodeService.redisTemplate.opsForValue().get(likeCountKey);
+            int likeCountInt = likeCount == null ? episodeService.getLikeCountFallback(episodeId)
+                : Integer.parseInt(likeCount);
+            return ResponseEntity.ok(likeCountInt);
+        } catch (Exception e) {
+            int fallbackCount = episodeService.getLikeCountFallback(episodeId);
+            return ResponseEntity.ok(fallbackCount);
+        }
     }
 }

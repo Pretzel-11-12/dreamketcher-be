@@ -22,4 +22,6 @@ public interface EpisodeRepository extends JpaRepository<Episode, Long> {
     Page<Episode> findByWebtoonIdOrderByPublishedAtAsc(Long webtoonId, Pageable pageable);
 
     Page<Episode> findAllByWebtoonId(Long webtoonId, Pageable pageable);
+
+    Long countByWebtoonId(Long webtoonId);
 }
