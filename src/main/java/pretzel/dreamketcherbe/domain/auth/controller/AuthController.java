@@ -2,6 +2,7 @@ package pretzel.dreamketcherbe.domain.auth.controller;
 
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -17,6 +18,7 @@ import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.common.cookie.CookieHandler;
 import pretzel.dreamketcherbe.domain.auth.dto.TokenResponse;
 import pretzel.dreamketcherbe.domain.auth.service.AuthFacadeService;
+import pretzel.dreamketcherbe.domain.auth.service.BaseUrlExtractorService;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -27,13 +29,17 @@ public class AuthController {
 
     private final AuthFacadeService authFacadeService;
     private final CookieHandler cookieHandler;
+    private final BaseUrlExtractorService baseUrlExtractorService;
 
     @GetMapping("/{socialType}/callback")
     public ResponseEntity<TokenResponse> loginOrRegister(
         @PathVariable("socialType") String socialType,
-        @RequestParam("code") String code
+        @RequestParam("code") String code,
+        HttpServletRequest request
     ) {
-        TokenResponse tokenResponse = authFacadeService.loginOrRegister(code);
+        String baseUrl = baseUrlExtractorService.extractBaseUrl(request);
+
+        TokenResponse tokenResponse = authFacadeService.loginOrRegister(code, baseUrl);
         ResponseCookie cookie = cookieHandler.createCookie(COOKIE_REFRESH_TOKEN,
             tokenResponse.refreshToken());
         return ResponseEntity.status(HttpStatus.OK)
