@@ -22,8 +22,8 @@ import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentNotRecommendatio
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
-import pretzel.dreamketcherbe.domain.comment.dto.RecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.NotRecommendationResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.RecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 import pretzel.dreamketcherbe.domain.comment.entity.NotRecommendation;
 import pretzel.dreamketcherbe.domain.comment.entity.Recommendation;
@@ -243,6 +243,7 @@ public class CommentService {
             recomments.getTotalElements()
         );
     }
+
     /**
      * 댓글 추천
      */
