@@ -9,7 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public record UpdateEpisodeReqDto(
     @NotBlank String title,
     @NotBlank String thumbnail,
-    @NotEmpty String content,
+    @NotBlank String content,
     @NotBlank String authorNote,
     @NotNull @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate publishedAt
 ) {
