@@ -2,8 +2,15 @@ package pretzel.dreamketcherbe.domain.comment.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pretzel.dreamketcherbe.common.dto.PageReqDto;
+import pretzel.dreamketcherbe.common.dto.PageResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
@@ -126,4 +133,28 @@ public class CommentService {
         commentRepository.save(findComment);
     }
 
+    /**
+     * 댓글 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public PageResDto<CommentResDto> getComments(Long episodeId, PageReqDto pageReqDto) {
+        Episode findEpisode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        Pageable pageable = PageRequest.of(
+            pageReqDto.getPage(),
+            pageReqDto.getSize(),
+            Sort.by(Sort.Direction.fromString(pageReqDto.getOrder()), "createdAt")
+        );
+
+        Page<Comment> comments = commentRepository.findByEpisodeId(episodeId,
+            pageable);
+
+        return new PageResDto<>(
+            comments.getContent().stream()
+                .map(CommentResDto::of)
+                .toList(),
+            comments.getTotalElements()
+        );
+    }
 }
