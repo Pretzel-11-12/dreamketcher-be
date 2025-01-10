@@ -8,7 +8,7 @@ import java.util.List;
 public record CreateWebtoonReqDto(
     @NotBlank String title,
     @NotBlank String thumbnail,
-    @NotBlank String prologue,
+    @NotEmpty List<String> prologue,
     @NotBlank String story,
     @NotBlank String description
 ) {
