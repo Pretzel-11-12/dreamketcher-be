@@ -15,6 +15,7 @@ import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.RecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 import pretzel.dreamketcherbe.domain.comment.entity.Recomment;
 import pretzel.dreamketcherbe.domain.comment.exception.CommentException;
@@ -77,6 +78,31 @@ public class CommentService {
     }
 
     /**
+     * 댓글 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public PageResDto<CommentResDto> getComments(Long episodeId, PageReqDto pageReqDto) {
+        Episode findEpisode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        Pageable pageable = PageRequest.of(
+            pageReqDto.getPage(),
+            pageReqDto.getSize(),
+            Sort.by(Sort.Direction.fromString(pageReqDto.getOrder()), "createdAt")
+        );
+
+        Page<Comment> comments = commentRepository.findByEpisodeId(episodeId,
+            pageable);
+
+        return new PageResDto<>(
+            comments.getContent().stream()
+                .map(CommentResDto::of)
+                .toList(),
+            comments.getTotalElements()
+        );
+    }
+
+    /**
      * 답글 생성
      */
     @Transactional
@@ -134,27 +160,27 @@ public class CommentService {
     }
 
     /**
-     * 댓글 목록 조회
+     * 답글 목록 조회
      */
     @Transactional(readOnly = true)
-    public PageResDto<CommentResDto> getComments(Long episodeId, PageReqDto pageReqDto) {
+    public PageResDto<RecommentResDto> getRecomments(Long episodeId, Long commentId,
+        PageReqDto pageReqDto) {
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
-        Pageable pageable = PageRequest.of(
-            pageReqDto.getPage(),
-            pageReqDto.getSize(),
-            Sort.by(Sort.Direction.fromString(pageReqDto.getOrder()), "createdAt")
-        );
+        Comment findComment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
 
-        Page<Comment> comments = commentRepository.findByEpisodeId(episodeId,
-            pageable);
+        Pageable pageable = PageRequest.of(pageReqDto.getPage(), pageReqDto.getSize());
+
+        Page<Recomment> recomments = recommentRepository.findActiveRecommentsByParentCommentId(
+            episodeId, pageable);
 
         return new PageResDto<>(
-            comments.getContent().stream()
-                .map(CommentResDto::of)
+            recomments.getContent().stream()
+                .map(RecommentResDto::of)
                 .toList(),
-            comments.getTotalElements()
+            recomments.getTotalElements()
         );
     }
 }

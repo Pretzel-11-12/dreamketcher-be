@@ -21,6 +21,7 @@ import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.RecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.service.CommentService;
 
 @Slf4j
@@ -91,5 +92,23 @@ public class CommentController {
         @PathVariable Long commentId, @PathVariable Long recommentId) {
         commentService.deleteRecomment(memberId, episodeId, commentId, recommentId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 대댓글 목록 조회
+     */
+    @GetMapping("/{commentId}/recomments")
+    public ResponseEntity<PageResDto<RecommentResDto>> getRecomments(
+        @PathVariable Long episodeId,
+        @PathVariable Long commentId,
+        @RequestParam int page,
+        @RequestParam int size,
+        @RequestParam(defaultValue = "DESC") String order) {
+
+        PageReqDto pageReqDto = PageReqDto.of(null, page, size, order);
+
+        PageResDto<RecommentResDto> response = commentService.getRecomments(episodeId, commentId,
+            pageReqDto);
+        return ResponseEntity.ok(response);
     }
 }
