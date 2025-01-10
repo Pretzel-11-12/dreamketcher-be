@@ -1,5 +1,7 @@
 package pretzel.dreamketcherbe.domain.webtoon.entity;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import java.util.List;
 import lombok.AccessLevel;
@@ -28,9 +30,8 @@ public class Webtoon extends BaseTimeEntity {
     @Column(nullable = false)
     private String thumbnail;
 
-    @ElementCollection
     @Column(nullable = false)
-    private List<String> prologue;
+    private String prologue;
 
     @Column(nullable = false)
     private String story;
@@ -58,7 +59,7 @@ public class Webtoon extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    private Webtoon(String title, String thumbnail, List<String> prologue, String story,
+    private Webtoon(String title, String thumbnail, String prologue, String story,
         String status,
         String description, Member member) {
         this.title = title;
@@ -70,23 +71,30 @@ public class Webtoon extends BaseTimeEntity {
         this.member = member;
     }
 
-    public static Webtoon addOf(CreateWebtoonReqDto dto, Member member) {
-        return Webtoon.builder()
+    public static Webtoon addOf(CreateWebtoonReqDto dto, Member member, ObjectMapper objectMapper) {
+        try {
+            return Webtoon.builder()
                 .title(dto.title())
                 .thumbnail(dto.thumbnail())
-                .prologue(dto.prologue())
+                .prologue(objectMapper.writeValueAsString(dto.prologue()))
                 .story(dto.story())
                 .description(dto.description())
                 .member(member)
                 .build();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("직렬화에 실패하였습니다.", e);
+        }
     }
 
-    public void updateOf(UpdateWebtoonReqDto dto) {
-        this.title = dto.title();
-        this.thumbnail = dto.thumbnail();
-        this.prologue = dto.prologue();
-        this.story = dto.story();
-        this.description = dto.description();
+    public void updateOf(UpdateWebtoonReqDto dto, ObjectMapper objectMapper) {
+        try {
+            this.title = dto.title();
+            this.thumbnail = dto.thumbnail();
+            this.prologue = objectMapper.writeValueAsString(dto.prologue());
+            this.description = dto.description();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("직렬화에 실패하였습니다.", e);
+        }
     }
 
     public void updateStatus(String status) {

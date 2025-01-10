@@ -1,5 +1,8 @@
 package pretzel.dreamketcherbe.domain.episode.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -137,7 +140,8 @@ public class EpisodeService {
             Long episodeCount = episodeRepository.countByWebtoonId(webtoonId);
             int nextEpisodeNo = episodeCount.intValue() + 1;
 
-            Episode newEpisode = Episode.addOf(request, nextEpisodeNo, findWebtoon, findMember);
+            Episode newEpisode = Episode.addOf(request, nextEpisodeNo, findWebtoon, findMember,
+                new ObjectMapper());
 
             episodeRepository.save(newEpisode);
 
@@ -177,13 +181,15 @@ public class EpisodeService {
     /**
      * 에피소드 컨텐츠 등록
      */
-    public List<String> uploadContent(Long webtoonId, Long memberId,
-        List<MultipartFile> content) {
+    public String uploadContent(Long webtoonId, Long memberId,
+        List<MultipartFile> content, ObjectMapper objectMapper) {
         try {
             String folderName =
                 "episode/" + memberId + "/" + webtoonId + "/" + "/content";
 
-            return s3Service.imagesUpload(content, folderName);
+            List<String> contentUrls = s3Service.imagesUpload(content, folderName);
+
+            return objectMapper.writeValueAsString(contentUrls);
         } catch (Exception e) {
             throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
         }
@@ -192,11 +198,18 @@ public class EpisodeService {
     /**
      * 에피소드 컨텐츠 수정
      */
-    public List<String> updateContent(List<String> existingUrls, List<MultipartFile> newImages,
-        List<Integer> replaceIndices, String folderName) {
+    public String updateContent(String existingUrlsJson, List<MultipartFile> newImages,
+        List<Integer> replaceIndices, String folderName, ObjectMapper objectMapper) {
         try {
-            return s3Service.updatePartialImages(existingUrls, newImages, replaceIndices,
+            List<String> oldContentUrls = objectMapper.readValue(existingUrlsJson,
+                new TypeReference<>() {
+                });
+
+            List<String> updateContentUrls = s3Service.updatePartialImages(oldContentUrls,
+                newImages, replaceIndices,
                 folderName);
+
+            return objectMapper.writeValueAsString(updateContentUrls);
         } catch (Exception e) {
             throw new S3Exception(S3ExceptionType.IMAGE_NOT_FOUND);
         }
@@ -207,7 +220,7 @@ public class EpisodeService {
      */
     @Transactional
     public void updateEpisode(Long memberId, Long webtoonId, Long episodeId,
-        UpdateEpisodeReqDto request) {
+        UpdateEpisodeReqDto request) throws JsonProcessingException {
 
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
@@ -223,7 +236,7 @@ public class EpisodeService {
         findEpisode.isAuthor(memberId);
 
         // 에피소드 수정
-        findEpisode.updateOf(request);
+        findEpisode.updateOf(request, new ObjectMapper());
         episodeRepository.save(findEpisode);
     }
 
