@@ -10,7 +10,7 @@ public record EpisodeResDto(
     int no,
     String title,
     String thumbnail,
-    List<String> content,
+    String content,
     String authorNote,
     long viewCount
 ) {

@@ -1,5 +1,7 @@
 package pretzel.dreamketcherbe.domain.episode.entity;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import java.util.List;
 import lombok.AccessLevel;
@@ -37,9 +39,8 @@ public class Episode extends BaseTimeEntity {
     @Column(nullable = false)
     private String thumbnail;
 
-    @ElementCollection
     @Column(nullable = false)
-    private List<String> content;
+    private String content;
 
     @Column(nullable = false, name = "author_note")
     private String authorNote;
@@ -75,7 +76,7 @@ public class Episode extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    public Episode(int no, String title, String thumbnail, List<String> content, String authorNote,
+    public Episode(int no, String title, String thumbnail, String content, String authorNote,
         int likeCount, LocalDate publishedAt,
         Webtoon webtoon, Member member) {
         this.no = no;
@@ -90,12 +91,12 @@ public class Episode extends BaseTimeEntity {
     }
 
     public static Episode addOf(CreateEpisodeReqDto dto, int nextEpisodeNo,
-        Webtoon webtoon, Member member) {
+        Webtoon webtoon, Member member, ObjectMapper objectMapper) throws JsonProcessingException {
         return Episode.builder()
             .no(nextEpisodeNo)
             .title(dto.title())
             .thumbnail(dto.thumbnail())
-            .content(dto.content())
+            .content(objectMapper.writeValueAsString(dto.content()))
             .authorNote(dto.authorNote())
             .publishedAt(dto.publishedAt())
             .webtoon(webtoon)
@@ -103,10 +104,11 @@ public class Episode extends BaseTimeEntity {
             .build();
     }
 
-    public void updateOf(UpdateEpisodeReqDto dto) {
+    public void updateOf(UpdateEpisodeReqDto dto, ObjectMapper objectMapper)
+        throws JsonProcessingException {
         this.title = dto.title();
         this.thumbnail = dto.thumbnail();
-        this.content = dto.content();
+        this.content = objectMapper.writeValueAsString(dto.content());
         this.authorNote = dto.authorNote();
         this.publishedAt = dto.publishedAt();
     }
