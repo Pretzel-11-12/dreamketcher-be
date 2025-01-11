@@ -168,9 +168,10 @@ public class EpisodeController {
      */
     @PutMapping("/{episodeId}/star")
     public ResponseEntity<Void> starEpisode(@Auth Long memberId,
+        @PathVariable("webtoonId") Long webtoonId,
         @PathVariable("episodeId") Long episodeId,
         @RequestParam @Min(0) @Max(5) float point) {
-        episodeService.starEpisode(memberId, episodeId, point);
+        episodeService.starEpisode(memberId, webtoonId, episodeId, point);
 
         return ResponseEntity.ok().build();
     }
@@ -180,8 +181,9 @@ public class EpisodeController {
      */
     @DeleteMapping("/{episodeId}/star")
     public ResponseEntity<Void> deleteStarEpisode(@Auth Long memberId,
+        @PathVariable("webtoonId") Long webtoonId,
         @PathVariable("episodeId") Long episodeId) {
-        episodeService.deleteEpisodeStar(memberId, episodeId);
+        episodeService.deleteEpisodeStar(memberId, webtoonId, episodeId);
 
         return ResponseEntity.ok().build();
     }

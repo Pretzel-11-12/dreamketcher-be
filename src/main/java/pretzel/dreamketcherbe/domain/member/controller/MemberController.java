@@ -8,10 +8,11 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
@@ -35,11 +36,13 @@ public class MemberController {
         return ResponseEntity.ok(memberService.getSelfInfo(memberId));
     }
 
-    // TODO: 닉네임 중복검사 로직 분리
     @PatchMapping("/profile")
-    public ResponseEntity<Void> updateProfile(@Auth Long memberId,
-        @Valid @RequestBody UpdateProfileRequest updateProfileRequest) {
-        memberService.updateProfile(memberId, updateProfileRequest);
+    public ResponseEntity<Void> updateProfileWithImage(
+        @Auth Long memberId,
+        @RequestPart(value = "image", required = false) MultipartFile image,
+        @RequestPart(value = "profileData", required = false) @Valid UpdateProfileRequest profileData
+    ) {
+        memberService.updateProfileWithImage(memberId, image, profileData);
         return ResponseEntity.ok().build();
     }
 
