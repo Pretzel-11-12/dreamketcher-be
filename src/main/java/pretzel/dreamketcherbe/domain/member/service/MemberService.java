@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
@@ -21,8 +23,8 @@ import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
-import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
+import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,12 +35,27 @@ public class MemberService {
     private final InterestedWebtoonRepository interestedWebtoonRepository;
     private final WebtoonRepository webtoonRepository;
     private final WebtoonGenreRepository webtoonGenreRepository;
+    private final S3Service s3Service;
 
     public SelfInfoResponse getSelfInfo(Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
         return SelfInfoResponse.of(member);
+    }
+
+    @Transactional
+    public String uploadProfileImage(Long memberId, MultipartFile image) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        String folderName = "profile-images";
+        String imageUrl = s3Service.imageUpload(image, folderName);
+
+        member.updateImageUrl(imageUrl);
+        memberRepository.save(member);
+
+        return imageUrl;
     }
 
     @Transactional

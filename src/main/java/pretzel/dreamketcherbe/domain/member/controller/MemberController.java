@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
@@ -33,6 +34,13 @@ public class MemberController {
     @GetMapping("/me")
     public ResponseEntity<SelfInfoResponse> me(@Auth Long memberId) {
         return ResponseEntity.ok(memberService.getSelfInfo(memberId));
+    }
+
+    @PatchMapping("/profile/image")
+    public ResponseEntity<String> uploadProfileImage(@Auth Long memberId,
+        @RequestParam("image") MultipartFile image) {
+        String imageUrl = memberService.uploadProfileImage(memberId, image);
+        return ResponseEntity.ok(imageUrl);
     }
 
     // TODO: 닉네임 중복검사 로직 분리
