@@ -397,7 +397,7 @@ public class EpisodeService {
      * 에피소드 별점
      */
     @Transactional
-    public void starEpisode(Long memberId, Long episodeId, float point) {
+    public void starEpisode(Long memberId, Long webtoonId, Long episodeId, float point) {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
@@ -408,7 +408,8 @@ public class EpisodeService {
                 episodeId)
             .orElse(null);
 
-        EpisodeStarReqDto dto = new EpisodeStarReqDto(memberId, episodeId, point); // DTO 생성
+        EpisodeStarReqDto dto = new EpisodeStarReqDto(memberId, webtoonId, episodeId,
+            point); // DTO 생성
 
         if (episodeStar != null) {
             episodeStar.updateOf(dto);
@@ -423,7 +424,7 @@ public class EpisodeService {
      * 에피소드 별점 삭제
      */
     @Transactional
-    public void deleteEpisodeStar(Long memberId, Long episodeId) {
+    public void deleteEpisodeStar(Long memberId, Long webtoonId, Long episodeId) {
         EpisodeStar episodeStar = episodeStarRepository.findByMemberIdAndEpisodeId(memberId,
                 episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_STAR_NOT_FOUND));
