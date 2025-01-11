@@ -66,7 +66,6 @@ public class MemberService {
         String newNickname = updateProfileRequest.nickname();
         String newBusinessEmail = updateProfileRequest.businessEmail();
         String newShortIntroduction = updateProfileRequest.shortIntroduction();
-        String newImageUrl = updateProfileRequest.imageUrl();
 
         if (!newNickname.equals(member.getNickname())) {
             if (memberRepository.existsByNicknameAndIdNot(newNickname, memberId)) {
@@ -85,10 +84,6 @@ public class MemberService {
 
         if (newShortIntroduction != null) {
             member.updateShortIntroduction(newShortIntroduction);
-        }
-
-        if (newImageUrl != null) {
-            member.updateImageUrl(newImageUrl);
         }
 
         memberRepository.save(member);
