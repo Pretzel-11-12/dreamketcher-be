@@ -3,26 +3,32 @@ package pretzel.dreamketcherbe.domain.webtoon.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
 import pretzel.dreamketcherbe.S3Utils.exception.S3ExceptionType;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.admin.entity.ManagementWebtoon;
 import pretzel.dreamketcherbe.domain.admin.repository.ManagementWebtoonRespository;
-import pretzel.dreamketcherbe.S3Utils.S3Service;
+import pretzel.dreamketcherbe.domain.episode.repository.EpisodeStarRepository;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
-import pretzel.dreamketcherbe.domain.webtoon.dto.*;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
@@ -47,6 +53,8 @@ public class WebtoonService {
     private final S3Service s3Service;
 
     private final ManagementWebtoonRespository managementWebtoonRespository;
+
+    private final EpisodeStarRepository episodeStarRepository;
 
     /**
      * 연재중인 웹툰 목록 조회
@@ -231,14 +239,38 @@ public class WebtoonService {
         if (keyword == null || keyword.trim().isEmpty()) {
             throw new WebtoonException(WebtoonExceptionType.SEARCH_KEYWORD_NOT_FOUND);
         }
+
         String normalizedKeyword = keyword.trim().toLowerCase();
+        List<Webtoon> webtoons = webtoonRepository.findByTitleOrMemberNickname(normalizedKeyword);
 
-        List<Webtoon> byTitle = webtoonRepository.findByTitleContaining(normalizedKeyword);
-        List<Webtoon> byMemberNickname = webtoonRepository.findByMemberNickname(normalizedKeyword);
+        if (webtoons.isEmpty()) {
+            return List.of();
+        }
 
-        return Stream.concat(byTitle.stream(), byMemberNickname.stream())
-            .distinct()
-            .map(SearchedWebtoonResDto::of)
+        List<Long> webtoonIds = webtoons.stream()
+            .map(Webtoon::getId)
+            .collect(Collectors.toList());
+
+        List<Object[]> starsData = episodeStarRepository.countDistinctStarsByWebtoonIds(webtoonIds);
+        Map<Long, Long> webtoonIdToStars = starsData.stream()
+            .collect(Collectors.toMap(
+                obj -> (Long) obj[0],
+                obj -> (Long) obj[1]
+            ));
+
+        List<Object[]> genresData = webtoonGenreRepository.findGenresByWebtoonIds(webtoonIds);
+        Map<Long, List<String>> webtoonIdToGenres = genresData.stream()
+            .collect(Collectors.groupingBy(
+                obj -> (Long) obj[0],
+                Collectors.mapping(obj -> (String) obj[1], Collectors.toList())
+            ));
+
+        return webtoons.stream()
+            .map(webtoon -> SearchedWebtoonResDto.of(
+                webtoon,
+                webtoonIdToGenres.getOrDefault(webtoon.getId(), Collections.emptyList()),
+                webtoonIdToStars.getOrDefault(webtoon.getId(), 0L)
+            ))
             .collect(Collectors.toList());
     }
 
