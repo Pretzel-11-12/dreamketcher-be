@@ -18,6 +18,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 
@@ -40,7 +41,7 @@ public class Recomment extends BaseTimeEntity {
     private Long parentCommentId;
 
     @Column(name = "comment_order")
-    private Long commentOrder;
+    private int commentOrder;
 
 
     @Column(name = "is_deleted", nullable = false)
@@ -56,13 +57,24 @@ public class Recomment extends BaseTimeEntity {
     private Episode episode;
 
     @Builder
-    public Recomment(String content, Long parentCommentId, Long commentOrder, Member member,
+    public Recomment(String content, Long parentCommentId, int commentOrder, Member member,
         Episode episode) {
         this.content = content;
         this.parentCommentId = parentCommentId;
         this.commentOrder = commentOrder;
         this.member = member;
         this.episode = episode;
+    }
+
+    public static Recomment addOf(CreateRecommentReqDto dto, int commentOrder, Member member,
+        Episode episode) {
+        return Recomment.builder()
+            .content(dto.content())
+            .parentCommentId(dto.parentCommentId())
+            .commentOrder(commentOrder)
+            .member(member)
+            .episode(episode)
+            .build();
     }
 
     public void isAuthor(Long memberId) {
