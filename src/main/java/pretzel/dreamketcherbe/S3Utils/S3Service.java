@@ -4,6 +4,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -223,6 +225,7 @@ public class S3Service {
      * 객체 키 추출
      */
     private String extractObjectKey(String fileUrl) {
+        String decodedUrl = URLDecoder.decode(fileUrl, StandardCharsets.UTF_8);
         String[] urlParts = fileUrl.split("/");
         return String.join("/", Arrays.copyOfRange(urlParts, 3, urlParts.length));
     }
