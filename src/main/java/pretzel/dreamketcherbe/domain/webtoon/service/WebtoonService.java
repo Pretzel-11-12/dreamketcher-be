@@ -1,5 +1,7 @@
 package pretzel.dreamketcherbe.domain.webtoon.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import java.util.Collections;
 import java.util.List;
@@ -99,7 +101,7 @@ public class WebtoonService {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        Webtoon newWebtoon = Webtoon.addOf(request, findMember);
+        Webtoon newWebtoon = Webtoon.addOf(request, findMember, new ObjectMapper());
         webtoonRepository.save(newWebtoon);
 
         ManagementWebtoon managementWebtoon = ManagementWebtoon.addOf(newWebtoon);
@@ -141,14 +143,17 @@ public class WebtoonService {
     /**
      * 웹툰 프롤로그 등록
      */
-    public List<String> uploadPrologue(Long memberId, List<MultipartFile> prologue) {
+    public String uploadPrologue(Long memberId, List<MultipartFile> prologue,
+        ObjectMapper objectMapper) {
         try {
             Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
             String folderName = "/webtoon" + memberId + "/prologue";
 
-            return s3Service.imagesUpload(prologue, folderName);
+            List<String> prologueImageUrls = s3Service.imagesUpload(prologue, folderName);
+
+            return objectMapper.writeValueAsString(prologueImageUrls);
         } catch (Exception e) {
             throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
         }
@@ -157,11 +162,18 @@ public class WebtoonService {
     /**
      * 웹툰 프롤로그 수정
      */
-    public List<String> updatePrologue(List<String> oldPrologue, List<MultipartFile> newPrologue,
-        List<Integer> replaceIndex, String folderName) {
+    public String updatePrologue(String oldPrologueJson, List<MultipartFile> newPrologue,
+        List<Integer> replaceIndex, String folderName, ObjectMapper objectMapper) {
         try {
-            return s3Service.updatePartialImages(oldPrologue, newPrologue, replaceIndex,
-                folderName);
+
+            List<String> oldPrologue = objectMapper.readValue(oldPrologueJson,
+                new TypeReference<>() {
+                });
+
+            List<String> updatedPrologueUrls = s3Service.updatePartialImages(oldPrologue,
+                newPrologue, replaceIndex, folderName);
+
+            return objectMapper.writeValueAsString(updatedPrologueUrls);
         } catch (Exception e) {
             throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
         }
@@ -201,7 +213,7 @@ public class WebtoonService {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-        findWebtoon.updateOf(request);
+        findWebtoon.updateOf(request, new ObjectMapper());
 
         webtoonRepository.save(findWebtoon);
     }
