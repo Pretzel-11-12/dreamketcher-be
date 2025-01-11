@@ -74,7 +74,7 @@ public class CommentController {
     }
 
     /**
-     * 대댓글 생성
+     * 답글 생성
      */
     @PostMapping("/{commentId}/recomment/create")
     public ResponseEntity<CreateRecommentResDto> createRecomment(@Auth Long memberId,
@@ -85,7 +85,7 @@ public class CommentController {
     }
 
     /**
-     * 대댓글 삭제
+     * 답글 삭제
      */
     @DeleteMapping("/{commentId}/recomment/{recommentId}/delete")
     public ResponseEntity<Void> deleteRecomment(@Auth Long memberId, @PathVariable Long episodeId,
