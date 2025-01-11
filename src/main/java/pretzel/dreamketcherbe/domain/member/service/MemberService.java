@@ -45,45 +45,40 @@ public class MemberService {
     }
 
     @Transactional
-    public String uploadProfileImage(Long memberId, MultipartFile image) {
+    public void updateProfileWithImage(Long memberId, MultipartFile image,
+        UpdateProfileRequest profileData) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        String folderName = "profile-images";
-        String imageUrl = s3Service.imageUpload(image, folderName);
+        if (profileData != null) {
+            String newNickname = profileData.nickname();
+            String newBusinessEmail = profileData.businessEmail();
+            String newShortIntroduction = profileData.shortIntroduction();
 
-        member.updateImageUrl(imageUrl);
-        memberRepository.save(member);
-
-        return imageUrl;
-    }
-
-    @Transactional
-    public void updateProfile(Long memberId, UpdateProfileRequest updateProfileRequest) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
-
-        String newNickname = updateProfileRequest.nickname();
-        String newBusinessEmail = updateProfileRequest.businessEmail();
-        String newShortIntroduction = updateProfileRequest.shortIntroduction();
-
-        if (!newNickname.equals(member.getNickname())) {
-            if (memberRepository.existsByNicknameAndIdNot(newNickname, memberId)) {
-                throw new MemberException(MemberExceptionType.NICKNAME_ALREADY_EXISTS);
+            if (newNickname != null && !newNickname.equals(member.getNickname())) {
+                if (memberRepository.existsByNicknameAndIdNot(newNickname, memberId)) {
+                    throw new MemberException(MemberExceptionType.NICKNAME_ALREADY_EXISTS);
+                }
+                member.updateNickname(newNickname);
             }
-            member.updateNickname(newNickname);
+
+            if (newBusinessEmail != null && !newBusinessEmail.isBlank()
+                && !newBusinessEmail.equals(member.getBusinessEmail())) {
+                if (memberRepository.existsByBusinessEmailAndIdNot(newBusinessEmail, memberId)) {
+                    throw new MemberException(MemberExceptionType.BUSINESS_EMAIL_ALREADY_EXISTS);
+                }
+                member.updateBusinessEmail(newBusinessEmail);
+            }
+
+            if (newShortIntroduction != null) {
+                member.updateShortIntroduction(newShortIntroduction);
+            }
         }
 
-        if (newBusinessEmail != null && !newBusinessEmail.isBlank()
-            && !newBusinessEmail.equals(member.getBusinessEmail())) {
-            if (memberRepository.existsByBusinessEmailAndIdNot(newBusinessEmail, memberId)) {
-                throw new MemberException(MemberExceptionType.BUSINESS_EMAIL_ALREADY_EXISTS);
-            }
-            member.updateBusinessEmail(newBusinessEmail);
-        }
-
-        if (newShortIntroduction != null) {
-            member.updateShortIntroduction(newShortIntroduction);
+        if (image != null && !image.isEmpty()) {
+            String folderName = "profile-images";
+            String imageUrl = s3Service.imageUpload(image, folderName);
+            member.updateImageUrl(imageUrl);
         }
 
         memberRepository.save(member);
