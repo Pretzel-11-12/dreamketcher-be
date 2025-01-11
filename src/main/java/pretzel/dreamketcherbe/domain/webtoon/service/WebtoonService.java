@@ -4,9 +4,7 @@ import jakarta.transaction.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -229,20 +227,16 @@ public class WebtoonService {
         if (keyword == null || keyword.trim().isEmpty()) {
             throw new WebtoonException(WebtoonExceptionType.SEARCH_KEYWORD_NOT_FOUND);
         }
+
         String normalizedKeyword = keyword.trim().toLowerCase();
-
-        List<Webtoon> byTitle = webtoonRepository.findByTitleContaining(normalizedKeyword);
-        List<Webtoon> byMemberNickname = webtoonRepository.findByMemberNickname(normalizedKeyword);
-
-        Set<Webtoon> webtoons = Stream.concat(byTitle.stream(), byMemberNickname.stream())
-            .collect(Collectors.toSet());
+        List<Webtoon> webtoons = webtoonRepository.findByTitleOrMemberNickname(normalizedKeyword);
 
         if (webtoons.isEmpty()) {
             return List.of();
         }
 
         List<Long> webtoonIds = webtoons.stream()
-            .map(webtoon -> webtoon.getId())
+            .map(Webtoon::getId)
             .collect(Collectors.toList());
 
         List<Object[]> starsData = episodeStarRepository.countDistinctStarsByWebtoonIds(webtoonIds);
