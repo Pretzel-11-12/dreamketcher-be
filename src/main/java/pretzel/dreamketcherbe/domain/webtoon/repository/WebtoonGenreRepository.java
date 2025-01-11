@@ -14,6 +14,9 @@ public interface WebtoonGenreRepository extends JpaRepository<WebtoonGenre, Long
 
     List<WebtoonGenre> findByWebtoon(Webtoon webtoon);
 
+    @Query("SELECT wg.webtoon.id, g.name FROM WebtoonGenre wg JOIN wg.genre g WHERE wg.webtoon.id IN :webtoonIds")
+    List<Object[]> findGenresByWebtoonIds(List<Long> webtoonIds);
+
     @Query("SELECT wg FROM WebtoonGenre wg WHERE wg.genre.id = :genreId AND wg.webtoon.status = 'IN_SERIES'")
     Page<WebtoonGenre> findByGenreIdAndStatus(Long genreId, Pageable pageable);
 

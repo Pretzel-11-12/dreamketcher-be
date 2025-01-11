@@ -1,6 +1,7 @@
 package pretzel.dreamketcherbe.domain.webtoon.repository;
 
 import io.lettuce.core.dynamic.annotation.Param;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,15 +9,15 @@ import org.springframework.data.jpa.repository.Query;
 import pretzel.dreamketcherbe.domain.ranking.repository.RankingRepositoryCustom;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
-import java.util.List;
+public interface WebtoonRepository extends JpaRepository<Webtoon, Long>, WebtoonRepositoryCustom,
+    RankingRepositoryCustom {
 
-public interface WebtoonRepository extends JpaRepository<Webtoon, Long>, WebtoonRepositoryCustom, RankingRepositoryCustom {
-    @Query("SELECT w FROM Webtoon w, ManagementWebtoon m WHERE (w.title LIKE %:title% OR REPLACE(w.title, ' ', '') LIKE %:title%) AND m.approval = 'APPROVAL'")
-    List<Webtoon> findByTitleContaining(@Param("title") String title);
-
-    // TODO: 추후 멤버 상태 관리 추가 시 수정 필요
-    @Query("SELECT w FROM Webtoon w JOIN w.member m WHERE m.nickname LIKE %:nickname% OR REPLACE(m.nickname, ' ', '') LIKE %:nickname%")
-    List<Webtoon> findByMemberNickname(@Param("nickname") String nickname);
+    @Query("SELECT DISTINCT w FROM Webtoon w " +
+        "JOIN w.member m " +
+        "WHERE (LOWER(w.title) LIKE %:keyword% OR LOWER(REPLACE(w.title, ' ', '')) LIKE %:keyword%) "
+        +
+        "OR (LOWER(m.nickname) LIKE %:keyword% OR LOWER(REPLACE(m.nickname, ' ', '')) LIKE %:keyword%)")
+    List<Webtoon> findByTitleOrMemberNickname(@Param("keyword") String keyword);
 
     Page<Webtoon> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }
