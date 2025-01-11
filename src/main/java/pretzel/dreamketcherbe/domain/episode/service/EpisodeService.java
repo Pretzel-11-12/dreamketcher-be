@@ -312,7 +312,10 @@ public class EpisodeService {
      * 에피소드 좋아요
      */
     @Transactional
-    public CreateEpisodeLikeResDto likeEpisode(Long episodeId, Long memberId) {
+    public CreateEpisodeLikeResDto likeEpisode(Long webtoonId, Long episodeId, Long memberId) {
+        Webtoon webtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+        
         Episode episode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
