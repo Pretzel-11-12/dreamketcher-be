@@ -18,6 +18,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 
@@ -40,8 +41,7 @@ public class Recomment extends BaseTimeEntity {
     private Long parentCommentId;
 
     @Column(name = "comment_order")
-    private Long commentOrder;
-
+    private int commentOrder;
 
     @Column(name = "is_deleted", nullable = false)
     @ColumnDefault("false")
@@ -55,14 +55,30 @@ public class Recomment extends BaseTimeEntity {
     @JoinColumn(name = "episode_id")
     private Episode episode;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
+
     @Builder
-    public Recomment(String content, Long parentCommentId, Long commentOrder, Member member,
-        Episode episode) {
+    public Recomment(String content, Long parentCommentId, int commentOrder, Member member,
+        Episode episode, Comment comment) {
         this.content = content;
         this.parentCommentId = parentCommentId;
         this.commentOrder = commentOrder;
         this.member = member;
         this.episode = episode;
+        this.comment = comment;
+    }
+
+    public static Recomment addOf(CreateRecommentReqDto dto, int commentOrder, Member member,
+        Episode episode, Comment comment) {
+        return Recomment.builder()
+            .content(dto.content())
+            .parentCommentId(comment.getId())
+            .commentOrder(commentOrder)
+            .member(member)
+            .episode(episode)
+            .build();
     }
 
     public void isAuthor(Long memberId) {

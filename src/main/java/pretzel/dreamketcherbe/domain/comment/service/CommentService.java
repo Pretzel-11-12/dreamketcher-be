@@ -113,20 +113,16 @@ public class CommentService {
         Comment findComment = commentRepository.findById(commentId)
             .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
 
-        long commentOrder =
-            recommentRepository.countByParentCommentIdAndIsDeletedFalse(findComment.getId()) + 1;
+        int commentOrder =
+            (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(findComment.getId())
+                + 1;
 
-        Recomment newRecomment = Recomment
-            .builder()
-            .member(findMember)
-            .episode(findEpisode)
-            .content(request.content())
-            .parentCommentId(findComment.getId())
-            .commentOrder(commentOrder)
-            .build();
+        Recomment newRecomment = Recomment.addOf(request, commentOrder, findMember, findEpisode,
+            findComment);
 
         int childCommentCount = (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(
             findComment.getId());
+
         findComment.updateChildCommentCount(childCommentCount);
         commentRepository.save(findComment);
 
