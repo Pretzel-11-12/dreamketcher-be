@@ -280,6 +280,8 @@ public class EpisodeService {
             throw new EpisodeException(EpisodeExceptionType.INVALID_EPISODE);
         }
 
+        calculateAverageStar(episodeId);
+
         // 조회수 중복 방지
         Cookie oldCookie = null;
         Cookie[] cookies = request.getCookies();
