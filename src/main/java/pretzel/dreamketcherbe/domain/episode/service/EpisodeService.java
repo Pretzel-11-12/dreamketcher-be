@@ -25,6 +25,7 @@ import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarReqDto;
+import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
@@ -400,7 +401,8 @@ public class EpisodeService {
      * 에피소드 별점
      */
     @Transactional
-    public void starEpisode(Long memberId, Long webtoonId, Long episodeId, float point) {
+    public EpisodeStarResDto starEpisode(Long memberId, Long webtoonId, Long episodeId,
+        float point) {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
@@ -416,9 +418,13 @@ public class EpisodeService {
 
         if (episodeStar != null) {
             episodeStar.updateOf(dto);
+
+            return EpisodeStarResDto.of(episodeStar.getId(), episodeStar.getPoint());
         } else {
             episodeStar = EpisodeStar.addOf(dto, findMember, findEpisode);
             episodeStarRepository.save(episodeStar);
+
+            return EpisodeStarResDto.of(episodeStar.getId(), episodeStar.getPoint());
         }
     }
 
