@@ -28,6 +28,7 @@ import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeLikeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
+import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
 import pretzel.dreamketcherbe.domain.episode.service.EpisodeService;
@@ -167,13 +168,15 @@ public class EpisodeController {
      * 에피소드 별점 등록
      */
     @PutMapping("/{episodeId}/star")
-    public ResponseEntity<Void> starEpisode(@Auth Long memberId,
+    public ResponseEntity<EpisodeStarResDto> starEpisode(@Auth Long memberId,
         @PathVariable("webtoonId") Long webtoonId,
         @PathVariable("episodeId") Long episodeId,
         @RequestParam @Min(0) @Max(5) float point) {
-        episodeService.starEpisode(memberId, webtoonId, episodeId, point);
 
-        return ResponseEntity.ok().build();
+        EpisodeStarResDto episodeStar = episodeService.starEpisode(memberId, webtoonId, episodeId,
+            point);
+
+        return ResponseEntity.ok(episodeStar);
     }
 
     /**
