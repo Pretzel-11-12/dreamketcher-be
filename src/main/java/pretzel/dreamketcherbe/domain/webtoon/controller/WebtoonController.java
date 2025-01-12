@@ -83,9 +83,9 @@ public class WebtoonController {
     public ResponseEntity<CreateWebtoonResDto> createWebtoon(@Auth Long memberId,
         @RequestBody @Valid CreateWebtoonReqDto request) {
 
-        CreateWebtoonResDto response = webtoonService.createWebtoon(memberId, request);
+        CreateWebtoonResDto webtoon = webtoonService.createWebtoon(memberId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(webtoonService.createWebtoon(memberId, request));
+            .body(webtoon);
     }
 
     /**

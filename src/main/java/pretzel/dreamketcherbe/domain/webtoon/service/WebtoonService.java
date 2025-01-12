@@ -132,9 +132,7 @@ public class WebtoonService {
     public String updateThumbnail(String oldThumbnail, MultipartFile newThumbnail,
         String folderName) {
         try {
-            s3Service.imageUpdate(oldThumbnail, newThumbnail, folderName);
-
-            return s3Service.imageUpload(newThumbnail, folderName);
+            return s3Service.imageUpdate(oldThumbnail, newThumbnail, folderName);
         } catch (Exception e) {
             throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
         }
