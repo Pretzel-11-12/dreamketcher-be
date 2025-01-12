@@ -85,6 +85,7 @@ public class Recomment extends BaseTimeEntity {
             .member(member)
             .webtoon(episode.getWebtoon())
             .episode(episode)
+            .comment(comment)
             .build();
     }
 
