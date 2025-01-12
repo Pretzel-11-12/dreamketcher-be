@@ -42,7 +42,6 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
-    private final WebtoonRepository webtoonRepository;
     private final EpisodeRepository episodeRepository;
     private final RecommentRepository recommentRepository;
 
