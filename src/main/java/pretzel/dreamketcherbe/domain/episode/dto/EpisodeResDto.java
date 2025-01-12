@@ -8,6 +8,7 @@ import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 public record EpisodeResDto(
     Long id,
     int no,
+    String webtoonTitle,
     String title,
     String thumbnail,
     String content,
@@ -18,6 +19,7 @@ public record EpisodeResDto(
     public static EpisodeResDto of(Episode episode) {
         return EpisodeResDto.builder()
             .id(episode.getId())
+            .webtoonTitle(episode.getWebtoon().getTitle())
             .title(episode.getTitle())
             .no(episode.getNo())
             .thumbnail(episode.getThumbnail())
