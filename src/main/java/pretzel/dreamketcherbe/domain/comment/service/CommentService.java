@@ -30,6 +30,10 @@ import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
+import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
+import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
+import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
 @Slf4j
 @Service
@@ -38,6 +42,7 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
+    private final WebtoonRepository webtoonRepository;
     private final EpisodeRepository episodeRepository;
     private final RecommentRepository recommentRepository;
 
@@ -102,7 +107,8 @@ public class CommentService {
      * 답글 생성
      */
     @Transactional
-    public CreateRecommentResDto createRecomment(Long memberId, Long episodeId, Long commentId,
+    public CreateRecommentResDto createRecomment(Long memberId, Long webtoonId, Long episodeId,
+        Long commentId,
         CreateRecommentReqDto request) {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));

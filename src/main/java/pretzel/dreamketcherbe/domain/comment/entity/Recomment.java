@@ -21,6 +21,7 @@ import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
+import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
 @Table(name = "re_comments")
 @Getter
@@ -52,6 +53,10 @@ public class Recomment extends BaseTimeEntity {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "webtoon_id")
+    private Webtoon webtoon;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "episode_id")
     private Episode episode;
 
@@ -61,11 +66,12 @@ public class Recomment extends BaseTimeEntity {
 
     @Builder
     public Recomment(String content, Long parentCommentId, int commentOrder, Member member,
-        Episode episode, Comment comment) {
+        Webtoon webtoon, Episode episode, Comment comment) {
         this.content = content;
         this.parentCommentId = parentCommentId;
         this.commentOrder = commentOrder;
         this.member = member;
+        this.webtoon = webtoon;
         this.episode = episode;
         this.comment = comment;
     }
@@ -77,6 +83,7 @@ public class Recomment extends BaseTimeEntity {
             .parentCommentId(comment.getId())
             .commentOrder(commentOrder)
             .member(member)
+            .webtoon(episode.getWebtoon())
             .episode(episode)
             .build();
     }
