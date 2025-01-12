@@ -45,7 +45,7 @@ public class CommentService {
      * 댓글 생성
      */
     @Transactional
-    public CreateCommentResDto createComment(Long memberId, Long episodeId,
+    public CreateCommentResDto createComment(Long memberId, Long webtoonId, Long episodeId,
         CreateCommentReqDto request) {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
