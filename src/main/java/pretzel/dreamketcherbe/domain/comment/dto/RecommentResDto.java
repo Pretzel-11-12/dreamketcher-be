@@ -9,7 +9,7 @@ public record RecommentResDto(
     String ninkname,
     String content,
     Long parentCommentId,
-    Long commentOrder
+    int commentOrder
 ) {
 
     public static RecommentResDto of(Recomment recomment) {
