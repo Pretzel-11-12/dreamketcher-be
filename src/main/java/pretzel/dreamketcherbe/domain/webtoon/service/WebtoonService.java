@@ -235,8 +235,8 @@ public class WebtoonService {
     /**
      * 내 작품 조회
      */
-    public MyWebtoonResDto getMyWebtoon(Long webtoonId) {
-        Member findMember = memberRepository.findById(webtoonId)
+    public MyWebtoonResDto getMyWebtoon(Long MemberId, Long webtoonId) {
+        Member findMember = memberRepository.findById(MemberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)

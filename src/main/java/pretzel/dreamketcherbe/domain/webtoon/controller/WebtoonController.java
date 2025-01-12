@@ -164,7 +164,7 @@ public class WebtoonController {
     public ResponseEntity<MyWebtoonResDto> getWebtoon(
         @Auth Long memberId,
         @PathVariable Long webtoonId) {
-        return ResponseEntity.ok(webtoonService.getMyWebtoon(webtoonId));
+        return ResponseEntity.ok(webtoonService.getMyWebtoon(memberId, webtoonId));
     }
 
     /**
