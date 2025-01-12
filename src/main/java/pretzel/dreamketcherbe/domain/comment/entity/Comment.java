@@ -57,11 +57,13 @@ public class Comment extends BaseTimeEntity {
     private Webtoon webtoon;
 
     @Builder
-    public Comment(String content, int childCommentCount, Member member, Episode episode) {
+    public Comment(String content, int childCommentCount, Member member, Episode episode,
+        Webtoon webtoon) {
         this.content = content;
         this.childCommentCount = childCommentCount;
         this.member = member;
         this.episode = episode;
+        this.webtoon = webtoon;
     }
 
     public static Comment addOf(CreateCommentReqDto dto, Member member, Episode episode) {
@@ -69,6 +71,7 @@ public class Comment extends BaseTimeEntity {
             .content(dto.content())
             .member(member)
             .episode(episode)
+            .webtoon(episode.getWebtoon())
             .build();
     }
 
