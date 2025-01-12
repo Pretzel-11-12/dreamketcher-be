@@ -63,8 +63,7 @@ public class ManageWebtoonService {
                     webtoon.getId())
                 .orElseThrow(() -> new AdminException(AdminExceptionType.MANAGE_WEBTOON_NOT_FOUND));
 
-            SerializationPeriod serializationPeriod = serializationPeriodRepository.findByWebtoonId(webtoon.getId())
-                    .orElseThrow(() -> new AdminException(WebtoonExceptionType.SERIALIZATION_PERIOD_NOT_FOUND));
+            SerializationPeriod serializationPeriod = serializationPeriodRepository.findByWebtoonId(webtoon.getId());
 
             return ManageWebtoonResDto.of(webtoon, genres, manangeWebtoon, serializationPeriod);
         });

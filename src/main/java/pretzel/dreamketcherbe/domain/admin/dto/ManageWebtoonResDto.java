@@ -32,6 +32,11 @@ public record ManageWebtoonResDto(
             .map(Reason::getContent)
             .orElse("N/A");
 
+        String endedAt = Optional.ofNullable(serializationPeriod)
+                .map(SerializationPeriod::getEndDate)
+                .map(endDate -> endDate.format(formatter))
+                .orElse("-");
+
         return ManageWebtoonResDto.builder()
             .id(webtoon.getId())
             .title(webtoon.getTitle())
@@ -39,7 +44,7 @@ public record ManageWebtoonResDto(
             .author(webtoon.getMember().getName())
             .episodeCount(webtoon.getEpisodeCount())
             .createAt(webtoon.getCreatedAt().format(formatter))
-            .endedAt(serializationPeriod.getEndDate().format(formatter))
+            .endedAt(endedAt)
             .updatedAt(webtoon.getUpdatedAt().format(formatter))
             .status(webtoon.getStatus())
             .reason(reasonContent)
