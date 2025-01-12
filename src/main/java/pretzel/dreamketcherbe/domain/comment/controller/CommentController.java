@@ -23,6 +23,7 @@ import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.NotRecommendationResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.RecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.service.CommentService;
 
 @Slf4j
@@ -43,16 +44,17 @@ public class CommentController {
      */
     @PostMapping("/create")
     public ResponseEntity<CreateCommentResDto> createComment(@Auth Long memberId,
+        @PathVariable Long webtoonId,
         @PathVariable Long episodeId,
         @RequestBody @Valid CreateCommentReqDto request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(commentService.createComment(memberId, episodeId, request));
+            .body(commentService.createComment(memberId, webtoonId, episodeId, request));
     }
 
     /**
      * 댓글 삭제
      */
-    @PostMapping("/{commentId}/delete")
+    @DeleteMapping("/{commentId}/delete")
     public ResponseEntity<Void> deleteComment(@Auth Long memberId, @PathVariable Long episodeId,
         @PathVariable Long commentId) {
         commentService.deleteComment(memberId, episodeId, commentId);
@@ -75,24 +77,44 @@ public class CommentController {
     }
 
     /**
-     * 대댓글 생성
+     * 답글 생성
      */
     @PostMapping("/{commentId}/recomment/create")
     public ResponseEntity<CreateRecommentResDto> createRecomment(@Auth Long memberId,
+        @PathVariable Long webtoonId,
         @PathVariable Long episodeId, @PathVariable Long commentId,
         @RequestBody @Valid CreateRecommentReqDto request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(commentService.createRecomment(memberId, episodeId, commentId, request));
+            .body(
+                commentService.createRecomment(memberId, webtoonId, episodeId, commentId, request));
     }
 
     /**
-     * 대댓글 삭제
+     * 답글 삭제
      */
-    @PostMapping("/{commentId}/recomment/{recommentId}/delete")
+    @DeleteMapping("/{commentId}/recomment/{recommentId}/delete")
     public ResponseEntity<Void> deleteRecomment(@Auth Long memberId, @PathVariable Long episodeId,
         @PathVariable Long commentId, @PathVariable Long recommentId) {
         commentService.deleteRecomment(memberId, episodeId, commentId, recommentId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 대댓글 목록 조회
+     */
+    @GetMapping("/{commentId}/recomments")
+    public ResponseEntity<PageResDto<RecommentResDto>> getRecomments(
+        @PathVariable Long episodeId,
+        @PathVariable Long commentId,
+        @RequestParam int page,
+        @RequestParam int size,
+        @RequestParam(defaultValue = "DESC") String order) {
+
+        PageReqDto pageReqDto = PageReqDto.of(null, page, size, order);
+
+        PageResDto<RecommentResDto> response = commentService.getRecomments(episodeId, commentId,
+            pageReqDto);
+        return ResponseEntity.ok(response);
     }
 
     /**

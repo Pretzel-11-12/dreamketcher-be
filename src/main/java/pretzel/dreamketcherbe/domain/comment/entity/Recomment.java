@@ -18,8 +18,10 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
+import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
 @Table(name = "re_comments")
 @Getter
@@ -40,32 +42,50 @@ public class Recomment extends BaseTimeEntity {
     private Long parentCommentId;
 
     @Column(name = "comment_order")
-    private Long commentOrder;
-    
+    private int commentOrder;
 
     @Column(name = "is_deleted", nullable = false)
     @ColumnDefault("false")
     private Boolean isDeleted;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "webtoon_id")
+    private Webtoon webtoon;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "episode_id")
     private Episode episode;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
+
     @Builder
-    public Recomment(String content, Long parentCommentId, Long commentOrder, Member member,
-        Episode episode) {
+    public Recomment(String content, Long parentCommentId, int commentOrder, Member member,
+        Webtoon webtoon, Episode episode, Comment comment) {
         this.content = content;
         this.parentCommentId = parentCommentId;
         this.commentOrder = commentOrder;
         this.member = member;
+        this.webtoon = webtoon;
         this.episode = episode;
+        this.comment = comment;
+    }
+
+    public static Recomment addOf(CreateRecommentReqDto dto, int commentOrder, Member member,
+        Episode episode, Comment comment) {
+        return Recomment.builder()
+            .content(dto.content())
+            .parentCommentId(comment.getId())
+            .commentOrder(commentOrder)
+            .member(member)
+            .webtoon(episode.getWebtoon())
+            .episode(episode)
+            .build();
     }
 
     public void isAuthor(Long memberId) {
@@ -75,7 +95,8 @@ public class Recomment extends BaseTimeEntity {
     }
 
     public void softDelete() {
-        this.isDeleted = true;
-        this.deletedAt = LocalDateTime.now();
+        if (!isDeleted) {
+            this.isDeleted = true;
+        }
     }
 }
