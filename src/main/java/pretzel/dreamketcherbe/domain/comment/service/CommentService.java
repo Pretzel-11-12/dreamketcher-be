@@ -45,7 +45,7 @@ public class CommentService {
      * 댓글 생성
      */
     @Transactional
-    public CreateCommentResDto createComment(Long memberId, Long episodeId,
+    public CreateCommentResDto createComment(Long memberId, Long webtoonId, Long episodeId,
         CreateCommentReqDto request) {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
@@ -53,12 +53,8 @@ public class CommentService {
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
-        Comment newComment = Comment
-            .builder()
-            .member(findMember)
-            .episode(findEpisode)
-            .content(request.content())
-            .build();
+        Comment newComment = Comment.addOf(request, findMember, findEpisode);
+        commentRepository.save(newComment);
 
         return CreateCommentResDto.of(newComment);
     }

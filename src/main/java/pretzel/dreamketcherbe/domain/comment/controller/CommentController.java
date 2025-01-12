@@ -42,10 +42,11 @@ public class CommentController {
      */
     @PostMapping("/create")
     public ResponseEntity<CreateCommentResDto> createComment(@Auth Long memberId,
+        @PathVariable Long webtoonId,
         @PathVariable Long episodeId,
         @RequestBody @Valid CreateCommentReqDto request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(commentService.createComment(memberId, episodeId, request));
+            .body(commentService.createComment(memberId, webtoonId, episodeId, request));
     }
 
     /**

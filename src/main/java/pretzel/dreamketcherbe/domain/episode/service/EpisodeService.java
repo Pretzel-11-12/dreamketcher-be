@@ -25,6 +25,7 @@ import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarReqDto;
+import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
@@ -158,7 +159,7 @@ public class EpisodeService {
         MultipartFile thumbnail) {
         try {
             String folderName =
-                "episode/" + memberId + "/" + webtoonId + "/" + "/thumbnail";
+                "episode/" + memberId + "/" + webtoonId + "/thumbnail";
 
             return s3Service.imageUpload(thumbnail, folderName);
         } catch (Exception e) {
@@ -185,7 +186,7 @@ public class EpisodeService {
         List<MultipartFile> content, ObjectMapper objectMapper) {
         try {
             String folderName =
-                "episode/" + memberId + "/" + webtoonId + "/" + "/content";
+                "episode/" + memberId + "/" + webtoonId + "/content";
 
             List<String> contentUrls = s3Service.imagesUpload(content, folderName);
 
@@ -312,7 +313,10 @@ public class EpisodeService {
      * 에피소드 좋아요
      */
     @Transactional
-    public CreateEpisodeLikeResDto likeEpisode(Long episodeId, Long memberId) {
+    public CreateEpisodeLikeResDto likeEpisode(Long webtoonId, Long episodeId, Long memberId) {
+        Webtoon webtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+        
         Episode episode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
@@ -397,7 +401,8 @@ public class EpisodeService {
      * 에피소드 별점
      */
     @Transactional
-    public void starEpisode(Long memberId, Long webtoonId, Long episodeId, float point) {
+    public EpisodeStarResDto starEpisode(Long memberId, Long webtoonId, Long episodeId,
+        float point) {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
@@ -413,9 +418,13 @@ public class EpisodeService {
 
         if (episodeStar != null) {
             episodeStar.updateOf(dto);
+
+            return EpisodeStarResDto.of(episodeStar.getId(), episodeStar.getPoint());
         } else {
             episodeStar = EpisodeStar.addOf(dto, findMember, findEpisode);
             episodeStarRepository.save(episodeStar);
+
+            return EpisodeStarResDto.of(episodeStar.getId(), episodeStar.getPoint());
         }
     }
 
