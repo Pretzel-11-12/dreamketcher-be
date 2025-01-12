@@ -4,6 +4,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -13,7 +15,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -81,7 +82,7 @@ public class S3Service {
      * 이미지 파일 수정
      */
     public String imageUpdate(String oldImage, MultipartFile newImage, String folderName) {
-        String newImageUrl = null;
+        String newImageUrl;
         String newImageKey = null;
         try {
             newImageUrl = imageUpload(newImage, folderName);
@@ -135,8 +136,7 @@ public class S3Service {
                 updatedImageUrls.set(replaceIndex, newImageUrl);
             }
 
-            for (int i = 0; i < successUpdatedIndices.size(); i++) {
-                int replaceIndex = successUpdatedIndices.get(i);
+            for (int replaceIndex : successUpdatedIndices) {
                 deleteImage(existingImageUrls.get(replaceIndex));
             }
         } catch (Exception e) {
@@ -225,6 +225,7 @@ public class S3Service {
      * 객체 키 추출
      */
     private String extractObjectKey(String fileUrl) {
+        String decodedUrl = URLDecoder.decode(fileUrl, StandardCharsets.UTF_8);
         String[] urlParts = fileUrl.split("/");
         return String.join("/", Arrays.copyOfRange(urlParts, 3, urlParts.length));
     }

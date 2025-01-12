@@ -8,6 +8,7 @@ public enum EpisodeExceptionType implements ExceptionType {
     EPIOSDE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 존재하는 에피소드입니다."),
     EPISODE_STAR_NOT_FOUND(HttpStatus.NOT_FOUND, "에피소드 별점을 찾을 수 없습니다."),
     INVALID_EPISODE(HttpStatus.BAD_REQUEST, "유효하지 않은 에피소드입니다."),
+    EPISODE_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "에피소드 좋아요를 찾을 수 없습니다."),
     CREATE_EPISODE_FAILED(HttpStatus.BAD_REQUEST, "에피소드 등록에 실패했습니다.");
 
     private final HttpStatus status;
