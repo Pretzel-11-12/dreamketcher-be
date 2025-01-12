@@ -26,10 +26,12 @@ import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonReposito
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
+import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonGenre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
@@ -228,6 +230,28 @@ public class WebtoonService {
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         webtoonRepository.delete(findWebtoon);
+    }
+
+    /**
+     * 내 작품 조회
+     */
+    public MyWebtoonResDto getMyWebtoon(Long webtoonId) {
+        Member findMember = memberRepository.findById(webtoonId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        if (!findWebtoon.getMember().getId().equals(findMember.getId())) {
+            throw new WebtoonException(WebtoonExceptionType.NO_AUTHORITY_WEBTOON);
+        }
+
+        List<WebtoonGenre> webtoonGenres = webtoonGenreRepository.findByWebtoonId(webtoonId);
+
+        List<String> genreNames = webtoonGenres.stream().map(wg -> wg.getGenre().getName())
+            .toList();
+
+        return MyWebtoonResDto.of(findWebtoon, genreNames);
     }
 
     /**
