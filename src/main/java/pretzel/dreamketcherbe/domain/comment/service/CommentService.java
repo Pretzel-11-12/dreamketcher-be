@@ -125,6 +125,7 @@ public class CommentService {
 
         Recomment newRecomment = Recomment.addOf(request, commentOrder, findMember, findEpisode,
             findComment);
+        recommentRepository.save(newRecomment);
 
         int childCommentCount = (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(
             findComment.getId());
