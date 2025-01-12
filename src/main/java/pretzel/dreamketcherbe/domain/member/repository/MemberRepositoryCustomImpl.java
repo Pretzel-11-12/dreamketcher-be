@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.member.dto.WorkResDto;
-import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -83,11 +82,16 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom{
     private BooleanBuilder getWhereConditions(Long memberId, String status) {
         BooleanBuilder builder = new BooleanBuilder();
 
-        return builder
-            .and(episode.member.id.eq(memberId))
-            .and(status.equals("NEW")
-                ? webtoon.status.eq(WebtoonStatus.IN_SERIES.getStatus())
-                .and(webtoon.createdAt.after(LocalDateTime.now().minusMonths(1)))
-                : webtoon.status.eq(status));
+        builder.and(episode.member.id.eq(memberId));
+
+        if ("all".equals(status)) {
+            return builder;
+        } else if ("NEW".equals(status)) {
+            builder.and(webtoon.createdAt.after(LocalDateTime.now().minusMonths(1)));
+        } else {
+            builder.and(webtoon.status.eq(status));
+        }
+
+        return builder;
     }
 }
