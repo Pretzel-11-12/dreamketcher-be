@@ -117,7 +117,8 @@ public class CommentService {
             (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(findComment.getId())
                 + 1;
 
-        Recomment newRecomment = Recomment.addOf(request, commentOrder, findMember, findEpisode);
+        Recomment newRecomment = Recomment.addOf(request, commentOrder, findMember, findEpisode,
+            findComment);
 
         int childCommentCount = (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(
             findComment.getId());
