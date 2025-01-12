@@ -196,12 +196,11 @@ public class EpisodeController {
      */
     @PostMapping("/{episodeId}/like")
     public ResponseEntity<CreateEpisodeLikeResDto> likeEpisode(@Auth Long memberId,
+        @PathVariable("webtoonId") Long webtoonId,
         @PathVariable("episodeId") Long episodeId) {
-        CreateEpisodeLikeResDto like = episodeService.likeEpisode(memberId, episodeId);
+        CreateEpisodeLikeResDto like = episodeService.likeEpisode(webtoonId, episodeId, memberId);
 
-        return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(like);
+        return ResponseEntity.ok(like);
     }
 
     /**
