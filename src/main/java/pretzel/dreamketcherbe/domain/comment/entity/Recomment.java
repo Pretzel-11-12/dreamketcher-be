@@ -46,7 +46,7 @@ public class Recomment extends BaseTimeEntity {
 
     @Column(name = "is_deleted", nullable = false)
     @ColumnDefault("false")
-    private Boolean isDeleted;
+    private boolean isDeleted;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
@@ -85,6 +85,7 @@ public class Recomment extends BaseTimeEntity {
             .member(member)
             .webtoon(episode.getWebtoon())
             .episode(episode)
+            .comment(comment)
             .build();
     }
 

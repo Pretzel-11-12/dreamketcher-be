@@ -167,6 +167,7 @@ public class CommentService {
 
         Recomment newRecomment = Recomment.addOf(request, commentOrder, findMember, findEpisode,
             findComment);
+        recommentRepository.save(newRecomment);
 
         int childCommentCount = (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(
             findComment.getId());
@@ -214,7 +215,7 @@ public class CommentService {
         Pageable pageable = PageRequest.of(pageReqDto.getPage(), pageReqDto.getSize());
 
         Page<Recomment> recomments = recommentRepository.findActiveRecommentsByParentCommentId(
-            episodeId, pageable);
+            commentId, pageable);
 
         return new PageResDto<>(
             recomments.getContent().stream()

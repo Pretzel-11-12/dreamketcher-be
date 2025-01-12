@@ -1,8 +1,9 @@
 package pretzel.dreamketcherbe.domain.comment.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record CreateRecommentReqDto(
-    Long parentCommentId,
-    String content
+    @NotBlank String content
 ) {
 
 }
