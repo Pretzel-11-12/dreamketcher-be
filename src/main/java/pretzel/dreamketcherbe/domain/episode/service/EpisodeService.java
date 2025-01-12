@@ -159,7 +159,7 @@ public class EpisodeService {
         MultipartFile thumbnail) {
         try {
             String folderName =
-                "episode/" + memberId + "/" + webtoonId + "/" + "/thumbnail";
+                "episode/" + memberId + "/" + webtoonId + "/thumbnail";
 
             return s3Service.imageUpload(thumbnail, folderName);
         } catch (Exception e) {
@@ -186,7 +186,7 @@ public class EpisodeService {
         List<MultipartFile> content, ObjectMapper objectMapper) {
         try {
             String folderName =
-                "episode/" + memberId + "/" + webtoonId + "/" + "/content";
+                "episode/" + memberId + "/" + webtoonId + "/content";
 
             List<String> contentUrls = s3Service.imagesUpload(content, folderName);
 
