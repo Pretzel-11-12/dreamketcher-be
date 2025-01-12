@@ -22,6 +22,7 @@ import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
@@ -155,6 +156,16 @@ public class WebtoonController {
     }
 
     // TODO: Redis 적용 후 관심 웹툰 삭제 메서드 추가
+
+    /**
+     * 내 작품 조회
+     */
+    @GetMapping("/{webtoonId}")
+    public ResponseEntity<MyWebtoonResDto> getWebtoon(
+        @Auth Long memberId,
+        @PathVariable Long webtoonId) {
+        return ResponseEntity.ok(webtoonService.getMyWebtoon(webtoonId));
+    }
 
     /**
      * 웹툰 수정
