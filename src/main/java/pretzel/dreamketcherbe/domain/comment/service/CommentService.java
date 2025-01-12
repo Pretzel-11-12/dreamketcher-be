@@ -53,12 +53,8 @@ public class CommentService {
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
-        Comment newComment = Comment
-            .builder()
-            .member(findMember)
-            .episode(findEpisode)
-            .content(request.content())
-            .build();
+        Comment newComment = Comment.addOf(request, findMember, findEpisode);
+        commentRepository.save(newComment);
 
         return CreateCommentResDto.of(newComment);
     }
