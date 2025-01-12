@@ -118,4 +118,8 @@ public class Episode extends BaseTimeEntity {
             throw new IllegalStateException(memberId + ", 작성자가 아닙니다.");
         }
     }
+
+    public void updateAverageStar(float averageStar) {
+        this.averageStar = averageStar;
+    }
 }
