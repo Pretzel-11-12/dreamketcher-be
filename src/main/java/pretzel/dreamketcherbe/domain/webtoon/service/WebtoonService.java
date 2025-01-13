@@ -120,7 +120,7 @@ public class WebtoonService {
             Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-            String folderName = "/webtoon" + memberId + "/thumbnail";
+            String folderName = "webtoon/" + memberId + "/thumbnail";
 
             return s3Service.imageUpload(thumbnail, folderName);
         } catch (Exception e) {
@@ -149,7 +149,7 @@ public class WebtoonService {
             Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-            String folderName = "/webtoon" + memberId + "/prologue";
+            String folderName = "webtoon/" + memberId + "/prologue";
 
             List<String> prologueImageUrls = s3Service.imagesUpload(prologue, folderName);
 
