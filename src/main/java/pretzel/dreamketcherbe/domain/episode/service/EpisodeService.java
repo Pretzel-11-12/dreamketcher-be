@@ -117,12 +117,21 @@ public class EpisodeService {
     }
 
     private float calculateAverageStar(Long episodeId) {
+        Episode episode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
         List<EpisodeStar> stars = episodeStarRepository.findByEpisodeId(episodeId);
         if (stars.isEmpty()) {
             return 0f;
         }
+
         double sum = stars.stream().mapToDouble(EpisodeStar::getPoint).sum();
-        return (float) (sum / stars.size());
+        float average = (float) (sum / stars.size());
+
+        episode.updateAverageStar(average);
+        episodeRepository.save(episode);
+
+        return average;
     }
 
     /**
@@ -271,6 +280,8 @@ public class EpisodeService {
             throw new EpisodeException(EpisodeExceptionType.INVALID_EPISODE);
         }
 
+        calculateAverageStar(episodeId);
+
         // 조회수 중복 방지
         Cookie oldCookie = null;
         Cookie[] cookies = request.getCookies();
@@ -316,7 +327,7 @@ public class EpisodeService {
     public CreateEpisodeLikeResDto likeEpisode(Long webtoonId, Long episodeId, Long memberId) {
         Webtoon webtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
-        
+
         Episode episode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 

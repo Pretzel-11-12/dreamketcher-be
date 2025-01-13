@@ -42,10 +42,11 @@ public class CommentController {
      */
     @PostMapping("/create")
     public ResponseEntity<CreateCommentResDto> createComment(@Auth Long memberId,
+        @PathVariable Long webtoonId,
         @PathVariable Long episodeId,
         @RequestBody @Valid CreateCommentReqDto request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(commentService.createComment(memberId, episodeId, request));
+            .body(commentService.createComment(memberId, webtoonId, episodeId, request));
     }
 
     /**
@@ -74,18 +75,20 @@ public class CommentController {
     }
 
     /**
-     * 대댓글 생성
+     * 답글 생성
      */
     @PostMapping("/{commentId}/recomment/create")
     public ResponseEntity<CreateRecommentResDto> createRecomment(@Auth Long memberId,
+        @PathVariable Long webtoonId,
         @PathVariable Long episodeId, @PathVariable Long commentId,
         @RequestBody @Valid CreateRecommentReqDto request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(commentService.createRecomment(memberId, episodeId, commentId, request));
+            .body(
+                commentService.createRecomment(memberId, webtoonId, episodeId, commentId, request));
     }
 
     /**
-     * 대댓글 삭제
+     * 답글 삭제
      */
     @DeleteMapping("/{commentId}/recomment/{recommentId}/delete")
     public ResponseEntity<Void> deleteRecomment(@Auth Long memberId, @PathVariable Long episodeId,

@@ -17,6 +17,7 @@ import java.util.Optional;
 import static pretzel.dreamketcherbe.domain.episode.entity.QEpisode.episode;
 import static pretzel.dreamketcherbe.domain.member.entity.QInterestedWebtoon.interestedWebtoon;
 import static pretzel.dreamketcherbe.domain.member.entity.QMember.member;
+import static pretzel.dreamketcherbe.domain.webtoon.entity.QLike.like;
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QSerializationPeriod.serializationPeriod;
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QWebtoon.webtoon;
 
@@ -39,25 +40,26 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom{
     private List<WorkResDto> getEpisodes(Long memberId, String status, PageReqDto pageReqDto) {
         return jpaQueryFactory.select(
                 Projections.constructor(WorkResDto.class,
-                    episode.id,
-                    episode.no,
+                    webtoon.id,
                     webtoon.title,
                     webtoon.thumbnail,
-                    Expressions.stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", episode.publishedAt),
+                    webtoon.episodeCount,
+                    Expressions.stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", webtoon.updatedAt),
                     Expressions.stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", serializationPeriod.startDate),
-                    episode.viewCount,
-                    Expressions.constant(0L),
                     JPAExpressions.select(interestedWebtoon.count())
                         .from(interestedWebtoon)
-                        .where(interestedWebtoon.webtoon.id.eq(webtoon.id))))
-            .from(episode)
-            .join(episode.webtoon, webtoon)
-            .join(episode.member, member)
+                        .where(interestedWebtoon.webtoon.id.eq(webtoon.id)),
+                    Expressions.constant(0L),
+                    JPAExpressions.select(like.count())
+                        .from(like)
+                        .where(like.webtoon.id.eq(webtoon.id))))
+            .from(webtoon)
+            .join(webtoon.member, member)
             .leftJoin(serializationPeriod).on(serializationPeriod.webtoon.id.eq(webtoon.id))
             .where(getWhereConditions(memberId, status))
             .offset(pageReqDto.getFirstIndex())
             .limit(pageReqDto.getSize())
-            .orderBy(episode.createdAt.desc())
+            .orderBy(webtoon.updatedAt.desc())
             .fetch();
     }
 
@@ -82,7 +84,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom{
     private BooleanBuilder getWhereConditions(Long memberId, String status) {
         BooleanBuilder builder = new BooleanBuilder();
 
-        builder.and(episode.member.id.eq(memberId));
+        builder.and(webtoon.member.id.eq(memberId));
 
         if ("all".equals(status)) {
             return builder;

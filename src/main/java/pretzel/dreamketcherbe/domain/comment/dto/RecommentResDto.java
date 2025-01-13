@@ -1,5 +1,6 @@
 package pretzel.dreamketcherbe.domain.comment.dto;
 
+import java.time.LocalDateTime;
 import lombok.Builder;
 import pretzel.dreamketcherbe.domain.comment.entity.Recomment;
 
@@ -9,7 +10,8 @@ public record RecommentResDto(
     String ninkname,
     String content,
     Long parentCommentId,
-    Long commentOrder
+    int commentOrder,
+    LocalDateTime createdAt
 ) {
 
     public static RecommentResDto of(Recomment recomment) {
@@ -19,6 +21,7 @@ public record RecommentResDto(
             .content(recomment.getContent())
             .parentCommentId(recomment.getParentCommentId())
             .commentOrder(recomment.getCommentOrder())
+            .createdAt(recomment.getCreatedAt())
             .build();
     }
 

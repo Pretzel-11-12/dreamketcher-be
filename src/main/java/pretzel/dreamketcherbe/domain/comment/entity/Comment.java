@@ -17,6 +17,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
@@ -56,11 +57,22 @@ public class Comment extends BaseTimeEntity {
     private Webtoon webtoon;
 
     @Builder
-    public Comment(String content, int childCommentCount, Member member, Episode episode) {
+    public Comment(String content, int childCommentCount, Member member, Episode episode,
+        Webtoon webtoon) {
         this.content = content;
         this.childCommentCount = childCommentCount;
         this.member = member;
         this.episode = episode;
+        this.webtoon = webtoon;
+    }
+
+    public static Comment addOf(CreateCommentReqDto dto, Member member, Episode episode) {
+        return Comment.builder()
+            .content(dto.content())
+            .member(member)
+            .episode(episode)
+            .webtoon(episode.getWebtoon())
+            .build();
     }
 
     public void isAuthor(Long memberId) {
