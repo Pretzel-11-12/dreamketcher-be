@@ -8,8 +8,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
-@EnableScheduling
-@EnableAsync
 public class DreamketcherbeApplication {
 
     public static void main(String[] args) {
