@@ -142,17 +142,19 @@ public class CommentController {
      * 댓글 추천 해제
      */
     @DeleteMapping("/{commentId}/recommend")
-    public ResponseEntity<Void> unrecommend(@Auth Long memberId, @PathVariable Long commentId) {
-        commentService.unrecommendComment(memberId, commentId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Integer> unrecommend(@Auth Long memberId, @PathVariable Long commentId) {
+        int updatedRecommendationCount = commentService.unrecommendComment(memberId, commentId);
+        return ResponseEntity.ok(updatedRecommendationCount);
     }
 
     /**
      * 댓글 비추천 해제
      */
     @DeleteMapping("/{commentId}/not-recommend")
-    public ResponseEntity<Void> unnotRecommend(@Auth Long memberId, @PathVariable Long commentId) {
-        commentService.unnotRecommendComment(memberId, commentId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Integer> unnotRecommend(@Auth Long memberId,
+        @PathVariable Long commentId) {
+        int updatedNotRecommendationCount = commentService.unnotRecommendComment(memberId,
+            commentId);
+        return ResponseEntity.ok(updatedNotRecommendationCount);
     }
 }

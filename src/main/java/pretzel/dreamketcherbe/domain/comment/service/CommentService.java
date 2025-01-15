@@ -245,23 +245,24 @@ public class CommentService {
             throw new IllegalStateException("추천 처리 실패");
         }
 
-        Recommendation recommendation = Recommendation.builder()
-            .member(findMember)
-            .comment(findComment)
-            .build();
+        Recommendation recommendation = Recommendation.addOf(findComment);
         recommendationRepository.save(recommendation);
 
-        return CreateRecommendationResDto.builder()
-            .id(recommendation.getId())
-            .recommendationCount(getRecommendationCount(recommendCountKey))
-            .build();
+        return CreateRecommendationResDto.of(recommendation,
+            getRecommendationCount(recommendCountKey));
     }
 
     /**
      * 댓굴 추천 해제
      */
     @Transactional
-    public void unrecommendComment(Long memberId, Long commentId) {
+    public int unrecommendComment(Long memberId, Long commentId) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Comment findComment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
+
         String recommendSetKey = RECOMMEND_SET_KEY_PREFIX + commentId;
         String recommendCountKey = RECOMMEND_COUNT_KEY_PREFIX + commentId;
 
@@ -272,6 +273,8 @@ public class CommentService {
         }
 
         recommendationRepository.deleteByMemberAndComment(memberId, commentId);
+
+        return getRecommendationCount(recommendCountKey);
     }
 
 
@@ -312,16 +315,11 @@ public class CommentService {
             throw new IllegalStateException("비추천 처리 실패");
         }
 
-        NotRecommendation notRecommendation = NotRecommendation.builder()
-            .member(findMember)
-            .comment(findComment)
-            .build();
+        NotRecommendation notRecommendation = NotRecommendation.addOf(findComment);
         notRecommendationRepository.save(notRecommendation);
 
-        return NotRecommendationResDto.builder()
-            .id(notRecommendation.getId())
-            .notRecommendationCount(getRecommendationCount(notRecommendCountKey))
-            .build();
+        return NotRecommendationResDto.of(notRecommendation,
+            getRecommendationCount(notRecommendCountKey));
     }
 
 
@@ -329,7 +327,13 @@ public class CommentService {
      * 댓글 비추천 해제
      */
     @Transactional
-    public void unnotRecommendComment(Long memberId, Long commentId) {
+    public int unnotRecommendComment(Long memberId, Long commentId) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Comment findComment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
+
         String notRecommendSetKey = NOT_RECOMMEND_SET_KEY_PREFIX + commentId;
         String notRecommendCountKey = NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId;
 
@@ -340,12 +344,13 @@ public class CommentService {
         }
 
         notRecommendationRepository.deleteByMemberAndComment(memberId, commentId);
+        return getRecommendationCount(notRecommendCountKey);
     }
 
     /**
      * 추천 수, 비추천 수 가져오기
      */
-    public int getRecommendationCount(String countKey) {
+    private int getRecommendationCount(String countKey) {
         String countValue = redisTemplate.opsForValue().get(countKey);
         return countValue == null ? 0 : Integer.parseInt(countValue);
     }
