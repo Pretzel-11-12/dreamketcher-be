@@ -48,10 +48,10 @@ public class S3Service {
         try {
             amazonS3.putObject(bucketName, filePath, multipartFile.getInputStream(), metadata);
         } catch (IOException e) {
-            log.error("Failed to convert image file", e);
+            log.error("파일 변환에 실패했습니다.", e);
             throw new S3Exception(S3ExceptionType.FAILED_TO_CONVERT_IMAGE);
         } catch (AmazonS3Exception e) {
-            log.error("Amazon S3 error while uploading file: {}", e.getMessage(), e);
+            log.error("업로드 중 에러가 발생했습니다.: {}", e.getMessage(), e);
             throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
         }
         return amazonS3.getUrl(bucketName, filePath).toString();
@@ -94,7 +94,7 @@ public class S3Service {
                 try {
                     deleteImage(newImageKey);
                 } catch (S3Exception cleanupException) {
-                    log.error("Failed to clean up the new image: {}", cleanupException.getMessage(),
+                    log.error("새로운 이미지를 비우는데 실패했습니다.: {}", cleanupException.getMessage(),
                         cleanupException);
                 }
             }
@@ -226,7 +226,8 @@ public class S3Service {
      */
     private String extractObjectKey(String fileUrl) {
         String decodedUrl = URLDecoder.decode(fileUrl, StandardCharsets.UTF_8);
-        String[] urlParts = decodedUrl.split("/");
-        return String.join("/", Arrays.copyOfRange(urlParts, 3, urlParts.length));
+        String split = ".com/";
+
+        return decodedUrl.substring(decodedUrl.lastIndexOf(split) + split.length());
     }
 }

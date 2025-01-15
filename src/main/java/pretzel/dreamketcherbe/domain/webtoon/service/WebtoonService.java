@@ -136,7 +136,7 @@ public class WebtoonService {
         try {
             return s3Service.imageUpdate(oldThumbnail, newThumbnail, folderName);
         } catch (Exception e) {
-            throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
+            throw new S3Exception(S3ExceptionType.UPDATE_FAILED);
         }
     }
 
@@ -175,7 +175,7 @@ public class WebtoonService {
 
             return objectMapper.writeValueAsString(updatedPrologueUrls);
         } catch (Exception e) {
-            throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
+            throw new S3Exception(S3ExceptionType.UPDATE_FAILED);
         }
     }
 
