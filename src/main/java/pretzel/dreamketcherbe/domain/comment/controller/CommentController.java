@@ -19,8 +19,10 @@ import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.NotRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.RecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.service.CommentService;
 
@@ -113,5 +115,46 @@ public class CommentController {
         PageResDto<RecommentResDto> response = commentService.getRecomments(episodeId, commentId,
             pageReqDto);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 댓글 추천
+     */
+    @PostMapping("/{commentId}/recommend")
+    public ResponseEntity<CreateRecommendationResDto> recommend(@Auth Long memberId,
+        @PathVariable Long commentId) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(commentService.recommendComment(memberId, commentId));
+    }
+
+    /**
+     * 댓글 비추천
+     */
+    @PostMapping("/{commentId}/not-recommend")
+    public ResponseEntity<NotRecommendationResDto> notRecommend(@Auth Long memberId,
+        @PathVariable Long commentId) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(commentService.notRecommendComment(memberId, commentId));
+    }
+
+
+    /**
+     * 댓글 추천 해제
+     */
+    @DeleteMapping("/{commentId}/recommend")
+    public ResponseEntity<Integer> unrecommend(@Auth Long memberId, @PathVariable Long commentId) {
+        int updatedRecommendationCount = commentService.unrecommendComment(memberId, commentId);
+        return ResponseEntity.ok(updatedRecommendationCount);
+    }
+
+    /**
+     * 댓글 비추천 해제
+     */
+    @DeleteMapping("/{commentId}/not-recommend")
+    public ResponseEntity<Integer> unnotRecommend(@Auth Long memberId,
+        @PathVariable Long commentId) {
+        int updatedNotRecommendationCount = commentService.unnotRecommendComment(memberId,
+            commentId);
+        return ResponseEntity.ok(updatedNotRecommendationCount);
     }
 }
