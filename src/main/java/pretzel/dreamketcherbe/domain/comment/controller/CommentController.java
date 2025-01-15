@@ -27,6 +27,7 @@ import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.NotRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.RecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.service.CommentService;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value.Int;
 
 @Slf4j
 @RestController
@@ -165,7 +166,7 @@ public class CommentController {
     /**
      * 답글 추천
      */
-    @PostMapping("/{commentId}/recomments/{recommentId}/recommend")
+    @PostMapping("/{commentId}/recomment/{recommentId}/recommend")
     public ResponseEntity<CreateRecommentRecommendationResDto> recommentRecommendation(
         @Auth Long memberId,
         @PathVariable Long episodeId, @PathVariable Long commentId,
@@ -180,12 +181,13 @@ public class CommentController {
      * 답글 추천 해제
      */
     @DeleteMapping("/{commentId}/recomment/{recommentId}/recommend")
-    public ResponseEntity<Void> cancelRecommendRecomment(@Auth Long memberId,
+    public ResponseEntity<Integer> cancelRecommendRecomment(@Auth Long memberId,
         @PathVariable Long episodeId, @PathVariable Long commentId,
         @PathVariable Long recommentId, @PathVariable Long recommendationId) {
-        commentService.unrecommentRecommendation(memberId, recommentId);
+        int updatedRecommentRecommendationCount = commentService.unrecommentRecommendation(memberId,
+            recommentId);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(updatedRecommentRecommendationCount);
     }
 
     /**
@@ -206,12 +208,13 @@ public class CommentController {
      * 답글 비추천 해제
      */
     @DeleteMapping("/{commentId}/recomment/{recommentId}/not-recommend")
-    public ResponseEntity<Void> cancelRecommentNotRecommend(@Auth Long memberId,
+    public ResponseEntity<Integer> cancelRecommentNotRecommend(@Auth Long memberId,
         @PathVariable Long episodeId, @PathVariable Long commentId,
         @PathVariable Long recommentId) {
-        commentService.unrecommentNotRecommendation(memberId, recommentId);
+        int updatedRecommentNotRecommendationCount = commentService.unrecommentNotRecommendation(
+            memberId, recommentId);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(updatedRecommentNotRecommendationCount);
     }
 
 }

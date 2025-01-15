@@ -362,7 +362,7 @@ public class CommentService {
     /**
      * 추천 수, 비추천 수 가져오기
      */
-    private int getRecommendationCount(String countKey) {
+    public int getRecommendationCount(String countKey) {
         String countValue = redisTemplate.opsForValue().get(countKey);
         return countValue == null ? 0 : Integer.parseInt(countValue);
     }
@@ -387,25 +387,20 @@ public class CommentService {
             throw new IllegalStateException("답글 추천 실패");
         }
 
-        RecommentRecommendation newRecommentRecommendation = RecommentRecommendation
-            .builder()
-            .member(findMember)
-            .recomment(findRecomment)
-            .build();
+        RecommentRecommendation newRecommentRecommendation = RecommentRecommendation.addOf(
+            findMember,
+            findRecomment);
         recommentRecommendationRepository.save(newRecommentRecommendation);
 
-        return CreateRecommentRecommendationResDto.builder()
-            .id(newRecommentRecommendation.getId())
-            .recommentRecommendationCount(
-                getRecommentRecommendationCount(recommendRecommentCountKey))
-            .build();
+        return CreateRecommentRecommendationResDto.of(newRecommentRecommendation,
+            getRecommentRecommendationCount(recommendRecommentCountKey));
     }
 
     /**
      * 답글 추천 해제
      */
     @Transactional
-    public void unrecommentRecommendation(Long memberId, Long recommentId) {
+    public int unrecommentRecommendation(Long memberId, Long recommentId) {
         String recommendRecommentSetKey = RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId;
         String recommendRecommentCountKey = RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
 
@@ -416,6 +411,7 @@ public class CommentService {
         }
 
         recommentRecommendationRepository.deleteByMemberAndRecomment(memberId, recommentId);
+        return getRecommentRecommendationCount(recommendRecommentCountKey);
     }
 
     /**
@@ -440,23 +436,19 @@ public class CommentService {
             throw new IllegalStateException("비추천 처리 실패");
         }
 
-        RecommentNotRecommendation newRecommentNotRecommendation = RecommentNotRecommendation.builder()
-            .member(findMember)
-            .recomment(findRecomment)
-            .build();
+        RecommentNotRecommendation newRecommentNotRecommendation = RecommentNotRecommendation.addOf(
+            findMember, findRecomment);
         recommentNotRecommendationRepository.save(newRecommentNotRecommendation);
 
-        return CreateRecommentNotRecommendationResDto.builder()
-            .id(newRecommentNotRecommendation.getId())
-            .notRecommendationCount(getRecommentRecommendationCount(notRecommendRecommentCountKey))
-            .build();
+        return CreateRecommentNotRecommendationResDto.of(newRecommentNotRecommendation,
+            getRecommentRecommendationCount(notRecommendRecommentCountKey));
     }
 
     /**
      * 답글 비추천 해제
      */
     @Transactional
-    public void unrecommentNotRecommendation(Long memberId, Long recommentId) {
+    public int unrecommentNotRecommendation(Long memberId, Long recommentId) {
         String notRecommentRecommendSetKey = RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX + recommentId;
         String notRecommentRecommendCountKey =
             RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
@@ -469,6 +461,7 @@ public class CommentService {
         }
 
         recommentNotRecommendationRepository.deleteByMemberAndRecomment(memberId, recommentId);
+        return getRecommentRecommendationCount(notRecommentRecommendCountKey);
     }
 
     /**
