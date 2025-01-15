@@ -20,6 +20,8 @@ import pretzel.dreamketcherbe.domain.comment.dto.CommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommendationResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentNotRecommendationResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.NotRecommendationResDto;
@@ -36,17 +38,13 @@ public class CommentController {
 
     /**
      * 댓글 생성
-     *
-     * @param memberId
-     * @param episodeId
-     * @param request
-     * @return
      */
     @PostMapping("/create")
     public ResponseEntity<CreateCommentResDto> createComment(@Auth Long memberId,
         @PathVariable Long webtoonId,
         @PathVariable Long episodeId,
         @RequestBody @Valid CreateCommentReqDto request) {
+
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(commentService.createComment(memberId, webtoonId, episodeId, request));
     }
@@ -84,6 +82,7 @@ public class CommentController {
         @PathVariable Long webtoonId,
         @PathVariable Long episodeId, @PathVariable Long commentId,
         @RequestBody @Valid CreateRecommentReqDto request) {
+
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(
                 commentService.createRecomment(memberId, webtoonId, episodeId, commentId, request));
@@ -157,4 +156,59 @@ public class CommentController {
             commentId);
         return ResponseEntity.ok(updatedNotRecommendationCount);
     }
+
+    /**
+     * 답글 추천
+     */
+    @PostMapping("/{commentId}/recomment/{recommentId}/recommend")
+    public ResponseEntity<CreateRecommentRecommendationResDto> recommentRecommendation(
+        @Auth Long memberId,
+        @PathVariable Long episodeId, @PathVariable Long commentId,
+        @PathVariable Long recommentId) {
+        CreateRecommentRecommendationResDto response = commentService.recommendRecomment(memberId,
+            recommentId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * 답글 추천 해제
+     */
+    @DeleteMapping("/{commentId}/recomment/{recommentId}/recommend")
+    public ResponseEntity<Integer> cancelRecommendRecomment(@Auth Long memberId,
+        @PathVariable Long episodeId, @PathVariable Long commentId,
+        @PathVariable Long recommentId) {
+        int updatedRecommentRecommendationCount = commentService.unrecommentRecommendation(memberId,
+            recommentId);
+
+        return ResponseEntity.ok(updatedRecommentRecommendationCount);
+    }
+
+    /**
+     * 답글 비추천
+     */
+    @PostMapping("/{commentId}/recomment/{recommentId}/not-recommend")
+    public ResponseEntity<CreateRecommentNotRecommendationResDto> recommentNotRecommendation(
+        @Auth Long memberId,
+        @PathVariable Long episodeId, @PathVariable Long commentId,
+        @PathVariable Long recommentId) {
+        CreateRecommentNotRecommendationResDto response = commentService.recommentNotRecommendation(
+            memberId, recommentId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * 답글 비추천 해제
+     */
+    @DeleteMapping("/{commentId}/recomment/{recommentId}/not-recommend")
+    public ResponseEntity<Integer> cancelRecommentNotRecommend(@Auth Long memberId,
+        @PathVariable Long episodeId, @PathVariable Long commentId,
+        @PathVariable Long recommentId) {
+        int updatedRecommentNotRecommendationCount = commentService.unrecommentNotRecommendation(
+            memberId, recommentId);
+
+        return ResponseEntity.ok(updatedRecommentNotRecommendationCount);
+    }
+
 }
