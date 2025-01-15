@@ -38,9 +38,9 @@ public class NotRecommendation extends BaseTimeEntity {
         this.comment = comment;
     }
 
-    public static NotRecommendation addOf(Comment comment) {
+    public static NotRecommendation addOf(Comment comment, Member member) {
         return NotRecommendation.builder()
-            .member(comment.getMember())
+            .member(member)
             .comment(comment)
             .build();
     }

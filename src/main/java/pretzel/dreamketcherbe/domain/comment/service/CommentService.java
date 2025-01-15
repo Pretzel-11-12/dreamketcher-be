@@ -245,7 +245,7 @@ public class CommentService {
             throw new IllegalStateException("추천 처리 실패");
         }
 
-        Recommendation recommendation = Recommendation.addOf(findComment);
+        Recommendation recommendation = Recommendation.addOf(findComment, findMember);
         recommendationRepository.save(recommendation);
 
         return CreateRecommendationResDto.of(recommendation,
@@ -315,7 +315,7 @@ public class CommentService {
             throw new IllegalStateException("비추천 처리 실패");
         }
 
-        NotRecommendation notRecommendation = NotRecommendation.addOf(findComment);
+        NotRecommendation notRecommendation = NotRecommendation.addOf(findComment, findMember);
         notRecommendationRepository.save(notRecommendation);
 
         return NotRecommendationResDto.of(notRecommendation,
