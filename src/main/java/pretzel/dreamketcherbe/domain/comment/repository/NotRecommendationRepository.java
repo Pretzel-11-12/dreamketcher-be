@@ -14,7 +14,7 @@ public interface NotRecommendationRepository extends JpaRepository<NotRecommenda
         @Param("commentId") Long commentId);
 
     @Modifying
-    @Query("SELECT r FROM NotRecommendation r WHERE r.member.id = :memberId AND r.comment.id = :commentId")
+    @Query("DELETE FROM NotRecommendation r WHERE r.member.id = :memberId AND r.comment.id = :commentId")
     void deleteByMemberAndComment(@Param("memberId") Long memberId,
         @Param("commentId") Long commentId);
 }
