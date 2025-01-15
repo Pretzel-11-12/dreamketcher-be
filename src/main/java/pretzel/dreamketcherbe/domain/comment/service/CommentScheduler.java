@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class CommentScheduler {
 
     private final CommentService commentService;
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Scheduled(cron = "0 0 * * * ?") // 정각 마다 실행
     public void syncRecommendationCountToDBScheduler() {

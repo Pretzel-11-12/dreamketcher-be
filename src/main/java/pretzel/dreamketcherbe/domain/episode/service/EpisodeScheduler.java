@@ -14,7 +14,7 @@ public class EpisodeScheduler {
 
     private final EpisodeService episodeService;
 
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     public static final String EPISODE_LIKE_COUNT_KEY_PREFIX = "episode:likeCount:";
 
