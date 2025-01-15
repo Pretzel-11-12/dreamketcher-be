@@ -2,13 +2,15 @@ package pretzel.dreamketcherbe.domain.comment.service;
 
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class RedisScheduler {
+public class CommentScheduler {
 
     private final CommentService commentService;
     private final RedisTemplate redisTemplate;
