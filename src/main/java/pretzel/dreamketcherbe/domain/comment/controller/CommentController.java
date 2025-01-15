@@ -27,7 +27,6 @@ import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.NotRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.RecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.service.CommentService;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value.Int;
 
 @Slf4j
 @RestController
@@ -39,11 +38,6 @@ public class CommentController {
 
     /**
      * 댓글 생성
-     *
-     * @param memberId
-     * @param episodeId
-     * @param request
-     * @return
      */
     @PostMapping("/create")
     public ResponseEntity<CreateCommentResDto> createComment(@Auth Long memberId,
@@ -183,7 +177,7 @@ public class CommentController {
     @DeleteMapping("/{commentId}/recomment/{recommentId}/recommend")
     public ResponseEntity<Integer> cancelRecommendRecomment(@Auth Long memberId,
         @PathVariable Long episodeId, @PathVariable Long commentId,
-        @PathVariable Long recommentId, @PathVariable Long recommendationId) {
+        @PathVariable Long recommentId) {
         int updatedRecommentRecommendationCount = commentService.unrecommentRecommendation(memberId,
             recommentId);
 
