@@ -10,8 +10,6 @@ import org.hibernate.annotations.DynamicInsert;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
-@Table(name = "management_webtoon")
-@Entity
 @Getter
 @DynamicInsert
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

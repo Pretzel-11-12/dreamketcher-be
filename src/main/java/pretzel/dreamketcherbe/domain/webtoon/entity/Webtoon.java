@@ -52,11 +52,11 @@ public class Webtoon extends BaseTimeEntity {
     @Column(nullable = false, name = "average_star")
     private float averageStar;
 
-    @Column(name = "episode_count", nullable = false)
+    @Column(nullable = false)
     @ColumnDefault("0")
     private int episodeCount;
 
-    @Column(name = "interest_count", nullable = false)
+    @Column(nullable = false)
     @ColumnDefault("0")
     private int interestCount;
 
