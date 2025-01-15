@@ -39,9 +39,9 @@ public class Recommendation extends BaseTimeEntity {
         this.comment = comment;
     }
 
-    public static Recommendation addOf(Comment comment) {
+    public static Recommendation addOf(Comment comment, Member member) {
         return Recommendation.builder()
-            .member(comment.getMember())
+            .member(member)
             .comment(comment)
             .build();
     }
