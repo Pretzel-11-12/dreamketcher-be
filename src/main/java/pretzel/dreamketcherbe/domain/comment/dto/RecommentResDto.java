@@ -8,6 +8,7 @@ import pretzel.dreamketcherbe.domain.comment.entity.Recomment;
 public record RecommentResDto(
     Long id,
     String nickname,
+    String profileImage,
     String content,
     Long parentCommentId,
     int commentOrder,
@@ -18,6 +19,7 @@ public record RecommentResDto(
         return RecommentResDto.builder()
             .id(recomment.getId())
             .nickname(recomment.getMember().getNickname())
+            .profileImage(recomment.getMember().getImageUrl())
             .content(recomment.getContent())
             .parentCommentId(recomment.getParentCommentId())
             .commentOrder(recomment.getCommentOrder())
