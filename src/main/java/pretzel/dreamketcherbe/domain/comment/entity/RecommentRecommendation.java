@@ -7,7 +7,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,6 +36,13 @@ public class RecommentRecommendation extends BaseTimeEntity {
     public RecommentRecommendation(Member member, Recomment recomment) {
         this.member = member;
         this.recomment = recomment;
+    }
+
+    public static RecommentRecommendation addOf(Member member, Recomment recomment) {
+        return RecommentRecommendation.builder()
+            .member(member)
+            .recomment(recomment)
+            .build();
     }
 
 }
