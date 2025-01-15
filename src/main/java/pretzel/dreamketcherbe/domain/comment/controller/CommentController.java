@@ -60,8 +60,7 @@ public class CommentController {
     @DeleteMapping("/{commentId}/delete")
     public ResponseEntity<Void> deleteComment(@Auth Long memberId, @PathVariable Long episodeId,
         @PathVariable Long commentId) {
-        commentService.deleteComment(memberId, commentId);
-
+        commentService.deleteComment(memberId, episodeId, commentId);
         return ResponseEntity.noContent().build();
     }
 
@@ -100,8 +99,7 @@ public class CommentController {
     @DeleteMapping("/{commentId}/recomment/{recommentId}/delete")
     public ResponseEntity<Void> deleteRecomment(@Auth Long memberId, @PathVariable Long episodeId,
         @PathVariable Long commentId, @PathVariable Long recommentId) {
-        commentService.deleteRecomment(memberId, commentId, recommentId);
-
+        commentService.deleteRecomment(memberId, episodeId, commentId, recommentId);
         return ResponseEntity.noContent().build();
     }
 
@@ -129,8 +127,6 @@ public class CommentController {
     @PostMapping("/{commentId}/recommend")
     public ResponseEntity<CreateRecommendationResDto> recommend(@Auth Long memberId,
         @PathVariable Long commentId) {
-        commentService.recommendComment(memberId, commentId);
-
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(commentService.recommendComment(memberId, commentId));
     }
@@ -141,28 +137,29 @@ public class CommentController {
     @PostMapping("/{commentId}/not-recommend")
     public ResponseEntity<NotRecommendationResDto> notRecommend(@Auth Long memberId,
         @PathVariable Long commentId) {
-        commentService.notRecommendComment(memberId, commentId);
-
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(commentService.notRecommendComment(memberId, commentId));
     }
+
 
     /**
      * 댓글 추천 해제
      */
     @DeleteMapping("/{commentId}/recommend")
-    public ResponseEntity<Void> unrecommend(@Auth Long memberId, @PathVariable Long commentId) {
-        commentService.unrecommendComment(memberId, commentId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Integer> unrecommend(@Auth Long memberId, @PathVariable Long commentId) {
+        int updatedRecommendationCount = commentService.unrecommendComment(memberId, commentId);
+        return ResponseEntity.ok(updatedRecommendationCount);
     }
 
     /**
      * 댓글 비추천 해제
      */
     @DeleteMapping("/{commentId}/not-recommend")
-    public ResponseEntity<Void> unnotRecommend(@Auth Long memberId, @PathVariable Long commentId) {
-        commentService.unnotRecommendComment(memberId, commentId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Integer> unnotRecommend(@Auth Long memberId,
+        @PathVariable Long commentId) {
+        int updatedNotRecommendationCount = commentService.unnotRecommendComment(memberId,
+            commentId);
+        return ResponseEntity.ok(updatedNotRecommendationCount);
     }
 
     /**
