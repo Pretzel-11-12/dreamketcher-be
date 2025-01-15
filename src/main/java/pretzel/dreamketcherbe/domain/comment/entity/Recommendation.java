@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 
 @Table(name = "recommendation")
@@ -36,5 +37,12 @@ public class Recommendation extends BaseTimeEntity {
     public Recommendation(Member member, Comment comment) {
         this.member = member;
         this.comment = comment;
+    }
+
+    public static Recommendation addOf(Comment comment) {
+        return Recommendation.builder()
+            .member(comment.getMember())
+            .comment(comment)
+            .build();
     }
 }
