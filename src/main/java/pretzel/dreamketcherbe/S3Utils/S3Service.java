@@ -226,7 +226,8 @@ public class S3Service {
      */
     private String extractObjectKey(String fileUrl) {
         String decodedUrl = URLDecoder.decode(fileUrl, StandardCharsets.UTF_8);
-        String[] urlParts = decodedUrl.split("/");
-        return String.join("/", Arrays.copyOfRange(urlParts, 3, urlParts.length));
+        String split = ".com/";
+
+        return decodedUrl.substring(decodedUrl.lastIndexOf(split) + split.length());
     }
 }
