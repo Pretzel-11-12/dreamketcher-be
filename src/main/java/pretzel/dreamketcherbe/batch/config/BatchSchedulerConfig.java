@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 @EnableScheduling
 @AllArgsConstructor
-public class SchedulerConfig {
+public class BatchSchedulerConfig {
 
     private final JobLauncher jobLauncher;
 

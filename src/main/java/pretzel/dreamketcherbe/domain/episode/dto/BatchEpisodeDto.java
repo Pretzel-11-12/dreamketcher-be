@@ -9,25 +9,38 @@ import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 
 public record BatchEpisodeDto(
     Long id,
+    int no,
+    String webtoonTitle,
     String title,
     String thumbnail,
     String content,
+    String authorName,
     String authorNote,
+    String authorImage,
     LocalDate publishedAt,
     boolean published,
-    Long viewCount
+    int likeCount,
+    Long viewCount,
+    float averageStar
+
 ) {
 
     public static BatchEpisodeDto fromEntity(Episode episode) {
         return new BatchEpisodeDto(
             episode.getId(),
+            episode.getNo(),
+            episode.getWebtoon().getTitle(),
             episode.getTitle(),
             episode.getThumbnail(),
             episode.getContent(),
+            episode.getWebtoon().getMember().getName(),
             episode.getAuthorNote(),
+            episode.getWebtoon().getMember().getImageUrl(),
             episode.getPublishedAt(),
             episode.isPublished(),
-            episode.getViewCount()
+            episode.getLikeCount(),
+            episode.getViewCount(),
+            episode.getAverageStar()
         );
     }
 
@@ -35,5 +48,5 @@ public record BatchEpisodeDto(
         existingEpisode.setPublished(this.published);
         return existingEpisode;
     }
-    
+
 }

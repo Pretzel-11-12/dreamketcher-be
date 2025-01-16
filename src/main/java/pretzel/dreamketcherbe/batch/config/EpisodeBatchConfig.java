@@ -37,7 +37,7 @@ public class EpisodeBatchConfig {
     public ItemReader<BatchEpisodeDto> episodeItemReader() {
 
         if (entityManagerFactoryBean.getObject() == null) {
-            throw new IllegalStateException("EntityManagerFactory must not be null");
+            throw new IllegalStateException("entity manager factory been 이 null 입니다.");
         }
 
         return new JpaPagingItemReaderBuilder<BatchEpisodeDto>()
@@ -57,13 +57,19 @@ public class EpisodeBatchConfig {
     public ItemProcessor<BatchEpisodeDto, BatchEpisodeDto> episodeEpisodeItemProcessor() {
         return dto -> new BatchEpisodeDto(
             dto.id(),
+            dto.no(),
+            dto.webtoonTitle(),
             dto.title(),
             dto.thumbnail(),
             dto.content(),
+            dto.authorName(),
             dto.authorNote(),
+            dto.authorImage(),
             dto.publishedAt(),
             true,
-            dto.viewCount()
+            dto.likeCount(),
+            dto.viewCount(),
+            dto.averageStar()
         );
     }
 
