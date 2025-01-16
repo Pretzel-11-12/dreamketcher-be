@@ -8,17 +8,19 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
+import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
 @Table(name = "comments")
 @Getter
@@ -38,12 +40,19 @@ public class Comment extends BaseTimeEntity {
     @Column(name = "child_comment_count")
     private int childCommentCount;
 
+    @Column(name = "recommendation_count", nullable = false)
+    @ColumnDefault("0")
+    @Setter
+    private int recommendationCount;
+
+    @Column(name = "not_recommendation_count", nullable = false)
+    @ColumnDefault("0")
+    @Setter
+    private int notRecommendationCount;
+
     @Column(name = "is_deleted", nullable = false)
     @ColumnDefault("false")
     private boolean isDeleted;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 
     @ManyToOne
     @JoinColumn(name = "member_id")
@@ -53,11 +62,30 @@ public class Comment extends BaseTimeEntity {
     @JoinColumn(name = "episode_id")
     private Episode episode;
 
+    @ManyToOne
+    @JoinColumn(name = "webtoon_id")
+    private Webtoon webtoon;
+
     @Builder
-    public Comment(String content, Member member, Episode episode) {
+    public Comment(String content, int childCommentCount, int recommendationCount,
+        int notRecommendationCount, Member member, Episode episode,
+        Webtoon webtoon) {
         this.content = content;
+        this.childCommentCount = childCommentCount;
+        this.recommendationCount = recommendationCount;
+        this.notRecommendationCount = notRecommendationCount;
         this.member = member;
         this.episode = episode;
+        this.webtoon = webtoon;
+    }
+
+    public static Comment addOf(CreateCommentReqDto dto, Member member, Episode episode) {
+        return Comment.builder()
+            .content(dto.content())
+            .member(member)
+            .episode(episode)
+            .webtoon(episode.getWebtoon())
+            .build();
     }
 
     public void isAuthor(Long memberId) {
@@ -67,8 +95,9 @@ public class Comment extends BaseTimeEntity {
     }
 
     public void softDelete() {
-        this.isDeleted = true;
-        this.deletedAt = LocalDateTime.now();
+        if (!this.isDeleted) {
+            this.isDeleted = true;
+        }
     }
 
     public void updateChildCommentCount(int count) {

@@ -12,10 +12,7 @@ public record UpdateProfileRequest(
     String shortIntroduction,
 
     @Email(message = "이메일 형식이 올바르지 않습니다.")
-    String businessEmail,
-
-    @NotBlank(message = "이미지 URL은 필수 입력 값입니다.")
-    String imageUrl
+    String businessEmail
 ) {
 
 }

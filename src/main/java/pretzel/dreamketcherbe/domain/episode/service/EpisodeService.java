@@ -1,5 +1,8 @@
 package pretzel.dreamketcherbe.domain.episode.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,6 +25,7 @@ import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarReqDto;
+import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
@@ -113,12 +117,21 @@ public class EpisodeService {
     }
 
     private float calculateAverageStar(Long episodeId) {
+        Episode episode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
         List<EpisodeStar> stars = episodeStarRepository.findByEpisodeId(episodeId);
         if (stars.isEmpty()) {
             return 0f;
         }
+
         double sum = stars.stream().mapToDouble(EpisodeStar::getPoint).sum();
-        return (float) (sum / stars.size());
+        float average = (float) (sum / stars.size());
+
+        episode.updateAverageStar(average);
+        episodeRepository.save(episode);
+
+        return average;
     }
 
     /**
@@ -137,7 +150,8 @@ public class EpisodeService {
             Long episodeCount = episodeRepository.countByWebtoonId(webtoonId);
             int nextEpisodeNo = episodeCount.intValue() + 1;
 
-            Episode newEpisode = Episode.addOf(request, nextEpisodeNo, findWebtoon, findMember);
+            Episode newEpisode = Episode.addOf(request, nextEpisodeNo, findWebtoon, findMember,
+                new ObjectMapper());
 
             episodeRepository.save(newEpisode);
 
@@ -154,7 +168,7 @@ public class EpisodeService {
         MultipartFile thumbnail) {
         try {
             String folderName =
-                "episode/" + memberId + "/" + webtoonId + "/" + "/thumbnail";
+                "episode/" + memberId + "/" + webtoonId + "thumbnail";
 
             return s3Service.imageUpload(thumbnail, folderName);
         } catch (Exception e) {
@@ -177,13 +191,15 @@ public class EpisodeService {
     /**
      * 에피소드 컨텐츠 등록
      */
-    public List<String> uploadContent(Long webtoonId, Long memberId,
-        List<MultipartFile> content) {
+    public String uploadContent(Long webtoonId, Long memberId,
+        List<MultipartFile> content, ObjectMapper objectMapper) {
         try {
             String folderName =
-                "episode/" + memberId + "/" + webtoonId + "/" + "/content";
+                "episode/" + memberId + webtoonId + "content";
 
-            return s3Service.imagesUpload(content, folderName);
+            List<String> contentUrls = s3Service.imagesUpload(content, folderName);
+
+            return objectMapper.writeValueAsString(contentUrls);
         } catch (Exception e) {
             throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
         }
@@ -192,11 +208,18 @@ public class EpisodeService {
     /**
      * 에피소드 컨텐츠 수정
      */
-    public List<String> updateContent(List<String> existingUrls, List<MultipartFile> newImages,
-        List<Integer> replaceIndices, String folderName) {
+    public String updateContent(String existingUrlsJson, List<MultipartFile> newImages,
+        List<Integer> replaceIndices, String folderName, ObjectMapper objectMapper) {
         try {
-            return s3Service.updatePartialImages(existingUrls, newImages, replaceIndices,
+            List<String> oldContentUrls = objectMapper.readValue(existingUrlsJson,
+                new TypeReference<>() {
+                });
+
+            List<String> updateContentUrls = s3Service.updatePartialImages(oldContentUrls,
+                newImages, replaceIndices,
                 folderName);
+
+            return objectMapper.writeValueAsString(updateContentUrls);
         } catch (Exception e) {
             throw new S3Exception(S3ExceptionType.IMAGE_NOT_FOUND);
         }
@@ -207,7 +230,7 @@ public class EpisodeService {
      */
     @Transactional
     public void updateEpisode(Long memberId, Long webtoonId, Long episodeId,
-        UpdateEpisodeReqDto request) {
+        UpdateEpisodeReqDto request) throws JsonProcessingException {
 
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
@@ -223,7 +246,7 @@ public class EpisodeService {
         findEpisode.isAuthor(memberId);
 
         // 에피소드 수정
-        findEpisode.updateOf(request);
+        findEpisode.updateOf(request, new ObjectMapper());
         episodeRepository.save(findEpisode);
     }
 
@@ -256,6 +279,8 @@ public class EpisodeService {
         if (!findEpisode.getWebtoon().getId().equals(webtoonId)) {
             throw new EpisodeException(EpisodeExceptionType.INVALID_EPISODE);
         }
+
+        calculateAverageStar(episodeId);
 
         // 조회수 중복 방지
         Cookie oldCookie = null;
@@ -299,7 +324,10 @@ public class EpisodeService {
      * 에피소드 좋아요
      */
     @Transactional
-    public CreateEpisodeLikeResDto likeEpisode(Long episodeId, Long memberId) {
+    public CreateEpisodeLikeResDto likeEpisode(Long webtoonId, Long episodeId, Long memberId) {
+        Webtoon webtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
         Episode episode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
@@ -384,7 +412,8 @@ public class EpisodeService {
      * 에피소드 별점
      */
     @Transactional
-    public void starEpisode(Long memberId, Long episodeId, float point) {
+    public EpisodeStarResDto starEpisode(Long memberId, Long webtoonId, Long episodeId,
+        float point) {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
@@ -395,13 +424,18 @@ public class EpisodeService {
                 episodeId)
             .orElse(null);
 
-        EpisodeStarReqDto dto = new EpisodeStarReqDto(memberId, episodeId, point); // DTO 생성
+        EpisodeStarReqDto dto = new EpisodeStarReqDto(memberId, webtoonId, episodeId,
+            point); // DTO 생성
 
         if (episodeStar != null) {
             episodeStar.updateOf(dto);
+
+            return EpisodeStarResDto.of(episodeStar.getId(), episodeStar.getPoint());
         } else {
             episodeStar = EpisodeStar.addOf(dto, findMember, findEpisode);
             episodeStarRepository.save(episodeStar);
+
+            return EpisodeStarResDto.of(episodeStar.getId(), episodeStar.getPoint());
         }
     }
 
@@ -410,7 +444,7 @@ public class EpisodeService {
      * 에피소드 별점 삭제
      */
     @Transactional
-    public void deleteEpisodeStar(Long memberId, Long episodeId) {
+    public void deleteEpisodeStar(Long memberId, Long webtoonId, Long episodeId) {
         EpisodeStar episodeStar = episodeStarRepository.findByMemberIdAndEpisodeId(memberId,
                 episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_STAR_NOT_FOUND));
