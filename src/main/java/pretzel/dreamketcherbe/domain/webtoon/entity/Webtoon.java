@@ -98,6 +98,7 @@ public class Webtoon extends BaseTimeEntity {
             this.thumbnail = dto.thumbnail();
             this.prologue = objectMapper.writeValueAsString(dto.prologue());
             this.description = dto.description();
+            this.story = dto.story();
         } catch (JsonProcessingException e) {
             throw new RuntimeException("직렬화에 실패하였습니다.", e);
         }
