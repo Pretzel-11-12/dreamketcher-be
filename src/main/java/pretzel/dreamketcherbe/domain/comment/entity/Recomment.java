@@ -76,12 +76,12 @@ public class Recomment extends BaseTimeEntity {
 
     @Builder
     public Recomment(String content, Long parentCommentId, int commentOrder,
-        int recommentRecommendationCount, int notRecommendationCount, Member member,
+        int recommendationCount, int notRecommendationCount, Member member,
         Episode episode, Webtoon webtoon, Comment comment) {
         this.content = content;
         this.parentCommentId = parentCommentId;
         this.commentOrder = commentOrder;
-        this.recommendationCount = recommentRecommendationCount;
+        this.recommendationCount = recommendationCount;
         this.notRecommendationCount = notRecommendationCount;
         this.member = member;
         this.webtoon = webtoon;

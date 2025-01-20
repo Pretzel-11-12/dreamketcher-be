@@ -289,24 +289,6 @@ public class CommentService {
         return getRecommendationCount(recommendCountKey);
     }
 
-
-    /**
-     * Redis와 DB 동기화
-     */
-    @Transactional
-    public void syncRecommendationCountToDatabase(Long commentId) {
-        String recommendCountKey = RECOMMEND_COUNT_KEY_PREFIX + commentId;
-
-        String countValue = redisTemplate.opsForValue().get(recommendCountKey);
-        int recommendCount = countValue == null ? 0 : Integer.parseInt(countValue);
-
-        Comment comment = commentRepository.findById(commentId)
-            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
-
-        comment.setRecommendationCount(recommendCount);
-        commentRepository.save(comment);
-    }
-
     /**
      * 댓글 비추천
      */
@@ -388,8 +370,7 @@ public class CommentService {
         }
 
         RecommentRecommendation newRecommentRecommendation = RecommentRecommendation.addOf(
-            findMember,
-            findRecomment);
+            findMember, findRecomment);
         recommentRecommendationRepository.save(newRecommentRecommendation);
 
         return CreateRecommentRecommendationResDto.of(newRecommentRecommendation,
