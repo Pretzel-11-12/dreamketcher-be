@@ -25,6 +25,7 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonGenreResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
@@ -193,6 +194,30 @@ public class WebtoonService {
         Genre genreId = genreRepository.findByGenreName(genreName);
 
         return WebtoonGenreResDto.of(genreId);
+    }
+
+    /**
+     * 웹툰 장르 등록
+     */
+    @Transactional
+    public CreateWebtoonGenreResDto addWebtoonGenre(Long memberId, Long webtoonId, Long genreId) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Webtoon webtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        Genre genre = genreRepository.findById(genreId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
+
+        WebtoonGenre webtoonGenre = WebtoonGenre.builder()
+            .webtoon(webtoon)
+            .genre(genre)
+            .build();
+
+        webtoonGenreRepository.save(webtoonGenre);
+
+        return CreateWebtoonGenreResDto.of(webtoonGenre);
     }
 
     /**

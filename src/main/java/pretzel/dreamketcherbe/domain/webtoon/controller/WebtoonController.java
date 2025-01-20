@@ -20,6 +20,7 @@ import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonGenreResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
@@ -152,6 +153,19 @@ public class WebtoonController {
     public ResponseEntity<WebtoonGenreResDto> getGenreId(@Auth Long memberId,
         @RequestParam String genre) {
         return ResponseEntity.ok(webtoonService.selectWebtoonGenre(memberId, genre));
+    }
+
+    /**
+     * 웹툰 장르 등록
+     */
+    @PostMapping("/{webtoonId}/genre/{genreId}")
+    public ResponseEntity<CreateWebtoonGenreResDto> addWebtoonGenre(@Auth Long memberId,
+        @PathVariable Long webtoonId,
+        @PathVariable Long genreId) {
+        CreateWebtoonGenreResDto webtoonGenre = webtoonService.addWebtoonGenre(memberId, webtoonId,
+            genreId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(webtoonGenre);
     }
 
     /**

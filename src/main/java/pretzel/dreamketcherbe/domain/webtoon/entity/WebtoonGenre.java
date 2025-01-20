@@ -8,6 +8,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
@@ -29,4 +30,10 @@ public class WebtoonGenre extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
     private Webtoon webtoon;
+
+    @Builder
+    public WebtoonGenre(Genre genre, Webtoon webtoon) {
+        this.genre = genre;
+        this.webtoon = webtoon;
+    }
 }
