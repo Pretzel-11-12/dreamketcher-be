@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,9 @@ import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonGenreResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.entity.Genre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonGenre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
@@ -177,6 +180,19 @@ public class WebtoonService {
         } catch (Exception e) {
             throw new S3Exception(S3ExceptionType.UPDATE_FAILED);
         }
+    }
+
+    /**
+     * 웹툰 장르 선택
+     */
+    @Transactional
+    public WebtoonGenreResDto selectWebtoonGenre(Long memberId, String genreName) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Genre genreId = genreRepository.findByGenreName(genreName);
+
+        return WebtoonGenreResDto.of(genreId);
     }
 
     /**

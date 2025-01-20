@@ -25,6 +25,7 @@ import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonGenreResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
@@ -144,6 +145,14 @@ public class WebtoonController {
         return ResponseEntity.ok(updatedPrologueUrls);
     }
 
+    /**
+     * 웹툰 장르 선택
+     */
+    @GetMapping("/genres")
+    public ResponseEntity<WebtoonGenreResDto> getGenreId(@Auth Long memberId,
+        @RequestParam String genre) {
+        return ResponseEntity.ok(webtoonService.selectWebtoonGenre(memberId, genre));
+    }
 
     /**
      * 관심 웹툰 추가
