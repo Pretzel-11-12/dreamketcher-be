@@ -221,6 +221,7 @@ public class WebtoonService {
     /**
      * 웹툰 삭제
      */
+    @Transactional
     public void deleteWebtoon(Long memberId, Long webtoonId) {
 
         Member findMember = memberRepository.findById(memberId)
@@ -229,7 +230,11 @@ public class WebtoonService {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-        webtoonRepository.delete(findWebtoon);
+        findWebtoon.isAuthor(memberId);
+
+        findWebtoon.softDelete();
+
+        webtoonRepository.save(findWebtoon);
     }
 
     /**
