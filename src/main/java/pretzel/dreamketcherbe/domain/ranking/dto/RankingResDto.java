@@ -2,8 +2,6 @@ package pretzel.dreamketcherbe.domain.ranking.dto;
 
 import lombok.Builder;
 
-import java.util.List;
-
 @Builder
 public record RankingResDto(
         Long id,
@@ -11,7 +9,7 @@ public record RankingResDto(
         String member,
         String description,
         String thumbnail,
-        List<String> genres,
+        String genre,
         int lastEpisode,
         float averageStar,
         Long numOfStars
@@ -23,7 +21,7 @@ public record RankingResDto(
             .member(data.getMember())
             .description(data.getDescription())
             .thumbnail(data.getThumbnail())
-            .genres(data.getGenres())
+            .genre(data.getGenre())
             .lastEpisode(data.getLastEpisode())
             .averageStar(data.getAverageStar())
             .numOfStars(data.getNumOfStars())

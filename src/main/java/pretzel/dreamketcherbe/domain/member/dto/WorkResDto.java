@@ -10,6 +10,8 @@ public record WorkResDto(
     int episodeCount,
     String updatedAt,
     String startedAt,
+    Float avgStar,
+    Long numOfStars,
     Long likeCount,
     Long commentCount,
     Long interestedCount

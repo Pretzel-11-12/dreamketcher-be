@@ -17,6 +17,7 @@ import java.util.Optional;
 import static pretzel.dreamketcherbe.domain.comment.entity.QComment.comment;
 import static pretzel.dreamketcherbe.domain.comment.entity.QRecomment.recomment;
 import static pretzel.dreamketcherbe.domain.episode.entity.QEpisode.episode;
+import static pretzel.dreamketcherbe.domain.episode.entity.QEpisodeStar.episodeStar;
 import static pretzel.dreamketcherbe.domain.member.entity.QInterestedWebtoon.interestedWebtoon;
 import static pretzel.dreamketcherbe.domain.member.entity.QMember.member;
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QLike.like;
@@ -54,16 +55,20 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom{
                 webtoon.episodeCount,
                 Expressions.stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", webtoon.updatedAt),
                 Expressions.stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", serializationPeriod.startDate),
+                webtoon.averageStar,
+                JPAExpressions.select(episodeStar.id.countDistinct())
+                    .from(episodeStar)
+                    .where(episodeStar.webtoon.id.eq(webtoon.id)),
                 JPAExpressions.select(like.count())
-                    .from(like)
-                    .where(like.webtoon.id.eq(webtoon.id)),
-                    JPAExpressions.select(comment.count().add(
-                        JPAExpressions.select(recomment.count())
-                            .from(recomment)
-                            .where(recomment.webtoon.id.eq(webtoon.id))
-                        ))
-                        .from(comment)
-                        .where(comment.webtoon.id.eq(webtoon.id)),
+                .from(like)
+                .where(like.webtoon.id.eq(webtoon.id)),
+                JPAExpressions.select(comment.count().add(
+                    JPAExpressions.select(recomment.count())
+                        .from(recomment)
+                        .where(recomment.webtoon.id.eq(webtoon.id))
+                    ))
+                    .from(comment)
+                    .where(comment.webtoon.id.eq(webtoon.id)),
                 JPAExpressions.select(interestedWebtoon.count())
                     .from(interestedWebtoon)
                     .where(interestedWebtoon.webtoon.id.eq(webtoon.id))
