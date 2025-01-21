@@ -26,7 +26,7 @@ import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLDelete(sql = "UPDATE comments SET is_deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE webtoons SET is_deleted = true WHERE id = ?")
 @SQLRestriction("is_deleted = false")
 public class Webtoon extends BaseTimeEntity {
 
