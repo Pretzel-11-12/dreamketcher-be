@@ -60,7 +60,7 @@ public class Webtoon extends BaseTimeEntity {
     @ColumnDefault("0")
     private int episodeCount;
 
-    @Column
+    @Column(nullable = false, name = "is_deleted")
     @ColumnDefault("false")
     private boolean isDeleted;
 
