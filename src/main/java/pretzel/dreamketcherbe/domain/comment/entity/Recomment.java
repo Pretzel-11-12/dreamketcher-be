@@ -9,11 +9,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -44,6 +44,16 @@ public class Recomment extends BaseTimeEntity {
     @Column(name = "comment_order")
     private int commentOrder;
 
+    @Column(name = "recommendation_count", nullable = false)
+    @ColumnDefault("0")
+    @Setter
+    private int recommendationCount;
+
+    @Column(name = "not_recommendation_count", nullable = false)
+    @ColumnDefault("0")
+    @Setter
+    private int notRecommendationCount;
+
     @Column(name = "is_deleted", nullable = false)
     @ColumnDefault("false")
     private boolean isDeleted;
@@ -65,11 +75,14 @@ public class Recomment extends BaseTimeEntity {
     private Comment comment;
 
     @Builder
-    public Recomment(String content, Long parentCommentId, int commentOrder, Member member,
-        Webtoon webtoon, Episode episode, Comment comment) {
+    public Recomment(String content, Long parentCommentId, int commentOrder,
+        int recommendationCount, int notRecommendationCount, Member member,
+        Episode episode, Webtoon webtoon, Comment comment) {
         this.content = content;
         this.parentCommentId = parentCommentId;
         this.commentOrder = commentOrder;
+        this.recommendationCount = recommendationCount;
+        this.notRecommendationCount = notRecommendationCount;
         this.member = member;
         this.webtoon = webtoon;
         this.episode = episode;

@@ -8,6 +8,7 @@ import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 public record CommentResDto(
     Long id,
     String nickname,
+    String profileImage,
     String content,
     int childCommentCount,
     LocalDateTime createdAt
@@ -18,6 +19,7 @@ public record CommentResDto(
         return CommentResDto.builder()
             .id(comment.getId())
             .nickname(comment.getMember().getNickname())
+            .profileImage(comment.getMember().getImageUrl())
             .content(comment.getContent())
             .childCommentCount(comment.getChildCommentCount())
             .createdAt(comment.getCreatedAt())
