@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
@@ -24,6 +26,8 @@ import java.time.LocalDate;
 @Entity
 @DynamicInsert
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE episodes SET is_deleted = true WHERE id = ?")
+@SQLRestriction("is_deleted = false")
 public class Episode extends BaseTimeEntity {
 
     @Id
@@ -66,6 +70,10 @@ public class Episode extends BaseTimeEntity {
 
     @ColumnDefault("'NOT_APPROVAL'")
     private String status;
+
+    @Column(nullable = false, name = "is_deleted")
+    @ColumnDefault("false")
+    private boolean isDeleted;
 
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
@@ -121,5 +129,11 @@ public class Episode extends BaseTimeEntity {
 
     public void updateAverageStar(float averageStar) {
         this.averageStar = averageStar;
+    }
+
+    public void softDelete() {
+        if (!this.isDeleted) {
+            this.isDeleted = true;
+        }
     }
 }
