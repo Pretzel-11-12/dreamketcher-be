@@ -251,7 +251,7 @@ public class EpisodeService {
     }
 
     /**
-     * 에피소드 삭제
+     * 에피소드 논리 삭제
      */
     @Transactional
     public void deleteEpisode(Long memberId, Long webtoonId, Long episodeId) {
@@ -260,7 +260,9 @@ public class EpisodeService {
 
         findEpisode.isAuthor(memberId);
 
-        episodeRepository.delete(findEpisode);
+        findEpisode.softDelete();
+
+        episodeRepository.save(findEpisode);
     }
 
     /**
