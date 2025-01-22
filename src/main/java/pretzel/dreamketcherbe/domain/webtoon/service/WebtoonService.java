@@ -22,15 +22,12 @@ import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonReposito
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.dto.*;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
-import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonGenre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.GenreRepository;
-import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,13 +38,12 @@ public class WebtoonService {
 
     private final WebtoonRepository webtoonRepository;
 
-    private final WebtoonGenreRepository webtoonGenreRepository;
-
     private final GenreRepository genreRepository;
 
     private final MemberRepository memberRepository;
 
     private final InterestedWebtoonRepository interestedWebtoonRepository;
+
     private final S3Service s3Service;
 
     private final ManagementWebtoonRespository managementWebtoonRespository;
@@ -242,10 +238,7 @@ public class WebtoonService {
             throw new WebtoonException(WebtoonExceptionType.NO_AUTHORITY_WEBTOON);
         }
 
-        WebtoonGenre webtoonGenre = webtoonGenreRepository.findByWebtoonId(findWebtoon.getId())
-            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_GENRE_NOT_FOUND));
-
-        return MyWebtoonResDto.of(findWebtoon, webtoonGenre.getGenre().getName());
+        return MyWebtoonResDto.of(findWebtoon, findWebtoon.getGenre().getName());
     }
 
     /**
@@ -274,29 +267,12 @@ public class WebtoonService {
                 obj -> (Long) obj[1]
             ));
 
-        List<Object[]> genresData = webtoonGenreRepository.findGenresByWebtoonIds(webtoonIds);
-        Map<Long, List<String>> webtoonIdToGenres = genresData.stream()
-            .collect(Collectors.groupingBy(
-                obj -> (Long) obj[0],
-                Collectors.mapping(obj -> (String) obj[1], Collectors.toList())
-            ));
-
         return webtoons.stream()
             .map(webtoon -> SearchedWebtoonResDto.of(
                 webtoon,
-                webtoonIdToGenres.getOrDefault(webtoon.getId(), Collections.emptyList()),
+                webtoon.getGenre().getName(),
                 webtoonIdToStars.getOrDefault(webtoon.getId(), 0L)
             ))
             .collect(Collectors.toList());
-    }
-
-    private List<Long> getWebtoonIdsInGenre(String genre) {
-        Long genreId = genreRepository.findByName(genre)
-            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND))
-            .getId();
-
-        return webtoonGenreRepository.findAllByGenreId(genreId).stream()
-            .map(webtoonGenre -> webtoonGenre.getWebtoon().getId())
-            .toList();
     }
 }

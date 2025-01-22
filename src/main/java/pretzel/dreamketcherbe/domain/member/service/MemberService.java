@@ -16,12 +16,10 @@ import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
-import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,7 +29,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final InterestedWebtoonRepository interestedWebtoonRepository;
     private final WebtoonRepository webtoonRepository;
-    private final WebtoonGenreRepository webtoonGenreRepository;
     private final S3Service s3Service;
 
     public SelfInfoResponse getSelfInfo(Long memberId) {
@@ -136,17 +133,12 @@ public class MemberService {
                 Webtoon webtoon = interestedWebtoon.getWebtoon();
                 Member author = webtoon.getMember();
 
-                List<String> genres = webtoonGenreRepository.findByWebtoon(webtoon)
-                    .stream()
-                    .map(WebtoonGenre -> WebtoonGenre.getGenre().getName())
-                    .collect(Collectors.toList());
-
                 return InterestedWebtoonResponse.from(
                     interestedWebtoon,
                     author.getNickname(),
                     webtoon.getEpisodeCount(),
                     webtoon.getUpdatedAt(),
-                    genres
+                    webtoon.getGenre().getName()
                 );
             })
             .toList();

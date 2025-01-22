@@ -24,7 +24,6 @@ import static pretzel.dreamketcherbe.domain.member.entity.QMember.member;
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QLike.like;
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QSerializationPeriod.serializationPeriod;
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QWebtoon.webtoon;
-import static pretzel.dreamketcherbe.domain.webtoon.entity.QWebtoonGenre.webtoonGenre;
 
 @RequiredArgsConstructor
 public class MemberRepositoryCustomImpl implements MemberRepositoryCustom{
@@ -56,9 +55,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom{
                 webtoon.thumbnail,
                 member.nickname,
                 webtoon.description,
-                JPAExpressions.select(webtoonGenre.genre.name)
-                    .from(webtoonGenre)
-                    .where(webtoonGenre.webtoon.id.eq(webtoon.id)),
+                webtoon.genre.name,
                 webtoon.episodeCount,
                 Expressions.stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", webtoon.updatedAt),
                 Expressions.stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", serializationPeriod.startDate),
