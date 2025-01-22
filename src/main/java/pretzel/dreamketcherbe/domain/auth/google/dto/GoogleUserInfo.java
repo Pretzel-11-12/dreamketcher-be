@@ -14,13 +14,12 @@ public record GoogleUserInfo(
 
     public Member toMember(String nickname) {
         return Member.builder()
-                   .socialType(SocialType.GOOGLE)
-                   .socialId(socialId)
-                   .email(email)
-                   .name(name)
-                   .nickname(nickname)
-                   .imageUrl(imageUrl)
-                   .role(Role.MEMBER)
-                   .build();
+            .socialType(SocialType.GOOGLE)
+            .socialId(socialId)
+            .email(email)
+            .name(name)
+            .nickname(nickname)
+            .role(Role.MEMBER)
+            .build();
     }
 }
