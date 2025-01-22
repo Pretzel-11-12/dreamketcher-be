@@ -20,6 +20,9 @@ public interface RecommentRepository extends JpaRepository<Recomment, Long> {
     @Query("SELECT r.id FROM Recomment r")
     List<Long> findAllRecommentIds();
 
+    @Query("SELECT r.id FROM Recomment r WHERE r.comment.id IN :commentIds AND r.isDeleted = false")
+    List<Long> findBycommentId(@Param("commentIds") List<Long> commentIds);
+
     @Modifying
     @Query("UPDATE Recomment r SET r.isDeleted = true WHERE r.comment.id IN :commentIds")
     void deleteByCommentId(@Param("commentIds") List<Long> commentIds);

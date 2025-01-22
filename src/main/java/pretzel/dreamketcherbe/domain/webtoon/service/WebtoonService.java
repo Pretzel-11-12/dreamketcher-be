@@ -18,6 +18,10 @@ import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.admin.entity.ManagementWebtoon;
 import pretzel.dreamketcherbe.domain.admin.repository.ManagementWebtoonRespository;
 import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.NotRecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentNotRecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentRecomendationRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.RecommentRepository;
 import pretzel.dreamketcherbe.domain.episode.repository.EpisodeLikeRepository;
 import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
@@ -70,6 +74,14 @@ public class WebtoonService {
     private final EpisodeStarRepository episodeStarRepository;
 
     private final EpisodeLikeRepository episodeLikeRepository;
+
+    private final RecommendationRepository recommendationRepository;
+
+    private final NotRecommendationRepository notRecommendationRepository;
+
+    private final RecommentRecomendationRepository recommentRecomendationRepository;
+
+    private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
 
     private final MemberService memberService;
 
@@ -258,8 +270,14 @@ public class WebtoonService {
 
         List<Long> commentIds = commentRepository.findByEpisodeId(episodeIds);
         commentRepository.deleteByEpisodeId(episodeIds);
+        recommendationRepository.deleteByComment(commentIds);
+        notRecommendationRepository.deleteByComment(commentIds);
 
+        List<Long> recommentIds = recommentRepository.findBycommentId(commentIds);
         recommentRepository.deleteByCommentId(commentIds);
+        recommentRecomendationRepository.deleteByRecommentId(recommentIds);
+        recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
+
     }
 
     /**
