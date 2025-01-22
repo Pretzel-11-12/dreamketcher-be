@@ -56,6 +56,7 @@ public class EpisodeStar extends BaseTimeEntity {
         return EpisodeStar.builder()
             .member(member)
             .episode(episode)
+            .webtoon(episode.getWebtoon())
             .point(dto.point())
             .build();
     }

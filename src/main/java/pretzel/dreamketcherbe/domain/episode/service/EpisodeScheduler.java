@@ -2,15 +2,19 @@ package pretzel.dreamketcherbe.domain.episode.service;
 
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
+@Slf4j
+@Component
 @RequiredArgsConstructor
 public class EpisodeScheduler {
 
     private final EpisodeService episodeService;
 
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     public static final String EPISODE_LIKE_COUNT_KEY_PREFIX = "episode:likeCount:";
 

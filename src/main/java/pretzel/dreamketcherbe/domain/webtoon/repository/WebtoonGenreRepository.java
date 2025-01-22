@@ -1,6 +1,5 @@
 package pretzel.dreamketcherbe.domain.webtoon.repository;
 
-import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,9 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonGenre;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface WebtoonGenreRepository extends JpaRepository<WebtoonGenre, Long> {
 
-    List<WebtoonGenre> findByWebtoonId(Long webtoonId);
+    Optional<WebtoonGenre> findByWebtoonId(Long webtoonId);
 
     List<WebtoonGenre> findByWebtoon(Webtoon webtoon);
 

@@ -1,10 +1,13 @@
 package pretzel.dreamketcherbe.domain.member.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
@@ -21,8 +24,8 @@ import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
-import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
+import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,6 +36,7 @@ public class MemberService {
     private final InterestedWebtoonRepository interestedWebtoonRepository;
     private final WebtoonRepository webtoonRepository;
     private final WebtoonGenreRepository webtoonGenreRepository;
+    private final S3Service s3Service;
 
     public SelfInfoResponse getSelfInfo(Long memberId) {
         Member member = memberRepository.findById(memberId)
@@ -41,38 +45,77 @@ public class MemberService {
         return SelfInfoResponse.of(member);
     }
 
+    private void updateBusinessEmail(Member member, String newBusinessEmail, Long memberId) {
+        Optional.ofNullable(newBusinessEmail)
+            .map(String::trim)
+            .ifPresent(email -> {
+                if (email.isEmpty()) {
+                    member.updateBusinessEmail("");
+                } else if (!email.equals(member.getBusinessEmail())) {
+                    if (memberRepository.existsByBusinessEmailAndIdNot(email, memberId)) {
+                        throw new MemberException(
+                            MemberExceptionType.BUSINESS_EMAIL_ALREADY_EXISTS);
+                    }
+                    member.updateBusinessEmail(email);
+                }
+            });
+    }
+
+    private void updateNickname(Member member, String newNickname, Long memberId) {
+        Optional.ofNullable(newNickname)
+            .filter(nickname -> !nickname.equals(member.getNickname()))
+            .ifPresent(nickname -> {
+                if (memberRepository.existsByNicknameAndIdNot(nickname, memberId)) {
+                    throw new MemberException(MemberExceptionType.NICKNAME_ALREADY_EXISTS);
+                }
+                member.updateNickname(nickname);
+            });
+    }
+
+    private void updateShortIntroduction(Member member, String newShortIntroduction) {
+        Optional.ofNullable(newShortIntroduction)
+            .map(String::trim)
+            .ifPresentOrElse(
+                shortIntro -> {
+                    if (!shortIntro.equals(member.getShortIntroduction())) {
+                        member.updateShortIntroduction(shortIntro);
+                    }
+                },
+                () -> {
+                    // newShortIntroduction이 null인 경우 아무런 변경도 하지 않음
+                }
+            );
+
+        if (newShortIntroduction != null && newShortIntroduction.isBlank()) {
+            member.updateShortIntroduction("");
+        }
+    }
+    
     @Transactional
-    public void updateProfile(Long memberId, UpdateProfileRequest updateProfileRequest) {
+    public void updateProfileWithImage(Long memberId, MultipartFile image,
+        UpdateProfileRequest profileData) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        String newNickname = updateProfileRequest.nickname();
-        String newBusinessEmail = updateProfileRequest.businessEmail();
-        String newShortIntroduction = updateProfileRequest.shortIntroduction();
-        String newImageUrl = updateProfileRequest.imageUrl();
+        if (profileData != null) {
+            String newNickname = profileData.nickname();
+            String newBusinessEmail = profileData.businessEmail();
+            String newShortIntroduction = profileData.shortIntroduction();
 
-        if (!newNickname.equals(member.getNickname())) {
-            if (memberRepository.existsByNicknameAndIdNot(newNickname, memberId)) {
-                throw new MemberException(MemberExceptionType.NICKNAME_ALREADY_EXISTS);
-            }
-            member.updateNickname(newNickname);
+            updateNickname(member, newNickname, memberId);
+
+            updateBusinessEmail(member, newBusinessEmail, memberId);
+
+            updateShortIntroduction(member, newShortIntroduction);
         }
 
-        if (newBusinessEmail != null && !newBusinessEmail.isBlank()
-            && !newBusinessEmail.equals(member.getBusinessEmail())) {
-            if (memberRepository.existsByBusinessEmailAndIdNot(newBusinessEmail, memberId)) {
-                throw new MemberException(MemberExceptionType.BUSINESS_EMAIL_ALREADY_EXISTS);
-            }
-            member.updateBusinessEmail(newBusinessEmail);
-        }
-
-        if (newShortIntroduction != null) {
-            member.updateShortIntroduction(newShortIntroduction);
-        }
-
-        if (newImageUrl != null) {
-            member.updateImageUrl(newImageUrl);
-        }
+        Optional.ofNullable(image)
+            .filter(img -> !img.isEmpty())
+            .ifPresent(img -> {
+                String folderName = "profile-images";
+                String imageUrl = s3Service.imageUpload(img, folderName);
+                member.updateImageUrl(imageUrl);
+            });
 
         memberRepository.save(member);
     }

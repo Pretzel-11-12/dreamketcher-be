@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 public record EpisodeStarReqDto(
     Long episodeId,
     Long memberId,
+    Long webtoonId,
     @NotEmpty float point
 ) {
 

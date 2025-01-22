@@ -2,12 +2,17 @@ package pretzel.dreamketcherbe.domain.member.dto;
 
 public record WorkResDto(
     Long id,
-    int no,
     String title,
     String thumbnail,
+    String author,
+    String description,
+    String genre,
+    int episodeCount,
     String updatedAt,
     String startedAt,
-    Long viewCount,
+    Float avgStar,
+    Long numOfStars,
+    Long likeCount,
     Long commentCount,
     Long interestedCount
 ) {

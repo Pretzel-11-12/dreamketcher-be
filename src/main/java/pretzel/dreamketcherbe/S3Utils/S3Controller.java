@@ -47,10 +47,10 @@ public class S3Controller {
     /**
      * 단일 이미지 수정
      */
-    @PutMapping("/{folderName}/{imageUrl}")
+    @PutMapping("/update")
     public ResponseEntity<String> s3UpdateImage(
-        @PathVariable String folderName,
-        @PathVariable String imageUrl, @RequestParam("image") MultipartFile image) {
+        @RequestParam String folderName,
+        @RequestParam String imageUrl, @RequestParam("image") MultipartFile image) {
         String updatedImageUrl = s3Service.imageUpdate(imageUrl, image, folderName);
         return ResponseEntity.ok(updatedImageUrl);
     }
@@ -58,9 +58,9 @@ public class S3Controller {
     /**
      * 이미지 부분 수정
      */
-    @PutMapping("/images/{folderName}")
+    @PutMapping("/updates")
     public ResponseEntity<List<String>> updatePartialImages(
-        @PathVariable String folderName,
+        @RequestParam String folderName,
         @RequestParam("existingUrls") List<String> existingUrls,
         @RequestParam("newImages") List<MultipartFile> newImages,
         @RequestParam("replaceIndices") List<Integer> replaceIndices) {
@@ -73,9 +73,9 @@ public class S3Controller {
     /*
      * 이미지 파일 삭제
      */
-    @DeleteMapping("/delete/{folderName}")
-    public ResponseEntity<Void> s3Delete(@PathVariable String folderName,
-        @RequestParam("image") String imageUrl) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> s3Delete(
+        @RequestParam String imageUrl) {
         s3Service.deleteImage(imageUrl);
         return ResponseEntity.noContent().build();
     }
