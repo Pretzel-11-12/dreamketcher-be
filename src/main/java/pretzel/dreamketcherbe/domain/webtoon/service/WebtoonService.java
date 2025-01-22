@@ -17,6 +17,10 @@ import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.admin.entity.ManagementWebtoon;
 import pretzel.dreamketcherbe.domain.admin.repository.ManagementWebtoonRespository;
+import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentRepository;
+import pretzel.dreamketcherbe.domain.episode.repository.EpisodeLikeRepository;
+import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
 import pretzel.dreamketcherbe.domain.episode.repository.EpisodeStarRepository;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
@@ -24,6 +28,7 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.member.service.MemberService;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
@@ -56,7 +61,17 @@ public class WebtoonService {
 
     private final ManagementWebtoonRespository managementWebtoonRespository;
 
+    private final EpisodeRepository episodeRepository;
+
+    private final CommentRepository commentRepository;
+
+    private final RecommentRepository recommentRepository;
+
     private final EpisodeStarRepository episodeStarRepository;
+
+    private final EpisodeLikeRepository episodeLikeRepository;
+
+    private final MemberService memberService;
 
     /**
      * 연재중인 웹툰 목록 조회
@@ -219,7 +234,7 @@ public class WebtoonService {
     }
 
     /**
-     * 웹툰 삭제
+     * 웹툰 논리 삭제
      */
     @Transactional
     public void deleteWebtoon(Long memberId, Long webtoonId) {
@@ -233,8 +248,18 @@ public class WebtoonService {
         findWebtoon.isAuthor(memberId);
 
         findWebtoon.softDelete();
-
         webtoonRepository.save(findWebtoon);
+        memberService.deleteFavoriteWebtoon(memberId, webtoonId);
+
+        List<Long> episodeIds = episodeRepository.findByWebtoonId(webtoonId);
+        episodeRepository.deleteByWebtoonId(webtoonId);
+        episodeStarRepository.deleteByEpisoe(episodeIds);
+        episodeLikeRepository.deleteByEpisode(episodeIds);
+
+        List<Long> commentIds = commentRepository.findByEpisodeId(episodeIds);
+        commentRepository.deleteByEpisodeId(episodeIds);
+
+        recommentRepository.deleteByCommentId(commentIds);
     }
 
     /**
