@@ -264,19 +264,20 @@ public class WebtoonService {
         memberService.deleteFavoriteWebtoon(memberId, webtoonId);
 
         List<Long> episodeIds = episodeRepository.findByWebtoonId(webtoonId);
-        episodeRepository.deleteByWebtoonId(webtoonId);
-        episodeStarRepository.deleteByEpisoe(episodeIds);
+        episodeStarRepository.deleteByEpisode(episodeIds);
         episodeLikeRepository.deleteByEpisode(episodeIds);
+        episodeRepository.deleteByWebtoonId(webtoonId);
 
         List<Long> commentIds = commentRepository.findByEpisodeId(episodeIds);
-        commentRepository.deleteByEpisodeId(episodeIds);
         recommendationRepository.deleteByComment(commentIds);
         notRecommendationRepository.deleteByComment(commentIds);
+        commentRepository.deleteByEpisodeId(episodeIds);
 
         List<Long> recommentIds = recommentRepository.findBycommentId(commentIds);
-        recommentRepository.deleteByCommentId(commentIds);
         recommentRecomendationRepository.deleteByRecommentId(recommentIds);
         recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
+        recommentRepository.deleteByCommentId(commentIds);
+
 
     }
 

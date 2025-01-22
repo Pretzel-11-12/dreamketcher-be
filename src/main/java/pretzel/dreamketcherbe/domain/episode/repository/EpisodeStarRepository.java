@@ -19,5 +19,5 @@ public interface EpisodeStarRepository extends JpaRepository<EpisodeStar, Long> 
 
     @Modifying
     @Query("DELETE FROM EpisodeStar es WHERE es.episode.id IN :episodeIds")
-    void deleteByEpisoe(@Param("episodeIds") List<Long> episodeIds);
+    void deleteByEpisode(@Param("episodeIds") List<Long> episodeIds);
 }
