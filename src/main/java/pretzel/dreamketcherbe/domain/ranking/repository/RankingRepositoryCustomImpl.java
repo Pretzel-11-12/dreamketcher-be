@@ -37,13 +37,9 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
                     webtoon.member.name,
                     webtoon.description,
                     webtoon.thumbnail,
-                    ExpressionUtils.as(
-                        JPAExpressions.select(Expressions.stringTemplate("GROUP_CONCAT(DISTINCT {0})", genre.name))
-                            .from(webtoonGenre)
-                            .join(webtoonGenre.genre, genre)
-                            .where(webtoonGenre.webtoon.id.eq(webtoon.id)),
-                        "genres"
-                    ),
+                    JPAExpressions.select(webtoonGenre.genre.name)
+                        .from(webtoonGenre)
+                        .where(webtoonGenre.webtoon.id.eq(webtoon.id)),
                     webtoon.episodeCount,
                     webtoon.averageStar,
                     ExpressionUtils.as(
