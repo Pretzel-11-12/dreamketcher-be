@@ -1,5 +1,6 @@
 package pretzel.dreamketcherbe.domain.episode.service;
 
+import ch.qos.logback.core.pattern.parser.OptionTokenizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,6 +8,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,6 +28,7 @@ import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarResDto;
+import pretzel.dreamketcherbe.domain.episode.dto.MemberEpisodeLikeAndStarResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
@@ -320,6 +323,27 @@ public class EpisodeService {
     @Transactional
     public void increaseViewCount(Long episodeId) {
         episodeRepository.increaseViewCount(episodeId);
+    }
+
+    /**
+     * 사용자 에피소드 좋아요, 별점 조회
+     */
+    public MemberEpisodeLikeAndStarResDto getMemberEpisodeLikeAndStar(Long memberId,
+        Long episodeId) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Episode findEpisode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        Optional<EpisodeLike> episodeLike = episodeLikeRepository.findByEpisodeAndMember(
+            episodeId, memberId);
+
+        Optional<EpisodeStar> episodeStar = episodeStarRepository.findByMemberIdAndEpisodeId(
+            memberId, episodeId);
+
+        return MemberEpisodeLikeAndStarResDto.of(episodeStar.orElse(null),
+            episodeLike.orElse(null));
     }
 
     /**
