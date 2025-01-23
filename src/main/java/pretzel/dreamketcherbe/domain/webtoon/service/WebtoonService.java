@@ -17,7 +17,7 @@ import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.NotRecommendationRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.RecommendationRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.RecommentNotRecommendationRepository;
-import pretzel.dreamketcherbe.domain.comment.repository.RecommentRecomendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentRecommendationRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.RecommentRepository;
 import pretzel.dreamketcherbe.domain.episode.repository.EpisodeLikeRepository;
 import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
@@ -71,7 +71,7 @@ public class WebtoonService {
 
     private final NotRecommendationRepository notRecommendationRepository;
 
-    private final RecommentRecomendationRepository recommentRecomendationRepository;
+    private final RecommentRecommendationRepository recommentRecomendationRepository;
 
     private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
 
