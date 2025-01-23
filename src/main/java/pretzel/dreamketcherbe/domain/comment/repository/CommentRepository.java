@@ -20,8 +20,15 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query("SELECT c.id FROM Comment c WHERE c.episode.id IN :episodeIds AND c.isDeleted = false")
     List<Long> findByEpisodeId(@Param("episodeIds") List<Long> episodeIds);
 
+    @Query("SELECT c.id FROM Comment c WHERE c.episode.id = :episodeId AND c.isDeleted = false")
+    List<Long> findByEpisodeId(@Param("episodeId") Long episodeId);
+
     @Modifying
     @Query("UPDATE Comment c SET c.isDeleted = true WHERE c.episode.id IN :episodes")
     void deleteByEpisodeId(@Param("episodeIds") List<Long> episodeIds);
+
+    @Modifying
+    @Query("UPDATE Comment c SET c.isDeleted = true WHERE c.episode.id = :episodeId")
+    void deleteByEpisode(@Param("episodeId") Long episodeId);
 
 }

@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
 import pretzel.dreamketcherbe.S3Utils.exception.S3ExceptionType;
+import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
 import pretzel.dreamketcherbe.domain.episode.dto.*;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.entity.EpisodeLike;
@@ -70,6 +71,7 @@ public class EpisodeService {
         """;
 
     private final RedisScript<Long> likeScript = new DefaultRedisScript<>(LIKE_SCRIPT, Long.class);
+    private final CommentRepository commentRepository;
 
     /**
      * 에피소드 목록 조회
@@ -253,8 +255,13 @@ public class EpisodeService {
         findEpisode.isAuthor(memberId);
 
         findEpisode.softDelete();
-
         episodeRepository.save(findEpisode);
+
+        List<Long> commentIds = commentRepository.findByEpisodeId(episodeId);
+
+        commentRepository.deleteByEpisode(episodeId);
+
+
     }
 
     /**

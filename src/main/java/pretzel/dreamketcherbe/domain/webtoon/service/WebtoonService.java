@@ -273,8 +273,6 @@ public class WebtoonService {
         recommentRecomendationRepository.deleteByRecommentId(recommentIds);
         recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
         recommentRepository.deleteByCommentId(commentIds);
-
-
     }
 
     /**
