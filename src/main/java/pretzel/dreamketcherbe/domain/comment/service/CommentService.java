@@ -211,12 +211,19 @@ public class CommentService {
 
         findRecomment.isAuthor(memberId);
 
+        recommentRecomendationRepository.deleteByRecomment(recommentId);
+        recommentRecomendationRepository.deleteByRecomment(recommentId);
+        redisTemplate.delete(RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+        redisTemplate.delete(RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+        redisTemplate.delete(RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+        redisTemplate.delete(RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
         findRecomment.softDelete();
         recommentRepository.save(findRecomment);
 
         int childCommentCount = (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(
             findComment.getId());
         findComment.updateChildCommentCount(childCommentCount);
+        commentRepository.save(findComment);
     }
 
     /**

@@ -21,6 +21,10 @@ public interface RecommentRecomendationRepository extends
         @Param("recommentId") Long recommentId);
 
     @Modifying
+    @Query("DELETE FROM RecommentRecommendation r WHERE r.recomment.id = :recommentId")
+    void deleteByRecomment(@Param("recommentId") Long recommentId);
+
+    @Modifying
     @Query("DELETE FROM RecommentRecommendation r WHERE r.recomment.id IN :recommentIds")
     void deleteByRecommentId(@Param("recommentIds") List<Long> recommentIds);
 }
