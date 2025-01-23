@@ -22,15 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
 import pretzel.dreamketcherbe.S3Utils.exception.S3ExceptionType;
-import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeLikeResDto;
-import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
-import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
-import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
-import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarReqDto;
-import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarResDto;
-import pretzel.dreamketcherbe.domain.episode.dto.MemberEpisodeLikeAndStarResDto;
-import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
-import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
+import pretzel.dreamketcherbe.domain.episode.dto.*;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.entity.EpisodeLike;
 import pretzel.dreamketcherbe.domain.episode.entity.EpisodeStar;
@@ -44,11 +36,12 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
-import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonGenre;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
-import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @AllArgsConstructor
@@ -57,7 +50,6 @@ public class EpisodeService {
     private final EpisodeRepository episodeRepository;
     private final WebtoonRepository webtoonRepository;
     private final MemberRepository memberRepository;
-    private final WebtoonGenreRepository webtoonGenreRepository;
     private final EpisodeLikeRepository episodeLikeRepository;
     private final EpisodeStarRepository episodeStarRepository;
     private final S3Service s3Service;
@@ -91,11 +83,6 @@ public class EpisodeService {
 
         String AuthorNickname = webtoon.getMember().getNickname();
 
-        List<WebtoonGenre> webtoonGenres = webtoonGenreRepository.findByWebtoonId(webtoonId);
-
-        List<String> genreNames = webtoonGenres.stream().map(wg -> wg.getGenre().getName())
-            .toList();
-
         PageRequest pageable = PageRequest.of(page, size);
         Page<Episode> episodePage =
             fromFirst ? episodeRepository.findByWebtoonIdOrderByPublishedAtAsc(webtoonId, pageable)
@@ -108,7 +95,7 @@ public class EpisodeService {
 
         return WebtoonEpisodeListResDto.of(webtoon.getId(), webtoon.getTitle(),
             webtoon.getThumbnail(), webtoon.getStory(), AuthorNickname,
-            webtoon.getInterestCount(), episodeCount, genreNames,
+            webtoon.getInterestCount(), episodeCount, webtoon.getGenre().getName(),
             episodePage.getNumber(), episodePage.getTotalPages(), episodes);
     }
 

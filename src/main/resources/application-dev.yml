@@ -84,3 +84,7 @@ cloud:
     stack:
       auto: false
 
+default:
+  profile:
+    image:
+      url: ENC(a8FSQns/hMzevGLVQnq00wDx3B5BRihrXIpvlU7ZkYP8FsD5TZrd0NKiOTk4W2S8f974Y9m/dKZrcDh4Jcxw6hi92I9PRIDjucfUpKuodw+ME2fSzUWUwxbJw4Z/g5UG3dVbydh7qMjGk/Ex1IK7Xg==)

@@ -20,7 +20,6 @@ import java.util.Optional;
 
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QLike.like;
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QWebtoon.webtoon;
-import static pretzel.dreamketcherbe.domain.webtoon.entity.QWebtoonGenre.webtoonGenre;
 
 @RequiredArgsConstructor
 public class WebtoonRepositoryCustomImpl implements WebtoonRepositoryCustom{
@@ -45,7 +44,6 @@ public class WebtoonRepositoryCustomImpl implements WebtoonRepositoryCustom{
         return jpaQueryFactory.select(
                     Projections.constructor(WebtoonResDto.class, webtoon.id, webtoon.thumbnail, webtoon.member.name, webtoon.title))
             .from(webtoon)
-            .join(webtoonGenre).on(webtoonGenre.webtoon.id.eq(webtoon.id))
             .where(getWhereConditions(status, pageReqDto))
             .offset(pageReqDto.getFirstIndex())
             .limit(pageReqDto.getSize())
@@ -60,7 +58,6 @@ public class WebtoonRepositoryCustomImpl implements WebtoonRepositoryCustom{
         return Optional.ofNullable(jpaQueryFactory
                 .select(webtoon.count())
                 .from(webtoon)
-                .join(webtoonGenre).on(webtoonGenre.webtoon.id.eq(webtoon.id))
                 .where(getWhereConditions(status, pageReqDto))
                 .fetchOne())
             .orElse(0L);
@@ -74,7 +71,7 @@ public class WebtoonRepositoryCustomImpl implements WebtoonRepositoryCustom{
         BooleanBuilder builder = new BooleanBuilder();
 
         return builder
-            .and(genre.equals("none") ? null : webtoonGenre.genre.name.eq(genre))
+            .and(genre.equals("none") ? null : webtoon.genre.name.eq(genre))
             .and(status.equals("NEW")
                 ? webtoon.status.eq(WebtoonStatus.IN_SERIES.getStatus())
                     .and(webtoon.createdAt.after(LocalDateTime.now().minusMonths(1)))
