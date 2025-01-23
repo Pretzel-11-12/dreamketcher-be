@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
-import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.member.dto.*;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.service.MemberService;
@@ -63,10 +62,10 @@ public class MemberController {
     }
 
     @GetMapping("/works")
-    public ResponseEntity<PageResDto<WorkResDto>> getAllWorks(@Auth Long memberId,
-        @RequestParam(defaultValue = "all") String status,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "25") int size) {
+    public ResponseEntity<WorkResDto> getAllWorks(@Auth Long memberId,
+                                                  @RequestParam(defaultValue = "all") String status,
+                                                  @RequestParam(defaultValue = "0") int page,
+                                                  @RequestParam(defaultValue = "25") int size) {
         PageReqDto pageReqDto = PageReqDto.of(page, size);
         return ResponseEntity.ok(memberService.getAllWorks(memberId, status, pageReqDto));
     }
