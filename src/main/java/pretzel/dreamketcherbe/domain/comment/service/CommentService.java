@@ -129,8 +129,15 @@ public class CommentService {
 
         findComment.isAuthor(memberId);
 
+        recommendationRepository.deleteBycommentId(commentId);
+        notRecommendationRepository.deleteBycommentId(commentId);
         findComment.softDelete();
         commentRepository.save(findComment);
+
+        List<Long> recommentIds = recommentRepository.findByComment(commentId);
+        recommentRecomendationRepository.deleteByRecommentId(recommentIds);
+        recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
+        recommentRepository.deleteByComment(commentId);
     }
 
     /**
@@ -210,15 +217,6 @@ public class CommentService {
         int childCommentCount = (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(
             findComment.getId());
         findComment.updateChildCommentCount(childCommentCount);
-
-        recommendationRepository.deleteBycommentId(commentId);
-        notRecommendationRepository.deleteBycommentId(commentId);
-        commentRepository.save(findComment);
-
-        List<Long> recommentIds = recommentRepository.findByComment(commentId);
-        recommentRecomendationRepository.deleteByRecommentId(recommentIds);
-        recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
-        recommentRepository.deleteByComment(commentId);
     }
 
     /**
