@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -54,6 +55,16 @@ public class EpisodeService {
     private final EpisodeStarRepository episodeStarRepository;
     private final S3Service s3Service;
     public final RedisTemplate<String, String> redisTemplate;
+
+    private static final String RECOMMEND_SET_KEY_PREFIX = "comment:recommend:";
+    private static final String RECOMMEND_COUNT_KEY_PREFIX = "comment:recommendCount:";
+    private static final String NOT_RECOMMEND_SET_KEY_PREFIX = "comment:notRecommend:";
+    private static final String NOT_RECOMMEND_COUNT_KEY_PREFIX = "comment:notRecommendCount:";
+
+    private static final String RECOMMENT_RECOMMEND_SET_KEY_PREFIX = "recomment:recommend:";
+    private static final String RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX = "recomment:recommendCount:";
+    private static final String RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX = "recomment:notRecommend:";
+    private static final String RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX = "recomment:notRecommendCount:";
 
     public static final String EPISODE_LIKE_COUNT_KEY_PREFIX = "episode:likeCount:";
     private static final String EPISODE_LIKE_USER_KEY_PREFIX = "episode:likeUser:";
@@ -268,6 +279,34 @@ public class EpisodeService {
         recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
         recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
         recommentRepository.deleteByCommentId(commentIds);
+
+        deleteRedisKeys(commentIds, recommentIds);
+    }
+
+    /**
+     * redis 추천/비추천 삭제
+     */
+    private void deleteRedisKeys(List<Long> commentIds, List<Long> recommentIds) {
+        List<String> deleteKeys = new ArrayList<>();
+
+        // 댓글 관련 키
+        for (Long commentId : commentIds) {
+            deleteKeys.add(RECOMMEND_SET_KEY_PREFIX + commentId);
+            deleteKeys.add(RECOMMEND_COUNT_KEY_PREFIX + commentId);
+            deleteKeys.add(NOT_RECOMMEND_SET_KEY_PREFIX + commentId);
+            deleteKeys.add(NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId);
+        }
+
+        // 답글 관련 키
+        for (Long recommentId : recommentIds) {
+            deleteKeys.add(RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+            deleteKeys.add(RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+            deleteKeys.add(RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+            deleteKeys.add(RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+        }
+
+        // Redis 키 일괄 삭제
+        redisTemplate.delete(deleteKeys);
     }
 
     /**

@@ -3,7 +3,9 @@ package pretzel.dreamketcherbe.domain.webtoon.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import lombok.AllArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.S3Utils.S3Service;
@@ -76,6 +78,21 @@ public class WebtoonService {
     private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
 
     private final MemberService memberService;
+
+    public final RedisTemplate<String, String> redisTemplate;
+
+    private static final String RECOMMEND_SET_KEY_PREFIX = "comment:recommend:";
+    private static final String RECOMMEND_COUNT_KEY_PREFIX = "comment:recommendCount:";
+    private static final String NOT_RECOMMEND_SET_KEY_PREFIX = "comment:notRecommend:";
+    private static final String NOT_RECOMMEND_COUNT_KEY_PREFIX = "comment:notRecommendCount:";
+
+    private static final String RECOMMENT_RECOMMEND_SET_KEY_PREFIX = "recomment:recommend:";
+    private static final String RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX = "recomment:recommendCount:";
+    private static final String RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX = "recomment:notRecommend:";
+    private static final String RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX = "recomment:notRecommendCount:";
+
+    public static final String EPISODE_LIKE_COUNT_KEY_PREFIX = "episode:likeCount:";
+    private static final String EPISODE_LIKE_USER_KEY_PREFIX = "episode:likeUser:";
 
     /**
      * 연재중인 웹툰 목록 조회
@@ -269,6 +286,41 @@ public class WebtoonService {
         recommentRecomendationRepository.deleteByRecommentId(recommentIds);
         recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
         recommentRepository.deleteByCommentId(commentIds);
+
+        deleteRedisKeys(episodeIds, commentIds, recommentIds);
+    }
+
+    /**
+     * redis 삭제
+     */
+    private void deleteRedisKeys(List<Long> episodeIds, List<Long> commentIds,
+        List<Long> recommentIds) {
+        List<String> deleteKeys = new ArrayList<>();
+
+        // 좋아요 관련 키
+        for (Long episodeId : episodeIds) {
+            deleteKeys.add(EPISODE_LIKE_COUNT_KEY_PREFIX + episodeId);
+            deleteKeys.add(EPISODE_LIKE_USER_KEY_PREFIX + episodeId);
+        }
+
+        // 댓글 관련 키
+        for (Long commentId : commentIds) {
+            deleteKeys.add(RECOMMEND_SET_KEY_PREFIX + commentId);
+            deleteKeys.add(RECOMMEND_COUNT_KEY_PREFIX + commentId);
+            deleteKeys.add(NOT_RECOMMEND_SET_KEY_PREFIX + commentId);
+            deleteKeys.add(NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId);
+        }
+
+        // 답글 관련 키
+        for (Long recommentId : recommentIds) {
+            deleteKeys.add(RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+            deleteKeys.add(RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+            deleteKeys.add(RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+            deleteKeys.add(RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+        }
+
+        // Redis 키 일괄 삭제
+        redisTemplate.delete(deleteKeys);
     }
 
     /**

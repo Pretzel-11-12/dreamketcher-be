@@ -1,5 +1,6 @@
 package pretzel.dreamketcherbe.domain.comment.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -141,6 +142,15 @@ public class CommentService {
         List<Long> recommentIds = recommentRepository.findByComment(commentId);
         recommentRecomendationRepository.deleteByRecommentId(recommentIds);
         recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
+
+        List<String> redisDeleteKeys = new ArrayList<>();
+        for (Long recommentId : recommentIds) {
+            redisDeleteKeys.add(RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+            redisDeleteKeys.add(RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+            redisDeleteKeys.add(RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+            redisDeleteKeys.add(RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+        }
+        redisTemplate.delete(redisDeleteKeys);
         recommentRepository.deleteByComment(commentId);
     }
 
