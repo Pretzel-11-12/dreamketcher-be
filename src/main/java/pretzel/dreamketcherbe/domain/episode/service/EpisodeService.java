@@ -33,10 +33,8 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
-import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonGenre;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
-import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
 import java.util.List;
@@ -49,7 +47,6 @@ public class EpisodeService {
     private final EpisodeRepository episodeRepository;
     private final WebtoonRepository webtoonRepository;
     private final MemberRepository memberRepository;
-    private final WebtoonGenreRepository webtoonGenreRepository;
     private final EpisodeLikeRepository episodeLikeRepository;
     private final EpisodeStarRepository episodeStarRepository;
     private final S3Service s3Service;
@@ -84,9 +81,6 @@ public class EpisodeService {
 
         String AuthorNickname = webtoon.getMember().getNickname();
 
-        WebtoonGenre webtoonGenre = webtoonGenreRepository.findByWebtoonId(webtoon.getId())
-            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_GENRE_NOT_FOUND));
-
         PageRequest pageable = PageRequest.of(page, size);
         Page<Episode> episodePage =
             fromFirst ? episodeRepository.findByWebtoonIdOrderByPublishedAtAsc(webtoonId, pageable)
@@ -99,7 +93,7 @@ public class EpisodeService {
 
         return WebtoonEpisodeListResDto.of(webtoon.getId(), webtoon.getTitle(),
             webtoon.getThumbnail(), webtoon.getStory(), AuthorNickname,
-            webtoon.getInterestCount(), episodeCount, webtoonGenre.getGenre().getName(),
+            webtoon.getInterestCount(), episodeCount, webtoon.getGenre().getName(),
             episodePage.getNumber(), episodePage.getTotalPages(), episodes);
     }
 

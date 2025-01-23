@@ -1,20 +1,12 @@
 package pretzel.dreamketcherbe.domain.member.service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
-import pretzel.dreamketcherbe.common.dto.PageResDto;
-import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
-import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonSimpleResponse;
-import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
-import pretzel.dreamketcherbe.domain.member.dto.UpdateProfileRequest;
-import pretzel.dreamketcherbe.domain.member.dto.WorkResDto;
+import pretzel.dreamketcherbe.domain.member.dto.*;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
@@ -24,8 +16,10 @@ import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
-import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -35,7 +29,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final InterestedWebtoonRepository interestedWebtoonRepository;
     private final WebtoonRepository webtoonRepository;
-    private final WebtoonGenreRepository webtoonGenreRepository;
     private final S3Service s3Service;
 
     public SelfInfoResponse getSelfInfo(Long memberId) {
@@ -140,17 +133,12 @@ public class MemberService {
                 Webtoon webtoon = interestedWebtoon.getWebtoon();
                 Member author = webtoon.getMember();
 
-                List<String> genres = webtoonGenreRepository.findByWebtoon(webtoon)
-                    .stream()
-                    .map(WebtoonGenre -> WebtoonGenre.getGenre().getName())
-                    .collect(Collectors.toList());
-
                 return InterestedWebtoonResponse.from(
                     interestedWebtoon,
                     author.getNickname(),
                     webtoon.getEpisodeCount(),
                     webtoon.getUpdatedAt(),
-                    genres
+                    webtoon.getGenre().getName()
                 );
             })
             .toList();
@@ -184,8 +172,7 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public PageResDto<WorkResDto> getAllWorks(final Long memberId, final String status,
-        final PageReqDto pageReqDto) {
+    public WorkResDto getAllWorks(final Long memberId, final String status, final PageReqDto pageReqDto) {
         return memberRepository.findAllWorkWithPage(memberId, status, pageReqDto);
     }
 }
