@@ -22,4 +22,8 @@ public interface NotRecommendationRepository extends JpaRepository<NotRecommenda
     @Modifying
     @Query("DELETE FROM NotRecommendation r WHERE r.comment.id IN :commentIds")
     void deleteByComment(@Param("commentIds") List<Long> commentIds);
+
+    @Modifying
+    @Query("DELETE FROM NotRecommendation r WHERE r.comment.id = :commentId")
+    void deleteBycommentId(@Param("commentId") Long commentId);
 }

@@ -23,4 +23,8 @@ public interface RecommendationRepository extends JpaRepository<Recommendation, 
     @Modifying
     @Query("DELETE FROM Recommendation r WHERE r.comment.id IN :commentIds")
     void deleteByComment(@Param("commentIds") List<Long> commentIds);
+
+    @Modifying
+    @Query("DELETE FROM Recommendation r WHERE r.comment.id = :commentId")
+    void deleteBycommentId(@Param("commentId") Long commentId);
 }
