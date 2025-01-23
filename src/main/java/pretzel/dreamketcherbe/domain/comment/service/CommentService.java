@@ -99,6 +99,7 @@ public class CommentService {
         """;
     private final RedisScript<Long> notRecommendScript = new DefaultRedisScript<>(
         NOT_RECOMMEND_LUA_SCRIPT, Long.class);
+    private final RecommentRecomendationRepository recommentRecomendationRepository;
 
     /**
      * 댓글 생성
@@ -191,7 +192,7 @@ public class CommentService {
     }
 
     /**
-     * 답글 삭제
+     * 답글 논리 삭제
      */
     @Transactional
     public void deleteRecomment(Long memberId, Long episodeId, Long commentId, Long recommentId) {
@@ -209,7 +210,15 @@ public class CommentService {
         int childCommentCount = (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(
             findComment.getId());
         findComment.updateChildCommentCount(childCommentCount);
+
+        recommendationRepository.deleteBycommentId(commentId);
+        notRecommendationRepository.deleteBycommentId(commentId);
         commentRepository.save(findComment);
+
+        List<Long> recommentIds = recommentRepository.findByComment(commentId);
+        recommentRecomendationRepository.deleteByRecommentId(recommentIds);
+        recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
+        recommentRepository.deleteByComment(commentId);
     }
 
     /**
