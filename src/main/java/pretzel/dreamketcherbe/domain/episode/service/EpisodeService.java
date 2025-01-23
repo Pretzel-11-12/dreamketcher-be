@@ -264,18 +264,26 @@ public class EpisodeService {
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
         findEpisode.isAuthor(memberId);
+        List<Long> commentIds = commentRepository.findByEpisodeId(episodeId);
+        List<Long> recommentIds = recommentRepository.findBycommentId(commentIds);
+        
+        if (commentIds.isEmpty()) {
+            episodeStarRepository.deleteByEpisodeId(episodeId);
+            episodeLikeRepository.deleteByEpisodeId(episodeId);
+            findEpisode.softDelete();
+            episodeRepository.save(findEpisode);
+            return;
+        }
 
         episodeStarRepository.deleteByEpisodeId(episodeId);
         episodeLikeRepository.deleteByEpisodeId(episodeId);
         findEpisode.softDelete();
         episodeRepository.save(findEpisode);
 
-        List<Long> commentIds = commentRepository.findByEpisodeId(episodeId);
         recommentRepository.deleteByCommentId(commentIds);
         notRecommendationRepository.deleteByComment(commentIds);
         commentRepository.deleteByEpisode(episodeId);
 
-        List<Long> recommentIds = recommentRepository.findBycommentId(commentIds);
         recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
         recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
         recommentRepository.deleteByCommentId(commentIds);

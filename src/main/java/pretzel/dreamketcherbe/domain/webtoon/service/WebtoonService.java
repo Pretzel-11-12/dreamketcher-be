@@ -267,12 +267,19 @@ public class WebtoonService {
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         findWebtoon.isAuthor(memberId);
+        List<Long> episodeIds = episodeRepository.findByWebtoonId(webtoonId);
+
+        if (episodeIds.isEmpty()) {
+            findWebtoon.softDelete();
+            webtoonRepository.save(findWebtoon);
+            memberService.deleteFavoriteWebtoon(memberId, webtoonId);
+            return;
+        }
 
         findWebtoon.softDelete();
         webtoonRepository.save(findWebtoon);
         memberService.deleteFavoriteWebtoon(memberId, webtoonId);
 
-        List<Long> episodeIds = episodeRepository.findByWebtoonId(webtoonId);
         episodeStarRepository.deleteByEpisode(episodeIds);
         episodeLikeRepository.deleteByEpisode(episodeIds);
         episodeRepository.deleteByWebtoonId(webtoonId);

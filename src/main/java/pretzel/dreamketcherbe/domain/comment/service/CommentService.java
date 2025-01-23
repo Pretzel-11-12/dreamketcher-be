@@ -129,6 +129,19 @@ public class CommentService {
             .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
 
         findComment.isAuthor(memberId);
+        List<Long> recommentIds = recommentRepository.findByComment(commentId);
+
+        if (recommentIds.isEmpty()) {
+            recommendationRepository.deleteBycommentId(commentId);
+            notRecommendationRepository.deleteBycommentId(commentId);
+            redisTemplate.delete(RECOMMEND_SET_KEY_PREFIX + commentId);
+            redisTemplate.delete(RECOMMEND_COUNT_KEY_PREFIX + commentId);
+            redisTemplate.delete(NOT_RECOMMEND_SET_KEY_PREFIX + commentId);
+            redisTemplate.delete(NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId);
+            findComment.softDelete();
+            commentRepository.save(findComment);
+            return;
+        }
 
         recommendationRepository.deleteBycommentId(commentId);
         notRecommendationRepository.deleteBycommentId(commentId);
@@ -139,7 +152,6 @@ public class CommentService {
         findComment.softDelete();
         commentRepository.save(findComment);
 
-        List<Long> recommentIds = recommentRepository.findByComment(commentId);
         recommentRecomendationRepository.deleteByRecommentId(recommentIds);
         recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
 
