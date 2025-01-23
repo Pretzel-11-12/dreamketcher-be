@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import pretzel.dreamketcherbe.domain.comment.entity.RecommentRecommendation;
 
-public interface RecommentRecomendationRepository extends
+public interface RecommentRecommendationRepository extends
     JpaRepository<RecommentRecommendation, Long> {
 
     @Query("SELECT r FROM RecommentRecommendation r WHERE r.member.id = :memberId AND r.recomment.id = :recommentId")
