@@ -11,7 +11,6 @@ public record MyWebtoonResDto(
     String title,
     String prologue,
     String story,
-    String description,
     List<String> genres
 ) {
 
@@ -22,7 +21,6 @@ public record MyWebtoonResDto(
             .title(webtoon.getTitle())
             .prologue(webtoon.getPrologue())
             .story(webtoon.getStory())
-            .description(webtoon.getDescription())
             .genres(genreNames)
             .build(
             );

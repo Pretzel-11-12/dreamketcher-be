@@ -52,6 +52,7 @@ public class WebtoonService {
     private final MemberRepository memberRepository;
 
     private final InterestedWebtoonRepository interestedWebtoonRepository;
+
     private final S3Service s3Service;
 
     private final ManagementWebtoonRespository managementWebtoonRespository;

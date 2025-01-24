@@ -13,8 +13,7 @@ public record SearchedWebtoonResDto(
     List<String> genres,
     int LastEpisodeNo,
     float averageStar,
-    Long numOfStars,
-    String description
+    Long numOfStars
 ) {
 
     public static SearchedWebtoonResDto of(Webtoon webtoon, List<String> genreNames,
@@ -28,7 +27,6 @@ public record SearchedWebtoonResDto(
             .LastEpisodeNo(webtoon.getEpisodeCount())
             .averageStar(webtoon.getAverageStar())
             .numOfStars(numOfStars)
-            .description(webtoon.getDescription())
             .build();
     }
 }
