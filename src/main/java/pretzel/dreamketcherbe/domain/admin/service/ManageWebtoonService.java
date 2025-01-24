@@ -15,26 +15,19 @@ import pretzel.dreamketcherbe.domain.admin.exception.AdminException;
 import pretzel.dreamketcherbe.domain.admin.exception.AdminExceptionType;
 import pretzel.dreamketcherbe.domain.admin.repository.ManagementWebtoonRepositoryCustom;
 import pretzel.dreamketcherbe.domain.admin.repository.ManagementWebtoonRespository;
-import pretzel.dreamketcherbe.domain.webtoon.entity.*;
+import pretzel.dreamketcherbe.domain.webtoon.entity.SerializationPeriod;
+import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
+import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
-import pretzel.dreamketcherbe.domain.webtoon.repository.GenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.SerializationPeriodRepository;
-import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class ManageWebtoonService {
 
     private final WebtoonRepository webtoonRepository;
-
-    private final WebtoonGenreRepository webtoonGenreRepository;
-
-    private final GenreRepository genreRepository;
 
     private final ManagementWebtoonRespository managementWebtoonRespository;
 
@@ -49,23 +42,13 @@ public class ManageWebtoonService {
         Page<Webtoon> webtoons = webtoonRepository.findAllByOrderByCreatedAtDesc(pageable);
 
         return webtoons.map(webtoon -> {
-            List<WebtoonGenre> webtoonGenres = webtoonGenreRepository.findByWebtoonId(
-                webtoon.getId());
-            List<String> genres = new ArrayList<>();
-
-            for (WebtoonGenre webtoonGenre : webtoonGenres) {
-                Genre genre = genreRepository.findById(webtoonGenre.getGenre().getId())
-                    .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
-                genres.add(genre.getName());
-            }
-
             ManagementWebtoon manangeWebtoon = managementWebtoonRespository.findByWebtoonId(
                     webtoon.getId())
                 .orElseThrow(() -> new AdminException(AdminExceptionType.MANAGE_WEBTOON_NOT_FOUND));
 
             SerializationPeriod serializationPeriod = serializationPeriodRepository.findByWebtoonId(webtoon.getId());
 
-            return ManageWebtoonResDto.of(webtoon, genres, manangeWebtoon, serializationPeriod);
+            return ManageWebtoonResDto.of(webtoon, webtoon.getGenre().getName(), manangeWebtoon, serializationPeriod);
         });
     }
 

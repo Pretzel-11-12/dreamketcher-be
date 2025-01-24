@@ -1,8 +1,9 @@
 package pretzel.dreamketcherbe.domain.member.dto;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
+
+import java.time.LocalDateTime;
 
 public record InterestedWebtoonResponse(
     Long interestedWebtoonId,
@@ -10,13 +11,14 @@ public record InterestedWebtoonResponse(
     String title,
     String thumbnail,
     String AuthorNickname,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     LocalDateTime updatedAt,
     int episodeCount,
-    List<String> genres
+    String genre
 ) {
 
     public static InterestedWebtoonResponse from(InterestedWebtoon interestedWebtoon,
-        String authorNickname, int episodeCount, LocalDateTime updatedAt, List<String> genres) {
+        String authorNickname, int episodeCount, LocalDateTime updatedAt, String genre) {
         return new InterestedWebtoonResponse(
             interestedWebtoon.getId(),
             interestedWebtoon.getWebtoon().getId(),
@@ -25,7 +27,7 @@ public record InterestedWebtoonResponse(
             authorNickname,
             updatedAt,
             episodeCount,
-            genres
+            genre
         );
     }
 }
