@@ -6,14 +6,14 @@ import pretzel.dreamketcherbe.domain.comment.entity.RecommentRecommendation;
 @Builder
 public record CreateRecommentRecommendationResDto(
     Long id,
-    int recommentRecommendationCount
+    int recommendationCount
 ) {
 
     public static CreateRecommentRecommendationResDto of(
-        RecommentRecommendation recommentRecommendation, int recommentRecommendationCount) {
+        RecommentRecommendation recommentRecommendation, int recommendationCount) {
         return CreateRecommentRecommendationResDto.builder()
             .id(recommentRecommendation.getId())
-            .recommentRecommendationCount(recommentRecommendationCount)
+            .recommendationCount(recommendationCount)
             .build();
     }
 }
