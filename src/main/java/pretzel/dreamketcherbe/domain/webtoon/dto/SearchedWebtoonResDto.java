@@ -10,7 +10,7 @@ public record SearchedWebtoonResDto(
     String member,
     String title,
     String genre,
-    int LastEpisodeNo,
+    int lastEpisode,
     float averageStar,
     Long numOfStars,
     String description
@@ -24,7 +24,7 @@ public record SearchedWebtoonResDto(
             .member(webtoon.getMember().getNickname())
             .title(webtoon.getTitle())
             .genre(genreName)
-            .LastEpisodeNo(webtoon.getEpisodeCount())
+            .lastEpisode(webtoon.getEpisodeCount())
             .averageStar(webtoon.getAverageStar())
             .numOfStars(numOfStars)
             .description(webtoon.getDescription())
