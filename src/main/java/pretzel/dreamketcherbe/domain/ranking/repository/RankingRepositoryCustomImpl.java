@@ -18,10 +18,8 @@ import java.util.List;
 import static pretzel.dreamketcherbe.domain.episode.entity.QEpisode.episode;
 import static pretzel.dreamketcherbe.domain.episode.entity.QEpisodeStar.episodeStar;
 import static pretzel.dreamketcherbe.domain.member.entity.QInterestedWebtoon.interestedWebtoon;
-import static pretzel.dreamketcherbe.domain.webtoon.entity.QGenre.genre;
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QLike.like;
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QWebtoon.webtoon;
-import static pretzel.dreamketcherbe.domain.webtoon.entity.QWebtoonGenre.webtoonGenre;
 
 @RequiredArgsConstructor
 public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
@@ -37,9 +35,7 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
                     webtoon.member.name,
                     webtoon.description,
                     webtoon.thumbnail,
-                    JPAExpressions.select(webtoonGenre.genre.name)
-                        .from(webtoonGenre)
-                        .where(webtoonGenre.webtoon.id.eq(webtoon.id)),
+                    webtoon.genre.name,
                     webtoon.episodeCount,
                     webtoon.averageStar,
                     ExpressionUtils.as(
@@ -60,8 +56,6 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
                 )
             )
             .from(webtoon)
-            .leftJoin(webtoonGenre).on(webtoonGenre.webtoon.id.eq(webtoon.id))
-            .leftJoin(genre).on(webtoonGenre.genre.id.eq(genre.id))
             .leftJoin(episode).on(episode.webtoon.id.eq(webtoon.id))
             .leftJoin(like).on(like.webtoon.id.eq(webtoon.id))
             .leftJoin(interestedWebtoon).on(interestedWebtoon.webtoon.id.eq(webtoon.id))
@@ -84,7 +78,7 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
         BooleanBuilder builder = new BooleanBuilder();
 
         return builder
-            .and(genreType.equals("none") ? null : webtoonGenre.genre.name.eq(genreType))
+            .and(genreType.equals("none") ? null : webtoon.genre.name.eq(genreType))
             .and(status.equals("NEW")
                 ? webtoon.status.eq(WebtoonStatus.IN_SERIES.getStatus())
                 .and(webtoon.createdAt.after(LocalDateTime.now().minusMonths(1)))
