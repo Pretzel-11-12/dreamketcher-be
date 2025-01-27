@@ -49,10 +49,12 @@ public class EpisodeController {
         @PathVariable Long webtoonId,
         @RequestParam(defaultValue = "false") boolean fromFirst,
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "20") int size
+        @RequestParam(defaultValue = "20") int size,
+        @RequestParam(required = false) Long currentEpisodeId,
+        @RequestParam(defaultValue = "2") int range
     ) {
         WebtoonEpisodeListResDto result = episodeService.getWebtoonEpisodes(
-            webtoonId, fromFirst, page, size);
+            webtoonId, fromFirst, page, size, currentEpisodeId, range);
         return ResponseEntity.ok(result);
     }
 
