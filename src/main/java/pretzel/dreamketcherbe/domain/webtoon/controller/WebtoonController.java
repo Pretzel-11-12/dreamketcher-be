@@ -20,14 +20,12 @@ import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
-import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonGenreResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
-import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonGenreResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
@@ -38,8 +36,6 @@ import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
 public class WebtoonController {
 
     private final WebtoonService webtoonService;
-    private final WebtoonRepository webtoonRepository;
-    private final MemberRepository memberRepository;
 
     /**
      * 연재중인 웹툰 목록 조회
@@ -145,28 +141,6 @@ public class WebtoonController {
             replaceIndices, folderName, objectMapper);
 
         return ResponseEntity.ok(updatedPrologueUrls);
-    }
-
-    /**
-     * 웹툰 장르 선택
-     */
-    @GetMapping("/genres")
-    public ResponseEntity<WebtoonGenreResDto> getGenreId(@Auth Long memberId,
-        @RequestParam String genre) {
-        return ResponseEntity.ok(webtoonService.selectWebtoonGenre(memberId, genre));
-    }
-
-    /**
-     * 웹툰 장르 등록
-     */
-    @PostMapping("/{webtoonId}/genre/{genreId}")
-    public ResponseEntity<CreateWebtoonGenreResDto> addWebtoonGenre(@Auth Long memberId,
-        @PathVariable Long webtoonId,
-        @PathVariable Long genreId) {
-        CreateWebtoonGenreResDto webtoonGenre = webtoonService.addWebtoonGenre(memberId, webtoonId,
-            genreId);
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(webtoonGenre);
     }
 
     /**

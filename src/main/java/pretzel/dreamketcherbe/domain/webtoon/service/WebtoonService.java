@@ -96,7 +96,10 @@ public class WebtoonService {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        Webtoon newWebtoon = Webtoon.addOf(request, findMember, new ObjectMapper());
+        Genre genre = genreRepository.findById(request.genreId())
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
+
+        Webtoon newWebtoon = Webtoon.addOf(request, findMember, genre, new ObjectMapper());
         webtoonRepository.save(newWebtoon);
 
         ManagementWebtoon managementWebtoon = ManagementWebtoon.addOf(newWebtoon);
@@ -170,19 +173,6 @@ public class WebtoonService {
         } catch (Exception e) {
             throw new S3Exception(S3ExceptionType.UPDATE_FAILED);
         }
-    }
-
-    /**
-     * 웹툰 장르 선택
-     */
-    @Transactional
-    public WebtoonGenreResDto selectWebtoonGenre(Long memberId, String genreName) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
-
-        Genre genreId = genreRepository.findByGenreName(genreName);
-
-        return WebtoonGenreResDto.of(genreId);
     }
 
     /**

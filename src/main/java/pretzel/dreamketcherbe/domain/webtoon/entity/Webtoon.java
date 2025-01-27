@@ -64,7 +64,7 @@ public class Webtoon extends BaseTimeEntity {
     @Builder
     private Webtoon(String title, String thumbnail, String prologue, String story,
         String status,
-        String description, Member member) {
+        String description, Member member, Genre genre) {
         this.title = title;
         this.thumbnail = thumbnail;
         this.prologue = prologue;
@@ -72,9 +72,11 @@ public class Webtoon extends BaseTimeEntity {
         this.status = status;
         this.description = description;
         this.member = member;
+        this.genre = genre;
     }
 
-    public static Webtoon addOf(CreateWebtoonReqDto dto, Member member, ObjectMapper objectMapper) {
+    public static Webtoon addOf(CreateWebtoonReqDto dto, Member member, Genre genre,
+        ObjectMapper objectMapper) {
         try {
             return Webtoon.builder()
                 .title(dto.title())
@@ -83,6 +85,7 @@ public class Webtoon extends BaseTimeEntity {
                 .story(dto.story())
                 .description(dto.description())
                 .member(member)
+                .genre(genre)
                 .build();
         } catch (JsonProcessingException e) {
             throw new RuntimeException("직렬화에 실패하였습니다.", e);

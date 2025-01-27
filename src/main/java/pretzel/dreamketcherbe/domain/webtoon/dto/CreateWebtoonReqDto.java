@@ -9,7 +9,8 @@ public record CreateWebtoonReqDto(
     @NotBlank String thumbnail,
     @NotEmpty List<String> prologue,
     @NotBlank String story,
-    @NotBlank String description
+    @NotBlank String description,
+    Long genreId
 ) {
 
 }
