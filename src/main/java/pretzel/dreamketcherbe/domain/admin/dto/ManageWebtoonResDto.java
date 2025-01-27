@@ -8,14 +8,13 @@ import pretzel.dreamketcherbe.domain.webtoon.entity.SerializationPeriod;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Optional;
 
 @Builder
 public record ManageWebtoonResDto(
     long id,
     String title,
-    List<String> genre,
+    String genre,
     String author,
     int episodeCount,
     String createAt,
@@ -25,7 +24,7 @@ public record ManageWebtoonResDto(
     String reason
 ) {
 
-    public static ManageWebtoonResDto of(Webtoon webtoon, List<String> genres, ManagementWebtoon managementWebtoon, SerializationPeriod serializationPeriod) {
+    public static ManageWebtoonResDto of(Webtoon webtoon, String genre, ManagementWebtoon managementWebtoon, SerializationPeriod serializationPeriod) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         String reasonContent = Optional.ofNullable(managementWebtoon.getReason())
@@ -40,7 +39,7 @@ public record ManageWebtoonResDto(
         return ManageWebtoonResDto.builder()
             .id(webtoon.getId())
             .title(webtoon.getTitle())
-            .genre(genres)
+            .genre(genre)
             .author(webtoon.getMember().getName())
             .episodeCount(webtoon.getEpisodeCount())
             .createAt(webtoon.getCreatedAt().format(formatter))

@@ -84,3 +84,8 @@ cloud:
       static: ${AWS_REGION}
     stack:
       auto: false
+
+default:
+  profile:
+    image:
+      url: ${DEFAULT_PROFILE_IMAGE_URL}

@@ -24,6 +24,7 @@ import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonGenreResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.SearchWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonGenreResDto;
@@ -216,7 +217,7 @@ public class WebtoonController {
      */
     @GetMapping("/search")
     public ResponseEntity<List<SearchedWebtoonResDto>> searchWebtoon(
-        @RequestParam String keyword) {
-        return ResponseEntity.ok(webtoonService.searchWebtoon(keyword));
+        @RequestParam SearchWebtoonReqDto request) {
+        return ResponseEntity.ok(webtoonService.searchWebtoon(request.keyword()));
     }
 }

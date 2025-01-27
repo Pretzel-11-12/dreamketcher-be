@@ -1,8 +1,9 @@
 package pretzel.dreamketcherbe.domain.episode.dto;
 
+import lombok.Builder;
+
 import java.time.LocalDate;
 import java.util.List;
-import lombok.Builder;
 
 @Builder
 public record WebtoonEpisodeListResDto(
@@ -13,7 +14,7 @@ public record WebtoonEpisodeListResDto(
     String AuthorNickname,
     int episode_count,
     int interestCount,
-    List<String> genreNames,
+    String genreName,
     int currentPage,
     int totalPages,
     List<EpisodeInfo> episodes
@@ -54,7 +55,7 @@ public record WebtoonEpisodeListResDto(
         String AuthorNickname,
         int interestCount,
         int episode_count,
-        List<String> genreNames,
+        String genreName,
         int currentPage,
         int totalPages,
         List<EpisodeInfo> episodes
@@ -67,7 +68,7 @@ public record WebtoonEpisodeListResDto(
             .AuthorNickname(AuthorNickname)
             .interestCount(interestCount)
             .episode_count(episode_count)
-            .genreNames(genreNames)
+            .genreName(genreName)
             .currentPage(currentPage)
             .totalPages(totalPages)
             .episodes(episodes)

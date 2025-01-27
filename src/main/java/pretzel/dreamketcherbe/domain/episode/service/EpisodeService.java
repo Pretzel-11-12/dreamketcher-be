@@ -1,5 +1,6 @@
 package pretzel.dreamketcherbe.domain.episode.service;
 
+import ch.qos.logback.core.pattern.parser.OptionTokenizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,6 +8,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,14 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
 import pretzel.dreamketcherbe.S3Utils.exception.S3ExceptionType;
-import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeLikeResDto;
-import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
-import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
-import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
-import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarReqDto;
-import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarResDto;
-import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
-import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
+import pretzel.dreamketcherbe.domain.episode.dto.*;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.entity.EpisodeLike;
 import pretzel.dreamketcherbe.domain.episode.entity.EpisodeStar;
@@ -41,11 +36,12 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
-import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonGenre;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
-import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonGenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @AllArgsConstructor
@@ -54,7 +50,6 @@ public class EpisodeService {
     private final EpisodeRepository episodeRepository;
     private final WebtoonRepository webtoonRepository;
     private final MemberRepository memberRepository;
-    private final WebtoonGenreRepository webtoonGenreRepository;
     private final EpisodeLikeRepository episodeLikeRepository;
     private final EpisodeStarRepository episodeStarRepository;
     private final S3Service s3Service;
@@ -88,11 +83,6 @@ public class EpisodeService {
 
         String AuthorNickname = webtoon.getMember().getNickname();
 
-        List<WebtoonGenre> webtoonGenres = webtoonGenreRepository.findByWebtoonId(webtoonId);
-
-        List<String> genreNames = webtoonGenres.stream().map(wg -> wg.getGenre().getName())
-            .toList();
-
         PageRequest pageable = PageRequest.of(page, size);
         Page<Episode> episodePage =
             fromFirst ? episodeRepository.findByWebtoonIdOrderByPublishedAtAsc(webtoonId, pageable)
@@ -105,7 +95,7 @@ public class EpisodeService {
 
         return WebtoonEpisodeListResDto.of(webtoon.getId(), webtoon.getTitle(),
             webtoon.getThumbnail(), webtoon.getStory(), AuthorNickname,
-            webtoon.getInterestCount(), episodeCount, genreNames,
+            webtoon.getInterestCount(), episodeCount, webtoon.getGenre().getName(),
             episodePage.getNumber(), episodePage.getTotalPages(), episodes);
     }
 
@@ -251,7 +241,7 @@ public class EpisodeService {
     }
 
     /**
-     * 에피소드 삭제
+     * 에피소드 논리 삭제
      */
     @Transactional
     public void deleteEpisode(Long memberId, Long webtoonId, Long episodeId) {
@@ -260,7 +250,9 @@ public class EpisodeService {
 
         findEpisode.isAuthor(memberId);
 
-        episodeRepository.delete(findEpisode);
+        findEpisode.softDelete();
+
+        episodeRepository.save(findEpisode);
     }
 
     /**
@@ -318,6 +310,27 @@ public class EpisodeService {
     @Transactional
     public void increaseViewCount(Long episodeId) {
         episodeRepository.increaseViewCount(episodeId);
+    }
+
+    /**
+     * 사용자 에피소드 좋아요, 별점 조회
+     */
+    public MemberEpisodeLikeAndStarResDto getMemberEpisodeLikeAndStar(Long memberId,
+        Long episodeId) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Episode findEpisode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        Optional<EpisodeLike> episodeLike = episodeLikeRepository.findByEpisodeAndMember(
+            episodeId, memberId);
+
+        Optional<EpisodeStar> episodeStar = episodeStarRepository.findByMemberIdAndEpisodeId(
+            memberId, episodeId);
+
+        return MemberEpisodeLikeAndStarResDto.of(episodeStar.orElse(null),
+            episodeLike.orElse(null));
     }
 
     /**

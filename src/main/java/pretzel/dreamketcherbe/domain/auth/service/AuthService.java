@@ -29,6 +29,9 @@ public class AuthService {
     @Value("${oauth2.google.local-uri}")
     private String localUri;
 
+    @Value("${default.profile.image.url}")
+    private String defaultProfileImageUrl;
+
     @Transactional
     public TokenResponse loginOrRegister(GoogleUserInfo googleUserInfo) {
         Member member = getOrCreateMember(googleUserInfo);
@@ -49,7 +52,9 @@ public class AuthService {
 
     private Member createNewMember(GoogleUserInfo googleUserInfo) {
         String nickname = generateUniqueNickname();
-        return googleUserInfo.toMember(nickname);
+        Member member = googleUserInfo.toMember(nickname);
+        member.updateImageUrl(defaultProfileImageUrl);
+        return member;
     }
 
     private String generateUniqueNickname() {

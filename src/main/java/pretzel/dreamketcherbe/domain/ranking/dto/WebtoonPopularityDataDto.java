@@ -1,17 +1,11 @@
 package pretzel.dreamketcherbe.domain.ranking.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 @Builder
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
 public class WebtoonPopularityDataDto {
 
@@ -20,7 +14,7 @@ public class WebtoonPopularityDataDto {
     private String member;
     private String description;
     private String thumbnail;
-    private List<String> genres;
+    private String genre;
     private int lastEpisode;
     private float averageStar;
     private Long numOfStars;
@@ -29,7 +23,7 @@ public class WebtoonPopularityDataDto {
     private Long interestedCount;
     private float popularity;
 
-    public WebtoonPopularityDataDto(Long id, String title, String member, String description, String thumbnail, String genres, int lastEpisode,
+    public WebtoonPopularityDataDto(Long id, String title, String member, String description, String thumbnail, String genre, int lastEpisode,
                                     float averageStar, Long numOfStars, Long likeCount, Long viewCount,
                                     Long interestedCount, float popularity) {
         this.id = id;
@@ -37,7 +31,7 @@ public class WebtoonPopularityDataDto {
         this.member = member;
         this.description = description;
         this.thumbnail = thumbnail;
-        this.genres = genres != null ? Arrays.asList(genres.split(",")) : Collections.emptyList();
+        this.genre = genre;
         this.lastEpisode = lastEpisode;
         this.averageStar = averageStar;
         this.numOfStars = numOfStars;
