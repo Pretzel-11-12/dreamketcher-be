@@ -53,6 +53,7 @@ public class Episode extends BaseTimeEntity {
     private LocalDate publishedAt;
 
     @ColumnDefault("false")
+    @Setter
     private boolean published;
 
     @ColumnDefault("0")
