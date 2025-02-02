@@ -54,7 +54,7 @@ jobs:
           script: |
             set -euxo pipefail
 
-            cd /home/ubuntu
+            cd /home/ubuntu/dreamketcherbe
 
             docker compose down
             docker compose pull
