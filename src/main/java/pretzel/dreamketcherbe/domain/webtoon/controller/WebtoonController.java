@@ -36,8 +36,6 @@ import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
 public class WebtoonController {
 
     private final WebtoonService webtoonService;
-    private final WebtoonRepository webtoonRepository;
-    private final MemberRepository memberRepository;
 
     /**
      * 연재중인 웹툰 목록 조회
@@ -144,7 +142,6 @@ public class WebtoonController {
 
         return ResponseEntity.ok(updatedPrologueUrls);
     }
-
 
     /**
      * 관심 웹툰 추가
