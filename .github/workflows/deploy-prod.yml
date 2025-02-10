@@ -54,7 +54,7 @@ jobs:
           script: |
             set -euxo pipefail
 
-            docker compose down
+            docker compose -f docker-compose-prod.yml down
             docker compose pull
             docker compose -f docker-compose-prod.yml up --build -d
             docker image prune -f
