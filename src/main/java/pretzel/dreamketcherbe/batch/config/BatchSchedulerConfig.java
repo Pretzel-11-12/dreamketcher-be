@@ -1,21 +1,25 @@
 package pretzel.dreamketcherbe.batch.config;
 
-import lombok.AllArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 @EnableScheduling
-@AllArgsConstructor
 public class BatchSchedulerConfig {
 
     private final JobLauncher jobLauncher;
 
-    private Job episodeJob;
+    private final Job episodeJob;
+
+    public BatchSchedulerConfig(JobLauncher jobLauncher, @Qualifier("episodeJob") Job episodeJob) {
+        this.jobLauncher = jobLauncher;
+        this.episodeJob = episodeJob;
+    }
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void runEpisodeJob() {
