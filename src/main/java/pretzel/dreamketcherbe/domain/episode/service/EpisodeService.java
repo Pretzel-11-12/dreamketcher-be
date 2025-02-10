@@ -1,12 +1,12 @@
 package pretzel.dreamketcherbe.domain.episode.service;
 
-import ch.qos.logback.core.pattern.parser.OptionTokenizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +22,10 @@ import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
 import pretzel.dreamketcherbe.S3Utils.exception.S3ExceptionType;
+import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.NotRecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentNotRecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentRepository;
 import pretzel.dreamketcherbe.domain.episode.dto.*;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.entity.EpisodeLike;
@@ -40,9 +44,6 @@ import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 @Service
 @AllArgsConstructor
 public class EpisodeService {
@@ -54,6 +55,16 @@ public class EpisodeService {
     private final EpisodeStarRepository episodeStarRepository;
     private final S3Service s3Service;
     public final RedisTemplate<String, String> redisTemplate;
+
+    private static final String RECOMMEND_SET_KEY_PREFIX = "comment:recommend:";
+    private static final String RECOMMEND_COUNT_KEY_PREFIX = "comment:recommendCount:";
+    private static final String NOT_RECOMMEND_SET_KEY_PREFIX = "comment:notRecommend:";
+    private static final String NOT_RECOMMEND_COUNT_KEY_PREFIX = "comment:notRecommendCount:";
+
+    private static final String RECOMMENT_RECOMMEND_SET_KEY_PREFIX = "recomment:recommend:";
+    private static final String RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX = "recomment:recommendCount:";
+    private static final String RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX = "recomment:notRecommend:";
+    private static final String RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX = "recomment:notRecommendCount:";
 
     public static final String EPISODE_LIKE_COUNT_KEY_PREFIX = "episode:likeCount:";
     private static final String EPISODE_LIKE_USER_KEY_PREFIX = "episode:likeUser:";
@@ -71,6 +82,10 @@ public class EpisodeService {
         """;
 
     private final RedisScript<Long> likeScript = new DefaultRedisScript<>(LIKE_SCRIPT, Long.class);
+    private final CommentRepository commentRepository;
+    private final RecommentRepository recommentRepository;
+    private final NotRecommendationRepository notRecommendationRepository;
+    private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
 
     /**
      * 에피소드 목록 조회
@@ -249,10 +264,57 @@ public class EpisodeService {
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
         findEpisode.isAuthor(memberId);
+        List<Long> commentIds = commentRepository.findByEpisodeId(episodeId);
+        List<Long> recommentIds = recommentRepository.findBycommentId(commentIds);
 
+        if (commentIds.isEmpty()) {
+            episodeStarRepository.deleteByEpisodeId(episodeId);
+            episodeLikeRepository.deleteByEpisodeId(episodeId);
+            findEpisode.softDelete();
+            episodeRepository.save(findEpisode);
+            return;
+        }
+
+        episodeStarRepository.deleteByEpisodeId(episodeId);
+        episodeLikeRepository.deleteByEpisodeId(episodeId);
         findEpisode.softDelete();
-
         episodeRepository.save(findEpisode);
+
+        recommentRepository.deleteByCommentId(commentIds);
+        notRecommendationRepository.deleteByComment(commentIds);
+        commentRepository.deleteByEpisode(episodeId);
+
+        recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
+        recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
+        recommentRepository.deleteByCommentId(commentIds);
+
+        deleteRedisKeys(commentIds, recommentIds);
+    }
+
+    /**
+     * redis 추천/비추천 삭제
+     */
+    private void deleteRedisKeys(List<Long> commentIds, List<Long> recommentIds) {
+        List<String> deleteKeys = new ArrayList<>();
+
+        // 댓글 관련 키
+        for (Long commentId : commentIds) {
+            deleteKeys.add(RECOMMEND_SET_KEY_PREFIX + commentId);
+            deleteKeys.add(RECOMMEND_COUNT_KEY_PREFIX + commentId);
+            deleteKeys.add(NOT_RECOMMEND_SET_KEY_PREFIX + commentId);
+            deleteKeys.add(NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId);
+        }
+
+        // 답글 관련 키
+        for (Long recommentId : recommentIds) {
+            deleteKeys.add(RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+            deleteKeys.add(RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+            deleteKeys.add(RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+            deleteKeys.add(RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+        }
+
+        // Redis 키 일괄 삭제
+        redisTemplate.delete(deleteKeys);
     }
 
     /**

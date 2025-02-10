@@ -21,4 +21,12 @@ public interface EpisodeLikeRepository extends JpaRepository<EpisodeLike, Long> 
 
     @Query("SELECT el FROM EpisodeLike el WHERE el.episode.id = :episodeId AND el.member.id = :memberId")
     Optional<EpisodeLike> findByEpisodeAndMember(Long episodeId, Long memberId);
+
+    @Modifying
+    @Query("DELETE FROM EpisodeLike el WHERE el.episode.id IN :episodeIds")
+    void deleteByEpisode(@Param("episodeIds") List<Long> episodeIds);
+
+    @Modifying
+    @Query("DELETE FROM EpisodeLike el WHERE el.episode.id = :episodeId")
+    void deleteByEpisodeId(@Param("episodeId") Long episodeId);
 }
