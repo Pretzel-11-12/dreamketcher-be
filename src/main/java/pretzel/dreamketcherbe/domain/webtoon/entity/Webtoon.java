@@ -14,6 +14,8 @@ import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
+import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 
 @Table(name = "webtoons")
 @Getter
@@ -107,7 +109,7 @@ public class Webtoon extends BaseTimeEntity {
 
     public void isAuthor(Long memberId) {
         if (!member.getId().equals(memberId)) {
-            throw new IllegalStateException(memberId + ", 작성자가 아닙니다.");
+            throw new WebtoonException(WebtoonExceptionType.UNAUTORIZED_MEMBER);
         }
     }
 

@@ -24,7 +24,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Long> findByEpisodeId(@Param("episodeId") Long episodeId);
 
     @Modifying
-    @Query("UPDATE Comment c SET c.isDeleted = true WHERE c.episode.id IN :episodes")
+    @Query("UPDATE Comment c SET c.isDeleted = true WHERE c.episode.id IN :episodeIds")
     void deleteByEpisodeId(@Param("episodeIds") List<Long> episodeIds);
 
     @Modifying
