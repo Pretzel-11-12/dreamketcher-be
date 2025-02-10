@@ -19,6 +19,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
+import pretzel.dreamketcherbe.domain.comment.exception.CommentException;
+import pretzel.dreamketcherbe.domain.comment.exception.CommentExceptionType;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
@@ -104,7 +106,7 @@ public class Recomment extends BaseTimeEntity {
 
     public void isAuthor(Long memberId) {
         if (!member.getId().equals(memberId)) {
-            throw new IllegalStateException(memberId + ", 답글 작성자가 아닙니다.");
+            throw new CommentException(CommentExceptionType.UNAUTHORIZED_MEMBER);
         }
     }
 
