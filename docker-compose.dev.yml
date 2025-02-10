@@ -1,0 +1,8 @@
+version: "3.8"
+
+services:
+  app:
+    image: ${ECR_URL}/dreamketcher-dev-server:latest
+    container_name: dreamketcher-dev-server
+    environment:
+      SPRING_PROFILES_ACTIVE: dev

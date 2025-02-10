@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  app:
+    image: ${ECR_URI}/dreamketcher-server:latest
+    container_name: dreamketcher-server
+    build: .
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
