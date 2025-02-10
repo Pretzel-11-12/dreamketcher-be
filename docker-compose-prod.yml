@@ -1,8 +1,8 @@
 services:
   server:
-    image: ${ECR_URI}/dreamketcher-server:latest
+    image: ${ECR_URL}/dreamketcher-prod-server:latest
     container_name: dreamketcher-server
-    build: .
+#    build: .
     ports:
       - 80:8080
     environment:
@@ -14,6 +14,7 @@ services:
     depends_on:
       redis-server:
         condition: service_healthy
+
   redis-server:
     image: redis
     ports:

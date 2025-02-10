@@ -44,6 +44,30 @@ jobs:
       - name: ECR에 Docker 이미지 Push하기
         run: docker push ${{ steps.login-ecr.outputs.registry }}/dreamketcher-prod-server:latest
 
+      - name: .env 파일 생성
+        run: |
+          echo "ECR_URL=${{ steps.login-ecr.outputs.registry }}" > .env
+          echo "JASYPT_ENCRYPTOR_PASSWORD=${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}" >> .env
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+
+      - name: .env 파일을 EC2로 전송하기
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: "./.env"
+          target: "/home/ubuntu"
+
+      - name: docker-compose.yml 파일을 EC2로 전송하기
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: "./docker-compose-prod.yml"
+          target: "/home/ubuntu"
+
       - name: SSH로 EC2에 접속하기
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -54,7 +78,9 @@ jobs:
           script: |
             set -euxo pipefail
 
+            cd /home/ubuntu
+            
             docker compose -f docker-compose-prod.yml down
-            docker compose pull
-            docker compose -f docker-compose-prod.yml up --build -d
+            docker compose -f docker-compose-prod.yml pull server
+            docker compose -f docker-compose-prod.yml up -d
             docker image prune -f
