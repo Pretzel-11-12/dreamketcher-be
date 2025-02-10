@@ -1,8 +1,25 @@
-version: "3.8"
-
 services:
-  app:
-    image: ${ECR_URL}/dreamketcher-dev-server:latest
-    container_name: dreamketcher-dev-server
+  server:
+    image: ${ECR_URI}/dreamketcher-server:latest
+    container_name: dreamketcher-server
+    build: .
+    ports:
+      - 80:8080
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: prod
+      JASYPT_ENCRYPTOR_PASSWORD: ${JASYPT_ENCRYPTOR_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      redis-server:
+        condition: service_healthy
+
+  redis-server:
+    image: redis
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
