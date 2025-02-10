@@ -14,6 +14,7 @@ public interface EpisodeStarRepository extends JpaRepository<EpisodeStar, Long> 
 
     Optional<EpisodeStar> findByMemberIdAndEpisodeId(Long memberId, Long episodeId);
 
+
     @Query("SELECT es.webtoon.id, COUNT(DISTINCT es.member.id) FROM EpisodeStar es WHERE es.webtoon.id IN :webtoonIds GROUP BY es.webtoon.id")
     List<Object[]> countDistinctStarsByWebtoonIds(List<Long> webtoonIds);
 

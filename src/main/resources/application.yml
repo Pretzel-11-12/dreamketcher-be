@@ -8,3 +8,7 @@ spring:
       max-file-size: 5MB
       max-request-size: 50MB
       enabled: true
+  batch:
+    job:
+      enabled: false
+

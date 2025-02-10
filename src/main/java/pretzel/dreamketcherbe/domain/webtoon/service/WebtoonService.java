@@ -32,6 +32,7 @@ import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonReposito
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.member.service.MemberService;
 import pretzel.dreamketcherbe.domain.webtoon.dto.*;
+import pretzel.dreamketcherbe.domain.webtoon.entity.Genre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
@@ -139,7 +140,10 @@ public class WebtoonService {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        Webtoon newWebtoon = Webtoon.addOf(request, findMember, new ObjectMapper());
+        Genre genre = genreRepository.findById(request.genreId())
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
+
+        Webtoon newWebtoon = Webtoon.addOf(request, findMember, genre, new ObjectMapper());
         webtoonRepository.save(newWebtoon);
 
         ManagementWebtoon managementWebtoon = ManagementWebtoon.addOf(newWebtoon);

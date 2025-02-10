@@ -8,8 +8,7 @@ public record UpdateWebtoonReqDto(
     @NotBlank String title,
     @NotBlank String thumbnail,
     @NotEmpty List<String> prologue,
-    @NotBlank String story,
-    @NotBlank String description
+    @NotBlank String story
 ) {
 
 }

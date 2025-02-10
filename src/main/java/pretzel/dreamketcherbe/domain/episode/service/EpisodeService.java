@@ -7,6 +7,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,9 +43,6 @@ import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @AllArgsConstructor
@@ -266,7 +266,7 @@ public class EpisodeService {
         findEpisode.isAuthor(memberId);
         List<Long> commentIds = commentRepository.findByEpisodeId(episodeId);
         List<Long> recommentIds = recommentRepository.findBycommentId(commentIds);
-        
+
         if (commentIds.isEmpty()) {
             episodeStarRepository.deleteByEpisodeId(episodeId);
             episodeLikeRepository.deleteByEpisodeId(episodeId);
@@ -372,6 +372,27 @@ public class EpisodeService {
     @Transactional
     public void increaseViewCount(Long episodeId) {
         episodeRepository.increaseViewCount(episodeId);
+    }
+
+    /**
+     * 사용자 에피소드 좋아요, 별점 조회
+     */
+    public MemberEpisodeLikeAndStarResDto getMemberEpisodeLikeAndStar(Long memberId,
+        Long episodeId) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Episode findEpisode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        Optional<EpisodeLike> episodeLike = episodeLikeRepository.findByEpisodeAndMember(
+            episodeId, memberId);
+
+        Optional<EpisodeStar> episodeStar = episodeStarRepository.findByMemberIdAndEpisodeId(
+            memberId, episodeId);
+
+        return MemberEpisodeLikeAndStarResDto.of(episodeStar.orElse(null),
+            episodeLike.orElse(null));
     }
 
     /**
