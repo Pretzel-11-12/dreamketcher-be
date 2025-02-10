@@ -1,5 +1,6 @@
 package pretzel.dreamketcherbe.domain.comment.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -18,4 +19,12 @@ public interface RecommendationRepository extends JpaRepository<Recommendation, 
     @Query("DELETE FROM Recommendation r WHERE r.member.id = :memberId AND r.comment.id = :commentId")
     void deleteByMemberAndComment(@Param("memberId") Long memberId,
         @Param("commentId") Long commentId);
+
+    @Modifying
+    @Query("DELETE FROM Recommendation r WHERE r.comment.id IN :commentIds")
+    void deleteByComment(@Param("commentIds") List<Long> commentIds);
+
+    @Modifying
+    @Query("DELETE FROM Recommendation r WHERE r.comment.id = :commentId")
+    void deleteBycommentId(@Param("commentId") Long commentId);
 }
