@@ -7,7 +7,7 @@ public record RankingResDto(
         Long id,
         String title,
         String member,
-        String description,
+        String story,
         String thumbnail,
         String genre,
         int lastEpisode,
@@ -19,7 +19,7 @@ public record RankingResDto(
             .id(data.getId())
             .title(data.getTitle())
             .member(data.getMember())
-            .description(data.getDescription())
+            .story(data.getStory())
             .thumbnail(data.getThumbnail())
             .genre(data.getGenre())
             .lastEpisode(data.getLastEpisode())
