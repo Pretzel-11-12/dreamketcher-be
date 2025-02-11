@@ -11,9 +11,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
+import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
+import pretzel.dreamketcherbe.domain.episode.exception.EpisodeExceptionType;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
@@ -24,6 +28,8 @@ import java.time.LocalDate;
 @Entity
 @DynamicInsert
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE episodes SET is_deleted = true WHERE id = ?")
+@SQLRestriction("is_deleted = false")
 public class Episode extends BaseTimeEntity {
 
     @Id
@@ -49,6 +55,7 @@ public class Episode extends BaseTimeEntity {
     private LocalDate publishedAt;
 
     @ColumnDefault("false")
+    @Setter
     private boolean published;
 
     @ColumnDefault("0")
@@ -66,6 +73,10 @@ public class Episode extends BaseTimeEntity {
 
     @ColumnDefault("'NOT_APPROVAL'")
     private String status;
+
+    @Column(nullable = false, name = "is_deleted")
+    @ColumnDefault("false")
+    private boolean isDeleted;
 
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
@@ -115,7 +126,17 @@ public class Episode extends BaseTimeEntity {
 
     public void isAuthor(Long memberId) {
         if (!member.getId().equals(memberId)) {
-            throw new IllegalStateException(memberId + ", 작성자가 아닙니다.");
+            throw new EpisodeException(EpisodeExceptionType.UNAUTHORIZED);
+        }
+    }
+
+    public void updateAverageStar(float averageStar) {
+        this.averageStar = averageStar;
+    }
+
+    public void softDelete() {
+        if (!this.isDeleted) {
+            this.isDeleted = true;
         }
     }
 }

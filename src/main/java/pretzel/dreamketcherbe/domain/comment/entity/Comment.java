@@ -8,16 +8,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
+import pretzel.dreamketcherbe.domain.comment.exception.CommentException;
+import pretzel.dreamketcherbe.domain.comment.exception.CommentExceptionType;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
@@ -40,6 +42,16 @@ public class Comment extends BaseTimeEntity {
     @Column(name = "child_comment_count")
     private int childCommentCount;
 
+    @Column(name = "recommendation_count", nullable = false)
+    @ColumnDefault("0")
+    @Setter
+    private int recommendationCount;
+
+    @Column(name = "not_recommendation_count", nullable = false)
+    @ColumnDefault("0")
+    @Setter
+    private int notRecommendationCount;
+
     @Column(name = "is_deleted", nullable = false)
     @ColumnDefault("false")
     private boolean isDeleted;
@@ -57,10 +69,13 @@ public class Comment extends BaseTimeEntity {
     private Webtoon webtoon;
 
     @Builder
-    public Comment(String content, int childCommentCount, Member member, Episode episode,
+    public Comment(String content, int childCommentCount, int recommendationCount,
+        int notRecommendationCount, Member member, Episode episode,
         Webtoon webtoon) {
         this.content = content;
         this.childCommentCount = childCommentCount;
+        this.recommendationCount = recommendationCount;
+        this.notRecommendationCount = notRecommendationCount;
         this.member = member;
         this.episode = episode;
         this.webtoon = webtoon;
@@ -77,7 +92,7 @@ public class Comment extends BaseTimeEntity {
 
     public void isAuthor(Long memberId) {
         if (!member.getId().equals(memberId)) {
-            throw new IllegalStateException(memberId + ", 작성자가 아닙니다.");
+            throw new CommentException(CommentExceptionType.UNAUTHORIZED_MEMBER);
         }
     }
 

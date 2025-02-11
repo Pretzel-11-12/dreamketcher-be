@@ -18,10 +18,8 @@ import java.util.List;
 import static pretzel.dreamketcherbe.domain.episode.entity.QEpisode.episode;
 import static pretzel.dreamketcherbe.domain.episode.entity.QEpisodeStar.episodeStar;
 import static pretzel.dreamketcherbe.domain.member.entity.QInterestedWebtoon.interestedWebtoon;
-import static pretzel.dreamketcherbe.domain.webtoon.entity.QGenre.genre;
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QLike.like;
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QWebtoon.webtoon;
-import static pretzel.dreamketcherbe.domain.webtoon.entity.QWebtoonGenre.webtoonGenre;
 
 @RequiredArgsConstructor
 public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
@@ -35,15 +33,8 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
                     webtoon.id,
                     webtoon.title,
                     webtoon.member.name,
-                    webtoon.description,
                     webtoon.thumbnail,
-                    ExpressionUtils.as(
-                        JPAExpressions.select(Expressions.stringTemplate("GROUP_CONCAT(DISTINCT {0})", genre.name))
-                            .from(webtoonGenre)
-                            .join(webtoonGenre.genre, genre)
-                            .where(webtoonGenre.webtoon.id.eq(webtoon.id)),
-                        "genres"
-                    ),
+                    webtoon.genre.name,
                     webtoon.episodeCount,
                     webtoon.averageStar,
                     ExpressionUtils.as(
@@ -64,8 +55,6 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
                 )
             )
             .from(webtoon)
-            .leftJoin(webtoonGenre).on(webtoonGenre.webtoon.id.eq(webtoon.id))
-            .leftJoin(genre).on(webtoonGenre.genre.id.eq(genre.id))
             .leftJoin(episode).on(episode.webtoon.id.eq(webtoon.id))
             .leftJoin(like).on(like.webtoon.id.eq(webtoon.id))
             .leftJoin(interestedWebtoon).on(interestedWebtoon.webtoon.id.eq(webtoon.id))
@@ -88,7 +77,7 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
         BooleanBuilder builder = new BooleanBuilder();
 
         return builder
-            .and(genreType.equals("none") ? null : webtoonGenre.genre.name.eq(genreType))
+            .and(genreType.equals("none") ? null : webtoon.genre.name.eq(genreType))
             .and(status.equals("NEW")
                 ? webtoon.status.eq(WebtoonStatus.IN_SERIES.getStatus())
                 .and(webtoon.createdAt.after(LocalDateTime.now().minusMonths(1)))
@@ -98,10 +87,15 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
     /**
      * 인기도 계산
      */
-    private NumberExpression<Float> calculatePopularity(NumberPath<Float> averageStar, NumberExpression<Long> likeCount, NumberExpression<Long> viewCount, NumberExpression<Long> interestedCount) {
-        NumberExpression<Double> logLikes = Expressions.numberTemplate(Double.class, "log10({0} + 1)", likeCount);
-        NumberExpression<Double> logViews = Expressions.numberTemplate(Double.class, "log10({0} + 1)", viewCount);
-        NumberExpression<Double> logInterested = Expressions.numberTemplate(Double.class, "log10({0} + 1)", interestedCount);
+    private NumberExpression<Float> calculatePopularity(NumberPath<Float> averageStar,
+        NumberExpression<Long> likeCount, NumberExpression<Long> viewCount,
+        NumberExpression<Long> interestedCount) {
+        NumberExpression<Double> logLikes = Expressions.numberTemplate(Double.class,
+            "log10({0} + 1)", likeCount);
+        NumberExpression<Double> logViews = Expressions.numberTemplate(Double.class,
+            "log10({0} + 1)", viewCount);
+        NumberExpression<Double> logInterested = Expressions.numberTemplate(Double.class,
+            "log10({0} + 1)", interestedCount);
 
         return averageStar.multiply(0.3)
             .add(logLikes.multiply(0.3))

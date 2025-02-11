@@ -6,7 +6,8 @@ public enum WebtoonStatus {
     FINISH("FINISH", "완결"),
     IN_SERIES("IN_SERIES", "연재중"),
     REST("REST", "휴재"),
-    NEW("NEW", "신작");
+    NEW("NEW", "신작"),
+    PRE_SERIES("PRE_SERIES", "연재전");
 
     private String status;
     private String value;
