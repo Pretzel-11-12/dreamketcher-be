@@ -10,6 +10,16 @@ jobs:
     environment: dev
     runs-on: ubuntu-latest
     steps:
+      - name: Gradle Caching
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: "${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}"
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - name: Github Repository 파일 불러오기
         uses: actions/checkout@v4
 
@@ -45,7 +55,7 @@ jobs:
       - name: 이전 ECR 이미지 정리
         run: |
           REPO_NAME="dreamketcher-dev-server"
-
+          
           OLD_IMAGES=$(aws ecr list-images \
             --repository-name $REPO_NAME \
             --query 'imageIds[?imageTag!=`latest`]' \
