@@ -1,5 +1,6 @@
 package pretzel.dreamketcherbe.domain.comment.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.NotRecommendationRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.RecommendationRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.RecommentNotRecommendationRepository;
-import pretzel.dreamketcherbe.domain.comment.repository.RecommentRecomendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentRecommendationRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.RecommentRepository;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
@@ -58,7 +59,7 @@ public class CommentService {
     private final RecommentRepository recommentRepository;
     private final RecommendationRepository recommendationRepository;
     private final NotRecommendationRepository notRecommendationRepository;
-    private final RecommentRecomendationRepository recommentRecommendationRepository;
+    private final RecommentRecommendationRepository recommentRecommendationRepository;
     private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
@@ -99,6 +100,7 @@ public class CommentService {
         """;
     private final RedisScript<Long> notRecommendScript = new DefaultRedisScript<>(
         NOT_RECOMMEND_LUA_SCRIPT, Long.class);
+    private final RecommentRecommendationRepository recommentRecomendationRepository;
 
     /**
      * 댓글 생성
@@ -119,7 +121,7 @@ public class CommentService {
     }
 
     /**
-     * 댓글 삭제
+     * 댓글 논리 삭제
      */
     @Transactional
     public void deleteComment(Long memberId, Long episodeId, Long commentId) {
@@ -127,9 +129,41 @@ public class CommentService {
             .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
 
         findComment.isAuthor(memberId);
+        List<Long> recommentIds = recommentRepository.findByComment(commentId);
 
+        if (recommentIds.isEmpty()) {
+            recommendationRepository.deleteBycommentId(commentId);
+            notRecommendationRepository.deleteBycommentId(commentId);
+            redisTemplate.delete(RECOMMEND_SET_KEY_PREFIX + commentId);
+            redisTemplate.delete(RECOMMEND_COUNT_KEY_PREFIX + commentId);
+            redisTemplate.delete(NOT_RECOMMEND_SET_KEY_PREFIX + commentId);
+            redisTemplate.delete(NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId);
+            findComment.softDelete();
+            commentRepository.save(findComment);
+            return;
+        }
+
+        recommendationRepository.deleteBycommentId(commentId);
+        notRecommendationRepository.deleteBycommentId(commentId);
+        redisTemplate.delete(RECOMMEND_SET_KEY_PREFIX + commentId);
+        redisTemplate.delete(RECOMMEND_COUNT_KEY_PREFIX + commentId);
+        redisTemplate.delete(NOT_RECOMMEND_SET_KEY_PREFIX + commentId);
+        redisTemplate.delete(NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId);
         findComment.softDelete();
         commentRepository.save(findComment);
+
+        recommentRecomendationRepository.deleteByRecommentId(recommentIds);
+        recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
+
+        List<String> redisDeleteKeys = new ArrayList<>();
+        for (Long recommentId : recommentIds) {
+            redisDeleteKeys.add(RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+            redisDeleteKeys.add(RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+            redisDeleteKeys.add(RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+            redisDeleteKeys.add(RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+        }
+        redisTemplate.delete(redisDeleteKeys);
+        recommentRepository.deleteByComment(commentId);
     }
 
     /**
@@ -191,7 +225,7 @@ public class CommentService {
     }
 
     /**
-     * 답글 삭제
+     * 답글 논리 삭제
      */
     @Transactional
     public void deleteRecomment(Long memberId, Long episodeId, Long commentId, Long recommentId) {
@@ -203,6 +237,12 @@ public class CommentService {
 
         findRecomment.isAuthor(memberId);
 
+        recommentRecomendationRepository.deleteByRecomment(recommentId);
+        recommentNotRecommendationRepository.deleteByRecomment(recommentId);
+        redisTemplate.delete(RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+        redisTemplate.delete(RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+        redisTemplate.delete(RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+        redisTemplate.delete(RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
         findRecomment.softDelete();
         recommentRepository.save(findRecomment);
 

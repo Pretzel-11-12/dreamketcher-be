@@ -44,7 +44,7 @@ public class EpisodeBatchConfig {
             .name("episodeItemReader")
             .entityManagerFactory(entityManagerFactoryBean.getObject())
             .queryString(
-                "SELECT e FROM episodes e WHERE e.publishedAt = :today AND e.published = false")
+                "SELECT e FROM episodes e WHERE e.publishedAt = :today AND e.published = false AND e.status = 'APPROVAL'")
             .parameterValues(Map.of("today", LocalDate.now()))
             .pageSize(10)
             .build();

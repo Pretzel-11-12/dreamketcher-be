@@ -56,6 +56,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                     webtoon.title,
                     webtoon.thumbnail,
                     member.nickname,
+                    webtoon.story,
                     webtoon.genre.name,
                     webtoon.episodeCount,
                     Expressions.stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", webtoon.updatedAt),

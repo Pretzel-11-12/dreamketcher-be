@@ -33,6 +33,7 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
                     webtoon.id,
                     webtoon.title,
                     webtoon.member.name,
+                    webtoon.story,
                     webtoon.thumbnail,
                     webtoon.genre.name,
                     webtoon.episodeCount,
@@ -75,6 +76,8 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
      */
     private BooleanBuilder getWhereConditions(String status, String genreType) {
         BooleanBuilder builder = new BooleanBuilder();
+
+        status = status.equals("none") ? WebtoonStatus.IN_SERIES.getStatus() : status;
 
         return builder
             .and(genreType.equals("none") ? null : webtoon.genre.name.eq(genreType))

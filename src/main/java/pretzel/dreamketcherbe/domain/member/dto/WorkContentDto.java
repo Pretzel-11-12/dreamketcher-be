@@ -5,7 +5,7 @@ public record WorkContentDto(
         String title,
         String thumbnail,
         String author,
-        String description,
+        String story,
         String genre,
         int episodeCount,
         String updatedAt,
