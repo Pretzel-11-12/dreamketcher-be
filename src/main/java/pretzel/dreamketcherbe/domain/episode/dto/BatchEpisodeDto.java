@@ -25,7 +25,7 @@ public record BatchEpisodeDto(
 
 ) {
 
-    public static BatchEpisodeDto fromEntity(Episode episode) {
+    public static BatchEpisodeDto of(Episode episode) {
         return new BatchEpisodeDto(
             episode.getId(),
             episode.getNo(),
@@ -42,11 +42,6 @@ public record BatchEpisodeDto(
             episode.getViewCount(),
             episode.getAverageStar()
         );
-    }
-
-    public Episode toEntity(Episode existingEpisode) {
-        existingEpisode.setPublished(this.published);
-        return existingEpisode;
     }
 
 }
