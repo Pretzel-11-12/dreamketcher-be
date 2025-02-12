@@ -115,6 +115,17 @@ public class WebtoonController {
     }
 
     /**
+     * 웹툰 썸네일 삭제
+     */
+    @DeleteMapping("/{webtoonId}/thumbnail")
+    public ResponseEntity<Void> deleteWebtoonThumbnail(@Auth Long memberId,
+        @PathVariable Long webtoonId,
+        @RequestParam("thumbnailUrl") String thumbnailUrl) {
+        webtoonService.deleteThumbnail(thumbnailUrl);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
      * 웹툰 프롤로그 등록
      */
     @PostMapping("/upload/prologue")
