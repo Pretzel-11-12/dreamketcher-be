@@ -26,7 +26,6 @@ import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
 @AllArgsConstructor
 public class EpisodeBatchConfig {
 
-    private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final LocalContainerEntityManagerFactoryBean entityManagerFactoryBean;
 
@@ -91,7 +90,8 @@ public class EpisodeBatchConfig {
      * Step : Chunk 기반 처리
      */
     @Bean
-    public Step episodeStep(ItemReader<BatchEpisodeDto> reader,
+    public Step episodeStep(JobRepository jobRepository,
+        ItemReader<BatchEpisodeDto> reader,
         ItemProcessor<BatchEpisodeDto, BatchEpisodeDto> processor,
         ItemWriter<BatchEpisodeDto> writer) {
         return new StepBuilder("episodeStep", jobRepository)
@@ -106,7 +106,7 @@ public class EpisodeBatchConfig {
      * Job
      */
     @Bean
-    public Job episodeJob(Step episodeStep) {
+    public Job episodeJob(JobRepository jobRepository, Step episodeStep) {
         return new JobBuilder("episodeJob", jobRepository)
             .start(episodeStep)
             .build();
