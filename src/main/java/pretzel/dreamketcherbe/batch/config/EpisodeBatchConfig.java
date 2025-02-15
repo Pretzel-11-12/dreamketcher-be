@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -26,7 +27,6 @@ import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
 @AllArgsConstructor
 public class EpisodeBatchConfig {
 
-    private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final LocalContainerEntityManagerFactoryBean entityManagerFactoryBean;
 
@@ -34,6 +34,7 @@ public class EpisodeBatchConfig {
      * 미발행 에피소드 읽기
      */
     @Bean
+    @JobScope
     public ItemReader<BatchEpisodeDto> episodeItemReader() {
 
         if (entityManagerFactoryBean.getObject() == null) {
@@ -91,7 +92,8 @@ public class EpisodeBatchConfig {
      * Step : Chunk 기반 처리
      */
     @Bean
-    public Step episodeStep(ItemReader<BatchEpisodeDto> reader,
+    public Step episodeStep(JobRepository jobRepository,
+        ItemReader<BatchEpisodeDto> reader,
         ItemProcessor<BatchEpisodeDto, BatchEpisodeDto> processor,
         ItemWriter<BatchEpisodeDto> writer) {
         return new StepBuilder("episodeStep", jobRepository)
@@ -106,7 +108,7 @@ public class EpisodeBatchConfig {
      * Job
      */
     @Bean
-    public Job episodeJob(Step episodeStep) {
+    public Job episodeJob(JobRepository jobRepository, Step episodeStep) {
         return new JobBuilder("episodeJob", jobRepository)
             .start(episodeStep)
             .build();
