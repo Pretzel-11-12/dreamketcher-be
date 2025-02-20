@@ -35,8 +35,8 @@ public class EpisodeBatchConfig {
     /**
      * 미발행 에피소드 읽기
      */
-    @Bean
     @StepScope
+    @Bean
     public JpaPagingItemReader<BatchEpisodeDto> episodeItemReader() {
 
         if (entityManagerFactoryBean.getObject() == null) {
@@ -56,6 +56,7 @@ public class EpisodeBatchConfig {
     /**
      * published 상태 업데이트
      */
+    @StepScope
     @Bean
     public ItemProcessor<BatchEpisodeDto, BatchEpisodeDto> episodeEpisodeItemProcessor() {
         return dto -> new BatchEpisodeDto(
@@ -79,6 +80,7 @@ public class EpisodeBatchConfig {
     /**
      * 에피소드 업데이트 저장
      */
+    @StepScope
     @Bean
     public ItemWriter<BatchEpisodeDto> episodeItemWriter(EpisodeRepository episodeRepository) {
         return items -> items.forEach(dto -> {
@@ -93,6 +95,7 @@ public class EpisodeBatchConfig {
     /**
      * Step : Chunk 기반 처리
      */
+    @JobScope
     @Bean
     public Step episodeStep(JobRepository jobRepository,
         ItemReader<BatchEpisodeDto> reader,
