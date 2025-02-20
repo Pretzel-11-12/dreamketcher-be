@@ -13,6 +13,7 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +36,7 @@ public class EpisodeBatchConfig {
      */
     @Bean
     @JobScope
-    public ItemReader<BatchEpisodeDto> episodeItemReader() {
+    public JpaPagingItemReader<BatchEpisodeDto> episodeItemReader() {
 
         if (entityManagerFactoryBean.getObject() == null) {
             throw new IllegalStateException("entity manager factory been 이 null 입니다.");
