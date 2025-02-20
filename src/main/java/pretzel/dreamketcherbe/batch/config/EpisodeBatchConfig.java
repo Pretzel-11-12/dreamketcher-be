@@ -7,12 +7,14 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,9 +35,9 @@ public class EpisodeBatchConfig {
     /**
      * 미발행 에피소드 읽기
      */
+    @StepScope
     @Bean
-    @JobScope
-    public ItemReader<BatchEpisodeDto> episodeItemReader() {
+    public JpaPagingItemReader<BatchEpisodeDto> episodeItemReader() {
 
         if (entityManagerFactoryBean.getObject() == null) {
             throw new IllegalStateException("entity manager factory been 이 null 입니다.");
@@ -54,6 +56,7 @@ public class EpisodeBatchConfig {
     /**
      * published 상태 업데이트
      */
+    @StepScope
     @Bean
     public ItemProcessor<BatchEpisodeDto, BatchEpisodeDto> episodeEpisodeItemProcessor() {
         return dto -> new BatchEpisodeDto(
@@ -77,6 +80,7 @@ public class EpisodeBatchConfig {
     /**
      * 에피소드 업데이트 저장
      */
+    @StepScope
     @Bean
     public ItemWriter<BatchEpisodeDto> episodeItemWriter(EpisodeRepository episodeRepository) {
         return items -> items.forEach(dto -> {
@@ -91,6 +95,7 @@ public class EpisodeBatchConfig {
     /**
      * Step : Chunk 기반 처리
      */
+    @JobScope
     @Bean
     public Step episodeStep(JobRepository jobRepository,
         ItemReader<BatchEpisodeDto> reader,
