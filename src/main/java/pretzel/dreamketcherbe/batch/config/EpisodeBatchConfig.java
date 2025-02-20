@@ -7,6 +7,7 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -35,7 +36,7 @@ public class EpisodeBatchConfig {
      * 미발행 에피소드 읽기
      */
     @Bean
-    @JobScope
+    @StepScope
     public JpaPagingItemReader<BatchEpisodeDto> episodeItemReader() {
 
         if (entityManagerFactoryBean.getObject() == null) {
