@@ -78,58 +78,73 @@ public class EpisodeService {
      * 에피소드 목록 조회
      */
     public WebtoonEpisodeListResDto getWebtoonEpisodes(Long webtoonId, boolean fromFirst, int page,
-        int size, Long currentEpisodeId, int range) {
+        int size) {
 
         Webtoon webtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-        String AuthorNickname = webtoon.getMember().getNickname();
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<Episode> episodePage = fromFirst
+            ? episodeRepository.findByWebtoonIdOrderByPublishedAtAsc(webtoonId, pageable)
+            : episodeRepository.findByWebtoonIdOrderByPublishedAtDesc(webtoonId, pageable);
 
-        List<WebtoonEpisodeListResDto.EpisodeInfo> episodes;
-        int episodeCount;
-        int currentPage = page;
-        int totalPages = 0;
+        List<WebtoonEpisodeListResDto.EpisodeInfo> episodes = episodePage.getContent()
+            .stream()
+            .map(this::toEpisodeInfo)
+            .toList();
 
-        if (currentEpisodeId != null) {
-            Episode currentEpisode = episodeRepository.findById(currentEpisodeId)
-                .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+        return WebtoonEpisodeListResDto.of(
+            webtoon.getId(),
+            webtoon.getTitle(),
+            webtoon.getThumbnail(),
+            webtoon.getStory(),
+            webtoon.getMember().getNickname(),
+            (int) episodePage.getTotalElements(),
+            webtoon.getInterestCount(),
+            webtoon.getGenre().getName(),
+            episodePage.getNumber(),
+            episodePage.getTotalPages(),
+            episodes
+        );
+    }
 
-            int currentEpisodeNo = currentEpisode.getNo();
-            int totalEpisodes = Math.toIntExact(episodeRepository.countByWebtoonId(webtoonId));
+    /**
+     * 에피소드 범위 조회
+     */
+    public WebtoonEpisodeListResDto getWebtoonEpisodesAround(
+        Long webtoonId, Long episodeId, int range) {
 
-            int startNo = currentEpisodeNo - range;
-            int endNo = currentEpisodeNo + range;
+        Webtoon webtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-            startNo = Math.max(startNo, 1);
-            endNo = Math.min(endNo, totalEpisodes);
+        Episode currentEpisode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
-            episodes = episodeRepository.findEpisodesAround(webtoonId, startNo, endNo)
-                .stream()
-                .map(this::toEpisodeInfo)
-                .toList();
+        int currentEpisodeNo = currentEpisode.getNo();
+        int totalEpisodes = Math.toIntExact(episodeRepository.countByWebtoonId(webtoonId));
 
-            episodeCount = totalEpisodes;
-        } else {
-            PageRequest pageable = PageRequest.of(page, size);
-            Page<Episode> episodePage =
-                fromFirst ? episodeRepository.findByWebtoonIdOrderByPublishedAtAsc(webtoonId,
-                    pageable)
-                    : episodeRepository.findByWebtoonIdOrderByPublishedAtDesc(webtoonId, pageable);
+        int startNo = Math.max(currentEpisodeNo - range, 1);
+        int endNo = Math.min(currentEpisodeNo + range, totalEpisodes);
 
-            episodes = episodePage.getContent().stream()
-                .map(this::toEpisodeInfo)
-                .toList();
+        List<WebtoonEpisodeListResDto.EpisodeInfo> episodes = episodeRepository
+            .findEpisodesAround(webtoonId, startNo, endNo)
+            .stream()
+            .map(this::toEpisodeInfo)
+            .toList();
 
-            episodeCount = (int) episodePage.getTotalElements();
-            currentPage = episodePage.getNumber();
-            totalPages = episodePage.getTotalPages();
-
-        }
-
-        return WebtoonEpisodeListResDto.of(webtoon.getId(), webtoon.getTitle(),
-            webtoon.getThumbnail(), webtoon.getStory(), AuthorNickname,
-            webtoon.getInterestCount(), episodeCount, webtoon.getGenre().getName(),
-            currentPage, totalPages, episodes);
+        return WebtoonEpisodeListResDto.of(
+            webtoon.getId(),
+            webtoon.getTitle(),
+            webtoon.getThumbnail(),
+            webtoon.getStory(),
+            webtoon.getMember().getNickname(),
+            totalEpisodes,
+            webtoon.getInterestCount(),
+            webtoon.getGenre().getName(),
+            0,
+            0,
+            episodes
+        );
     }
 
     private WebtoonEpisodeListResDto.EpisodeInfo toEpisodeInfo(Episode episode) {

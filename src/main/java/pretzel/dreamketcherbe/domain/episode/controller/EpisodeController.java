@@ -43,18 +43,31 @@ public class EpisodeController {
 
     /**
      * 에피소드 목록 조회
+     * todo: webtoon 조회와 episode 조회 분리
      */
     @GetMapping
     public ResponseEntity<WebtoonEpisodeListResDto> getEpisodes(
         @PathVariable Long webtoonId,
         @RequestParam(defaultValue = "false") boolean fromFirst,
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "20") int size,
-        @RequestParam(required = false) Long currentEpisodeId,
-        @RequestParam(defaultValue = "2") int range
+        @RequestParam(defaultValue = "20") int size
     ) {
         WebtoonEpisodeListResDto result = episodeService.getWebtoonEpisodes(
-            webtoonId, fromFirst, page, size, currentEpisodeId, range);
+            webtoonId, fromFirst, page, size);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 에피소드 범위 조회
+     */
+    @GetMapping("/{episodeId}/around")
+    public ResponseEntity<WebtoonEpisodeListResDto> getEpisodesAround(
+        @PathVariable Long webtoonId,
+        @PathVariable Long episodeId,
+        @RequestParam(defaultValue = "2") int range
+    ) {
+        WebtoonEpisodeListResDto result = episodeService.getWebtoonEpisodesAround(
+            webtoonId, episodeId, range);
         return ResponseEntity.ok(result);
     }
 
