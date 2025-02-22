@@ -26,7 +26,7 @@ import static pretzel.dreamketcherbe.domain.webtoon.entity.QSerializationPeriod.
 import static pretzel.dreamketcherbe.domain.webtoon.entity.QWebtoon.webtoon;
 
 @RequiredArgsConstructor
-public class MemberRepositoryCustomImpl implements MemberRepositoryCustom{
+public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
 
@@ -39,9 +39,11 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom{
         long finishCount = getWorkStatusDataCount(memberId, WebtoonStatus.FINISH.getStatus());
         long newCount = getWorkStatusDataCount(memberId, WebtoonStatus.NEW.getStatus());
         long restCount = getWorkStatusDataCount(memberId, WebtoonStatus.REST.getStatus());
-        long preSeriesCount = getWorkStatusDataCount(memberId, WebtoonStatus.PRE_SERIES.getStatus());
+        long preSeriesCount = getWorkStatusDataCount(memberId,
+            WebtoonStatus.PRE_SERIES.getStatus());
 
-        return WorkResDto.of(new PageResDto<>(content, total), inSeriesCount, finishCount, newCount, restCount, preSeriesCount);
+        return WorkResDto.of(new PageResDto<>(content, total), inSeriesCount, finishCount, newCount,
+            restCount, preSeriesCount);
     }
 
     /**
@@ -49,34 +51,35 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom{
      */
     private List<WorkContentDto> getWorks(Long memberId, String status, PageReqDto pageReqDto) {
         return jpaQueryFactory.select(
-            Projections.constructor(WorkContentDto.class,
-                webtoon.id,
-                webtoon.title,
-                webtoon.thumbnail,
-                member.nickname,
-                webtoon.description,
-                webtoon.genre.name,
-                webtoon.episodeCount,
-                Expressions.stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", webtoon.updatedAt),
-                Expressions.stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", serializationPeriod.startDate),
-                webtoon.averageStar,
-                JPAExpressions.select(episodeStar.id.countDistinct())
-                    .from(episodeStar)
-                    .where(episodeStar.webtoon.id.eq(webtoon.id)),
-                JPAExpressions.select(like.count())
-                .from(like)
-                .where(like.webtoon.id.eq(webtoon.id)),
-                JPAExpressions.select(comment.count().add(
-                    JPAExpressions.select(recomment.count())
-                        .from(recomment)
-                        .where(recomment.webtoon.id.eq(webtoon.id))
-                    ))
-                    .from(comment)
-                    .where(comment.webtoon.id.eq(webtoon.id)),
-                JPAExpressions.select(interestedWebtoon.count())
-                    .from(interestedWebtoon)
-                    .where(interestedWebtoon.webtoon.id.eq(webtoon.id))
-            ))
+                Projections.constructor(WorkContentDto.class,
+                    webtoon.id,
+                    webtoon.title,
+                    webtoon.thumbnail,
+                    member.nickname,
+                    webtoon.story,
+                    webtoon.genre.name,
+                    webtoon.episodeCount,
+                    Expressions.stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", webtoon.updatedAt),
+                    Expressions.stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')",
+                        serializationPeriod.startDate),
+                    webtoon.averageStar,
+                    JPAExpressions.select(episodeStar.id.countDistinct())
+                        .from(episodeStar)
+                        .where(episodeStar.webtoon.id.eq(webtoon.id)),
+                    JPAExpressions.select(like.count())
+                        .from(like)
+                        .where(like.webtoon.id.eq(webtoon.id)),
+                    JPAExpressions.select(comment.count().add(
+                            JPAExpressions.select(recomment.count())
+                                .from(recomment)
+                                .where(recomment.webtoon.id.eq(webtoon.id))
+                        ))
+                        .from(comment)
+                        .where(comment.webtoon.id.eq(webtoon.id)),
+                    JPAExpressions.select(interestedWebtoon.count())
+                        .from(interestedWebtoon)
+                        .where(interestedWebtoon.webtoon.id.eq(webtoon.id))
+                ))
             .from(webtoon)
             .join(webtoon.member, member)
             .leftJoin(serializationPeriod).on(serializationPeriod.webtoon.id.eq(webtoon.id))
@@ -92,13 +95,13 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom{
      */
     private long getTotalDataCount(Long memberId, String status) {
         return Optional.ofNullable(jpaQueryFactory
-            .select(webtoon.count())
-            .from(webtoon)
-            .join(webtoon.member, member)
-            .leftJoin(serializationPeriod).on(serializationPeriod.webtoon.id.eq(webtoon.id))
-            .where(getWhereConditions(memberId, status))
-            .fetchOne())
-        .orElse(0L);
+                .select(webtoon.count())
+                .from(webtoon)
+                .join(webtoon.member, member)
+                .leftJoin(serializationPeriod).on(serializationPeriod.webtoon.id.eq(webtoon.id))
+                .where(getWhereConditions(memberId, status))
+                .fetchOne())
+            .orElse(0L);
     }
 
     /**
@@ -106,11 +109,11 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom{
      */
     private long getWorkStatusDataCount(Long memberId, String status) {
         return Optional.ofNullable(jpaQueryFactory
-            .select(webtoon.count())
-            .from(webtoon)
-            .where(getWhereConditions(memberId, status))
-            .fetchOne())
-        .orElse(0L);
+                .select(webtoon.count())
+                .from(webtoon)
+                .where(getWhereConditions(memberId, status))
+                .fetchOne())
+            .orElse(0L);
     }
 
     /**

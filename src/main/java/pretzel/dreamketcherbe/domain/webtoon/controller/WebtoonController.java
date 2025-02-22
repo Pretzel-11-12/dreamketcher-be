@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
-import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
@@ -27,7 +27,6 @@ import pretzel.dreamketcherbe.domain.webtoon.dto.SearchWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
-import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
 
 @RestController
@@ -36,8 +35,6 @@ import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
 public class WebtoonController {
 
     private final WebtoonService webtoonService;
-    private final WebtoonRepository webtoonRepository;
-    private final MemberRepository memberRepository;
 
     /**
      * 연재중인 웹툰 목록 조회
@@ -145,7 +142,6 @@ public class WebtoonController {
         return ResponseEntity.ok(updatedPrologueUrls);
     }
 
-
     /**
      * 관심 웹툰 추가
      */
@@ -194,7 +190,7 @@ public class WebtoonController {
      */
     @GetMapping("/search")
     public ResponseEntity<List<SearchedWebtoonResDto>> searchWebtoon(
-        @RequestParam SearchWebtoonReqDto request) {
+        @Valid @ModelAttribute SearchWebtoonReqDto request) {
         return ResponseEntity.ok(webtoonService.searchWebtoon(request.keyword()));
     }
 }
