@@ -11,6 +11,8 @@ public record CommentResDto(
     String profileImage,
     String content,
     int childCommentCount,
+    int recommendationCount,
+    int notRecommendationCount,
     LocalDateTime createdAt
 
 ) {
@@ -22,6 +24,8 @@ public record CommentResDto(
             .profileImage(comment.getMember().getImageUrl())
             .content(comment.getContent())
             .childCommentCount(comment.getChildCommentCount())
+            .recommendationCount(comment.getRecommendationCount())
+            .notRecommendationCount(comment.getNotRecommendationCount())
             .createdAt(comment.getCreatedAt())
             .build();
     }
