@@ -1,9 +1,8 @@
 package pretzel.dreamketcherbe.domain.episode.dto;
 
-import lombok.Builder;
-
 import java.time.LocalDate;
 import java.util.List;
+import lombok.Builder;
 
 @Builder
 public record WebtoonEpisodeListResDto(
@@ -23,6 +22,7 @@ public record WebtoonEpisodeListResDto(
     @Builder
     public record EpisodeInfo(
         Long episodeId,
+        int no,
         String title,
         String thumbnail,
         LocalDate publishedAt,
@@ -37,6 +37,7 @@ public record WebtoonEpisodeListResDto(
         ) {
             return EpisodeInfo.builder()
                 .episodeId(episode.getId())
+                .no(episode.getNo())
                 .title(episode.getTitle())
                 .thumbnail(episode.getThumbnail())
                 .publishedAt(episode.getPublishedAt())
