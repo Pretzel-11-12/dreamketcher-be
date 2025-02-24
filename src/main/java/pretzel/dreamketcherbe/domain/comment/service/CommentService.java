@@ -249,6 +249,7 @@ public class CommentService {
         int childCommentCount = (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(
             findComment.getId());
         findComment.updateChildCommentCount(childCommentCount);
+
         commentRepository.save(findComment);
     }
 
@@ -300,6 +301,8 @@ public class CommentService {
         Recommendation recommendation = Recommendation.addOf(findComment, findMember);
         recommendationRepository.save(recommendation);
 
+        findComment.updateRecommendationCount(getRecommendationCount(recommendCountKey));
+
         return CreateRecommendationResDto.of(recommendation,
             getRecommendationCount(recommendCountKey));
     }
@@ -325,6 +328,7 @@ public class CommentService {
         }
 
         recommendationRepository.deleteByMemberAndComment(memberId, commentId);
+        findComment.updateRecommendationCount(getRecommendationCount(recommendCountKey));
 
         return getRecommendationCount(recommendCountKey);
     }
@@ -352,6 +356,8 @@ public class CommentService {
         NotRecommendation notRecommendation = NotRecommendation.addOf(findComment, findMember);
         notRecommendationRepository.save(notRecommendation);
 
+        findComment.updateNotRecommendationCount(getRecommendationCount(notRecommendCountKey));
+
         return NotRecommendationResDto.of(notRecommendation,
             getRecommendationCount(notRecommendCountKey));
     }
@@ -378,6 +384,8 @@ public class CommentService {
         }
 
         notRecommendationRepository.deleteByMemberAndComment(memberId, commentId);
+        findComment.updateNotRecommendationCount(getRecommendationCount(notRecommendCountKey));
+
         return getRecommendationCount(notRecommendCountKey);
     }
 
@@ -405,6 +413,7 @@ public class CommentService {
 
         Long result = redisTemplate.execute(recommendScript,
             List.of(recommendRecommentSetKey, recommendRecommentCountKey, memberId.toString()));
+
         if (result == null || result != 1) {
             throw new IllegalStateException("답글 추천 실패");
         }
@@ -412,6 +421,9 @@ public class CommentService {
         RecommentRecommendation newRecommentRecommendation = RecommentRecommendation.addOf(
             findMember, findRecomment);
         recommentRecommendationRepository.save(newRecommentRecommendation);
+
+        findRecomment.updateRecommendationCount(
+            getRecommentRecommendationCount(recommendRecommentCountKey));
 
         return CreateRecommentRecommendationResDto.of(newRecommentRecommendation,
             getRecommentRecommendationCount(recommendRecommentCountKey));
@@ -422,6 +434,9 @@ public class CommentService {
      */
     @Transactional
     public int unrecommentRecommendation(Long memberId, Long recommentId) {
+        Recomment findRecomment = recommentRepository.findById(recommentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
+
         String recommendRecommentSetKey = RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId;
         String recommendRecommentCountKey = RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
 
@@ -432,6 +447,9 @@ public class CommentService {
         }
 
         recommentRecommendationRepository.deleteByMemberAndRecomment(memberId, recommentId);
+        findRecomment.updateRecommendationCount(
+            getRecommentRecommendationCount(recommendRecommentCountKey));
+
         return getRecommentRecommendationCount(recommendRecommentCountKey);
     }
 
@@ -461,6 +479,9 @@ public class CommentService {
             findMember, findRecomment);
         recommentNotRecommendationRepository.save(newRecommentNotRecommendation);
 
+        findRecomment.updateNotRecommendationCount(
+            getRecommentRecommendationCount(notRecommendRecommentCountKey));
+
         return CreateRecommentNotRecommendationResDto.of(newRecommentNotRecommendation,
             getRecommentRecommendationCount(notRecommendRecommentCountKey));
     }
@@ -470,6 +491,9 @@ public class CommentService {
      */
     @Transactional
     public int unrecommentNotRecommendation(Long memberId, Long recommentId) {
+        Recomment findRecomment = recommentRepository.findById(recommentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
+
         String notRecommentRecommendSetKey = RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX + recommentId;
         String notRecommentRecommendCountKey =
             RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
@@ -482,6 +506,9 @@ public class CommentService {
         }
 
         recommentNotRecommendationRepository.deleteByMemberAndRecomment(memberId, recommentId);
+        findRecomment.updateNotRecommendationCount(
+            getRecommentRecommendationCount(notRecommentRecommendCountKey));
+
         return getRecommentRecommendationCount(notRecommentRecommendCountKey);
     }
 
@@ -514,8 +541,8 @@ public class CommentService {
             Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
 
-            comment.setRecommendationCount(recommendCount);
-            comment.setNotRecommendationCount(notRecommendCount);
+            comment.updateRecommendationCount(recommendCount);
+            comment.updateNotRecommendationCount(notRecommendCount);
             commentRepository.save(comment);
         }
     }
@@ -544,8 +571,8 @@ public class CommentService {
             Recomment recomment = recommentRepository.findById(recommentId)
                 .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
 
-            recomment.setRecommendationCount(recommendCount);
-            recomment.setNotRecommendationCount(notRecommendCount);
+            recomment.updateRecommendationCount(recommendCount);
+            recomment.updateNotRecommendationCount(notRecommendCount);
             recommentRepository.save(recomment);
         }
     }

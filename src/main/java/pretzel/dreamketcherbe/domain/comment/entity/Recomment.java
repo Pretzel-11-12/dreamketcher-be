@@ -48,12 +48,10 @@ public class Recomment extends BaseTimeEntity {
 
     @Column(name = "recommendation_count", nullable = false)
     @ColumnDefault("0")
-    @Setter
     private int recommendationCount;
 
     @Column(name = "not_recommendation_count", nullable = false)
     @ColumnDefault("0")
-    @Setter
     private int notRecommendationCount;
 
     @Column(name = "is_deleted", nullable = false)
@@ -114,5 +112,13 @@ public class Recomment extends BaseTimeEntity {
         if (!isDeleted) {
             this.isDeleted = true;
         }
+    }
+
+    public void updateRecommendationCount(int count) {
+        this.recommendationCount = count;
+    }
+
+    public void updateNotRecommendationCount(int count) {
+        this.notRecommendationCount = count;
     }
 }
