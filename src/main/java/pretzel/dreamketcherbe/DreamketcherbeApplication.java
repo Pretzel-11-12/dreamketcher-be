@@ -9,7 +9,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
-@EnableBatchProcessing
 public class DreamketcherbeApplication {
 
     public static void main(String[] args) {
