@@ -181,6 +181,17 @@ public class WebtoonService {
     }
 
     /**
+     * 웹툰 썸네일 삭제
+     */
+    public void deleteThumbnail(String imageUrl) {
+        try {
+            s3Service.deleteImage(imageUrl);
+        } catch (Exception e) {
+            throw new S3Exception(S3ExceptionType.DELETE_FAILED);
+        }
+    }
+
+    /**
      * 웹툰 프롤로그 등록
      */
     public String uploadPrologue(Long memberId, List<MultipartFile> prologue,
