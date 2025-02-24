@@ -27,7 +27,7 @@ import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
 
 @Configuration
 @AllArgsConstructor
-public class EpisodeBatchConfig extends DefaultBatchConfiguration {
+public class EpisodeBatchConfig {
 
     private final PlatformTransactionManager transactionManager;
     private final LocalContainerEntityManagerFactoryBean entityManagerFactoryBean;
