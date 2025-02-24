@@ -231,6 +231,17 @@ public class EpisodeService {
     }
 
     /**
+     * 에피소드 이미지 삭제
+     */
+    public void deleteImage(String imageUrl) {
+        try {
+            s3Service.deleteImage(imageUrl);
+        } catch (Exception e) {
+            throw new S3Exception(S3ExceptionType.DELETE_FAILED);
+        }
+    }
+
+    /**
      * 에피소드 수정
      */
     @Transactional

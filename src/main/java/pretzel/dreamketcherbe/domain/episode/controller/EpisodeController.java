@@ -126,6 +126,17 @@ public class EpisodeController {
         return ResponseEntity.ok(updatedContentUrls);
     }
 
+    /**
+     * 에피소드 이미지 삭제
+     */
+    @DeleteMapping("/{episodeId}/image")
+    public ResponseEntity<Void> deleteEpisodeImage(@Auth Long memberId,
+        @PathVariable("episodeId") Long episodeId,
+        @RequestParam("imageUrl") String imageUrl) {
+        episodeService.deleteImage(imageUrl);
+
+        return ResponseEntity.noContent().build();
+    }
 
     /**
      * 에피소드 수정

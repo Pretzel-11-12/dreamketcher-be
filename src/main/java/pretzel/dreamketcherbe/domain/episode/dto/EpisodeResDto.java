@@ -9,6 +9,8 @@ public record EpisodeResDto(
     Long id,
     int no,
     String webtoonTitle,
+    String webtoonThumbnail,
+    String genre,
     String title,
     String thumbnail,
     String content,
@@ -24,6 +26,8 @@ public record EpisodeResDto(
         return EpisodeResDto.builder()
             .id(episode.getId())
             .webtoonTitle(episode.getWebtoon().getTitle())
+            .webtoonThumbnail(episode.getWebtoon().getThumbnail())
+            .genre(episode.getWebtoon().getGenre().getName())
             .title(episode.getTitle())
             .no(episode.getNo())
             .thumbnail(episode.getThumbnail())
