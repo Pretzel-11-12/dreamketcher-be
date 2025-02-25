@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
@@ -22,6 +22,14 @@ import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
 import pretzel.dreamketcherbe.S3Utils.exception.S3ExceptionType;
+import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeLikeResDto;
+import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
+import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
+import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
+import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarReqDto;
+import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarResDto;
+import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
+import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
 import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.NotRecommendationRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.RecommentNotRecommendationRepository;
@@ -96,22 +104,68 @@ public class EpisodeService {
         Webtoon webtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-        String AuthorNickname = webtoon.getMember().getNickname();
-
         PageRequest pageable = PageRequest.of(page, size);
-        Page<Episode> episodePage =
-            fromFirst ? episodeRepository.findByWebtoonIdOrderByPublishedAtAsc(webtoonId, pageable)
-                : episodeRepository.findByWebtoonIdOrderByPublishedAtDesc(webtoonId, pageable);
+        Page<Episode> episodePage = fromFirst
+            ? episodeRepository.findByWebtoonIdOrderByPublishedAtAsc(webtoonId, pageable)
+            : episodeRepository.findByWebtoonIdOrderByPublishedAtDesc(webtoonId, pageable);
 
-        List<WebtoonEpisodeListResDto.EpisodeInfo> episodes = episodePage.getContent().stream()
-            .map(this::toEpisodeInfo).toList();
+        List<WebtoonEpisodeListResDto.EpisodeInfo> episodes = episodePage.getContent()
+            .stream()
+            .map(this::toEpisodeInfo)
+            .toList();
 
-        int episodeCount = (int) episodePage.getTotalElements();
+        return WebtoonEpisodeListResDto.of(
+            webtoon.getId(),
+            webtoon.getTitle(),
+            webtoon.getThumbnail(),
+            webtoon.getStory(),
+            webtoon.getMember().getNickname(),
+            (int) episodePage.getTotalElements(),
+            webtoon.getInterestCount(),
+            webtoon.getGenre().getName(),
+            episodePage.getNumber(),
+            episodePage.getTotalPages(),
+            episodes
+        );
+    }
 
-        return WebtoonEpisodeListResDto.of(webtoon.getId(), webtoon.getTitle(),
-            webtoon.getThumbnail(), webtoon.getStory(), AuthorNickname,
-            webtoon.getInterestCount(), episodeCount, webtoon.getGenre().getName(),
-            episodePage.getNumber(), episodePage.getTotalPages(), episodes);
+    /**
+     * 에피소드 범위 조회
+     */
+    public WebtoonEpisodeListResDto getWebtoonEpisodesAround(
+        Long webtoonId, Long episodeId, int range) {
+
+        Webtoon webtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        Episode currentEpisode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        int currentEpisodeNo = currentEpisode.getNo();
+        int totalEpisodes = Math.toIntExact(episodeRepository.countByWebtoonId(webtoonId));
+
+        int startNo = Math.max(currentEpisodeNo - range, 1);
+        int endNo = Math.min(currentEpisodeNo + range, totalEpisodes);
+
+        List<WebtoonEpisodeListResDto.EpisodeInfo> episodes = episodeRepository
+            .findEpisodesAround(webtoonId, startNo, endNo)
+            .stream()
+            .map(this::toEpisodeInfo)
+            .toList();
+
+        return WebtoonEpisodeListResDto.of(
+            webtoon.getId(),
+            webtoon.getTitle(),
+            webtoon.getThumbnail(),
+            webtoon.getStory(),
+            webtoon.getMember().getNickname(),
+            totalEpisodes,
+            webtoon.getInterestCount(),
+            webtoon.getGenre().getName(),
+            0,
+            0,
+            episodes
+        );
     }
 
     private WebtoonEpisodeListResDto.EpisodeInfo toEpisodeInfo(Episode episode) {
@@ -227,6 +281,17 @@ public class EpisodeService {
             return objectMapper.writeValueAsString(updateContentUrls);
         } catch (Exception e) {
             throw new S3Exception(S3ExceptionType.IMAGE_NOT_FOUND);
+        }
+    }
+
+    /**
+     * 에피소드 이미지 삭제
+     */
+    public void deleteImage(String imageUrl) {
+        try {
+            s3Service.deleteImage(imageUrl);
+        } catch (Exception e) {
+            throw new S3Exception(S3ExceptionType.DELETE_FAILED);
         }
     }
 

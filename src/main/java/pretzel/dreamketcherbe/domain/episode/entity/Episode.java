@@ -55,7 +55,6 @@ public class Episode extends BaseTimeEntity {
     private LocalDate publishedAt;
 
     @ColumnDefault("false")
-    @Setter
     private boolean published;
 
     @ColumnDefault("0")
@@ -138,5 +137,9 @@ public class Episode extends BaseTimeEntity {
         if (!this.isDeleted) {
             this.isDeleted = true;
         }
+    }
+
+    public void updatePublished(boolean published) {
+        this.published = published;
     }
 }

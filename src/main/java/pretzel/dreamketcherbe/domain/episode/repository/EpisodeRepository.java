@@ -25,6 +25,13 @@ public interface EpisodeRepository extends JpaRepository<Episode, Long> {
 
     Page<Episode> findAllByWebtoonId(Long webtoonId, Pageable pageable);
 
+    @Query("SELECT e FROM Episode e WHERE e.webtoon.id = :webtoonId AND e.no BETWEEN :startNo AND :endNo ORDER BY e.no ASC")
+    List<Episode> findEpisodesAround(
+        @Param("webtoonId") Long webtoonId,
+        @Param("startNo") int startNo,
+        @Param("endNo") int endNo
+    );
+
     Long countByWebtoonId(Long webtoonId);
 
     @Query("SELECT e.id FROM Episode e WHERE e.webtoon.id = :webtoonId AND e.isDeleted = false ")

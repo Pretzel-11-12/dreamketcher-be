@@ -44,6 +44,7 @@ public class EpisodeController {
 
     /**
      * 에피소드 목록 조회
+     * todo: webtoon 조회와 episode 조회 분리
      */
     @GetMapping
     public ResponseEntity<WebtoonEpisodeListResDto> getEpisodes(
@@ -54,6 +55,20 @@ public class EpisodeController {
     ) {
         WebtoonEpisodeListResDto result = episodeService.getWebtoonEpisodes(
             webtoonId, fromFirst, page, size);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 에피소드 범위 조회
+     */
+    @GetMapping("/{episodeId}/around")
+    public ResponseEntity<WebtoonEpisodeListResDto> getEpisodesAround(
+        @PathVariable Long webtoonId,
+        @PathVariable Long episodeId,
+        @RequestParam(defaultValue = "2") int range
+    ) {
+        WebtoonEpisodeListResDto result = episodeService.getWebtoonEpisodesAround(
+            webtoonId, episodeId, range);
         return ResponseEntity.ok(result);
     }
 
@@ -126,6 +141,17 @@ public class EpisodeController {
         return ResponseEntity.ok(updatedContentUrls);
     }
 
+    /**
+     * 에피소드 이미지 삭제
+     */
+    @DeleteMapping("/{episodeId}/image")
+    public ResponseEntity<Void> deleteEpisodeImage(@Auth Long memberId,
+        @PathVariable("episodeId") Long episodeId,
+        @RequestParam("imageUrl") String imageUrl) {
+        episodeService.deleteImage(imageUrl);
+
+        return ResponseEntity.noContent().build();
+    }
 
     /**
      * 에피소드 수정
