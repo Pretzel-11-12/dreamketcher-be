@@ -1,6 +1,8 @@
 package pretzel.dreamketcherbe.batch.config;
 
+import java.util.Map;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,13 @@ public class BatchSchedulerConfig {
     @Scheduled(cron = "0 0 0 * * ?")
     public void runEpisodeJob() {
         try {
-            jobLauncher.run(episodeJob, new JobParameters());
+            JobParameters jobParameters = new JobParameters(
+                Map.of("run.id",
+                    new JobParameter<>(String.valueOf(System.currentTimeMillis()), String.class,
+                        true))
+            );
+
+            jobLauncher.run(episodeJob, jobParameters);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
