@@ -1,5 +1,6 @@
 package pretzel.dreamketcherbe.batch.config;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +88,7 @@ public class EpisodeBatchConfig {
     /**
      * 에피소드 업데이트 저장
      */
+    @Transactional
     @Bean
     public ItemWriter<BatchEpisodeDto> episodeItemWriter(EpisodeRepository episodeRepository) {
         return items -> {
@@ -108,7 +110,7 @@ public class EpisodeBatchConfig {
                 }
                 episode.updatePublished(dto.published());
             });
-            episodeRepository.saveAll(episodes);
+            episodeRepository.updatePublishedById(episodeIds);
         };
     }
 
