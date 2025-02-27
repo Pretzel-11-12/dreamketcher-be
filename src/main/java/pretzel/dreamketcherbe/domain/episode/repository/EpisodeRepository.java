@@ -1,5 +1,6 @@
 package pretzel.dreamketcherbe.domain.episode.repository;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.time.LocalDate;
 import org.springframework.data.domain.Page;
@@ -40,4 +41,9 @@ public interface EpisodeRepository extends JpaRepository<Episode, Long> {
     @Modifying
     @Query("UPDATE Episode e SET e.isDeleted = true WHERE e.webtoon.id =:webtoonId")
     void deleteByWebtoonId(@Param("webtoonId") Long webtoonId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Episode e SET e.published = true WHERE e.id IN :episodeIds")
+    void updatePublishedById(@Param("episodeIds") List<Long> episodeIds);
 }
