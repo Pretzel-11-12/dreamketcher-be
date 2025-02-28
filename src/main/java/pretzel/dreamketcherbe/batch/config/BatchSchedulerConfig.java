@@ -25,7 +25,7 @@ public class BatchSchedulerConfig {
         this.episodeJob = episodeJob;
     }
 
-    @Scheduled(cron = "0 0 0 * * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 14 * * ?", zone = "Asia/Seoul")
     public void runEpisodeJob() {
         try {
             JobParameters jobParameters = new JobParameters(
