@@ -100,7 +100,6 @@ public class CommentService {
         """;
     private final RedisScript<Long> notRecommendScript = new DefaultRedisScript<>(
         NOT_RECOMMEND_LUA_SCRIPT, Long.class);
-    private final RecommentRecommendationRepository recommentRecomendationRepository;
 
     /**
      * 댓글 생성
@@ -152,7 +151,7 @@ public class CommentService {
         findComment.softDelete();
         commentRepository.save(findComment);
 
-        recommentRecomendationRepository.deleteByRecommentId(recommentIds);
+        recommentRecommendationRepository.deleteByRecommentId(recommentIds);
         recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
 
         List<String> redisDeleteKeys = new ArrayList<>();
@@ -237,7 +236,7 @@ public class CommentService {
 
         findRecomment.isAuthor(memberId);
 
-        recommentRecomendationRepository.deleteByRecomment(recommentId);
+        recommentRecommendationRepository.deleteByRecomment(recommentId);
         recommentNotRecommendationRepository.deleteByRecomment(recommentId);
         redisTemplate.delete(RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId);
         redisTemplate.delete(RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
