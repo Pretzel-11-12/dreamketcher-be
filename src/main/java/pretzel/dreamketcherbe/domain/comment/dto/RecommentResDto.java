@@ -12,6 +12,8 @@ public record RecommentResDto(
     String content,
     Long parentCommentId,
     int commentOrder,
+    int recommendationCount,
+    int notRecommendationCount,
     LocalDateTime createdAt
 ) {
 
@@ -23,6 +25,8 @@ public record RecommentResDto(
             .content(recomment.getContent())
             .parentCommentId(recomment.getParentCommentId())
             .commentOrder(recomment.getCommentOrder())
+            .recommendationCount(recomment.getRecommendationCount())
+            .notRecommendationCount(recomment.getNotRecommendationCount())
             .createdAt(recomment.getCreatedAt())
             .build();
     }
