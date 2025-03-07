@@ -73,33 +73,60 @@ public class CommentService {
     private static final String RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX = "recomment:notRecommend:";
     private static final String RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX = "recomment:notRecommendCount:";
 
-    private static final String RECOMMEND_LUA_SCRIPT = """
-        if redis.call('sismember', KEYS[1], ARGV[1]) == 1 then
-            redis.call('srem', KEYS[1], ARGV[1])
-            redis.call('decr', KEYS[2])
-            return -1
-        else
+    private static final String ADD_RECOMMEND_LUA_SCRIPT = """
+        local isMember = redis.call('sismember', KEYS[1], ARCV[1])
+        if isMember == 0 then
             redis.call('sadd', KEYS[1], ARGV[1])
             redis.call('incr', KEYS[2])
             return 1
+        else
+            return 0
         end
         """;
-    private final RedisScript<Long> recommendScript = new DefaultRedisScript<>(RECOMMEND_LUA_SCRIPT,
+    private final RedisScript<Long> recommendScript = new DefaultRedisScript<>(
+        ADD_RECOMMEND_LUA_SCRIPT,
         Long.class);
 
-    private static final String NOT_RECOMMEND_LUA_SCRIPT = """
-        if redis.call('sismember', KEYS[1], ARGV[1]) == 1 then
+    private static final String REMOVE_RECOMMEND_LUA_SCRIPT = """
+        local isMember = redis.call('sismember, KEYS[1], ARGV[1])
+        if isMember == 1 then
             redis.call('srem', KEYS[1], ARGV[1])
             redis.call('decr', KEYS[2])
             return -1
         else
+            return 0
+        end
+        """;
+    private final RedisScript<Long> removeRecommendScript = new DefaultRedisScript<>(
+        REMOVE_RECOMMEND_LUA_SCRIPT,
+        Long.class);
+
+    private static final String ADD_NOT_RECOMMEND_LUA_SCRIPT = """
+        local isMember = redis.call('sismember', KEYS[1], ARCV[1])
+        if isMember == 0 then
             redis.call('sadd', KEYS[1], ARGV[1])
             redis.call('incr', KEYS[2])
             return 1
+        else
+            return 0
         end
         """;
     private final RedisScript<Long> notRecommendScript = new DefaultRedisScript<>(
-        NOT_RECOMMEND_LUA_SCRIPT, Long.class);
+        ADD_NOT_RECOMMEND_LUA_SCRIPT, Long.class);
+
+    private static final String REMOVE_NOT_RECOMMEND_LUA_SCRIPT = """
+        local isMember = redis.call('sismember, KEYS[1], ARGV[1])
+        if isMember == 1 then
+            redis.call('srem', KEYS[1], ARGV[1])
+            redis.call('decr', KEYS[2])
+            return -1
+        else
+            return 0
+        end
+        """;
+    private final RedisScript<Long> removeNotRecommendScript = new DefaultRedisScript<>(
+        REMOVE_NOT_RECOMMEND_LUA_SCRIPT,
+        Long.class);
 
     /**
      * 댓글 생성
@@ -293,6 +320,7 @@ public class CommentService {
 
         Long result = redisTemplate.execute(recommendScript,
             List.of(recommendSetKey, recommendCountKey), memberId.toString());
+
         if (result == null || result != 1) {
             throw new IllegalStateException("추천 처리 실패");
         }
@@ -320,8 +348,9 @@ public class CommentService {
         String recommendSetKey = RECOMMEND_SET_KEY_PREFIX + commentId;
         String recommendCountKey = RECOMMEND_COUNT_KEY_PREFIX + commentId;
 
-        Long result = redisTemplate.execute(recommendScript,
+        Long result = redisTemplate.execute(removeRecommendScript,
             List.of(recommendSetKey, recommendCountKey), memberId.toString());
+
         if (result == null || result != -1) {
             throw new IllegalStateException("추천 해제 실패");
         }
@@ -376,8 +405,9 @@ public class CommentService {
         String notRecommendSetKey = NOT_RECOMMEND_SET_KEY_PREFIX + commentId;
         String notRecommendCountKey = NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId;
 
-        Long result = redisTemplate.execute(notRecommendScript,
+        Long result = redisTemplate.execute(removeNotRecommendScript,
             List.of(notRecommendSetKey, notRecommendCountKey), memberId.toString());
+
         if (result == null || result != -1) {
             throw new IllegalStateException("비추천 해제 실패");
         }
@@ -439,8 +469,9 @@ public class CommentService {
         String recommendRecommentSetKey = RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId;
         String recommendRecommentCountKey = RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
 
-        Long result = redisTemplate.execute(recommendScript,
+        Long result = redisTemplate.execute(removeRecommendScript,
             List.of(recommendRecommentSetKey, recommendRecommentCountKey), memberId.toString());
+
         if (result == null || result != -1) {
             throw new IllegalStateException("추천 해제 실패");
         }
@@ -470,6 +501,7 @@ public class CommentService {
 
         Long result = redisTemplate.execute(notRecommendScript,
             List.of(notRecommendRecommentKey, notRecommendRecommentCountKey), memberId.toString());
+
         if (result == null || result != 1) {
             throw new IllegalStateException("비추천 처리 실패");
         }
@@ -497,9 +529,10 @@ public class CommentService {
         String notRecommentRecommendCountKey =
             RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
 
-        Long result = redisTemplate.execute(notRecommendScript,
+        Long result = redisTemplate.execute(removeNotRecommendScript,
             List.of(notRecommentRecommendSetKey, notRecommentRecommendCountKey),
             memberId.toString());
+
         if (result == null || result != -1) {
             throw new IllegalStateException("비추천 해제 실패");
         }
