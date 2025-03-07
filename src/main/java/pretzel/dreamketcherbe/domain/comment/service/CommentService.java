@@ -102,7 +102,7 @@ public class CommentService {
         Long.class);
 
     private static final String ADD_NOT_RECOMMEND_LUA_SCRIPT = """
-        local isMember = redis.call('sismember', KEYS[1], ARCV[1])
+        local isMember = redis.call('sismember', KEYS[1], ARGV[1])
         if isMember == 0 then
             redis.call('sadd', KEYS[1], ARGV[1])
             redis.call('incr', KEYS[2])
