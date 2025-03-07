@@ -319,7 +319,7 @@ public class CommentService {
         String recommendCountKey = RECOMMEND_COUNT_KEY_PREFIX + commentId;
 
         Long result = redisTemplate.execute(recommendScript,
-            List.of(recommendSetKey, recommendCountKey), memberId.toString());
+            List.of(recommendSetKey, recommendCountKey), String.valueOf(memberId));
 
         if (result == null || result != 1) {
             throw new IllegalStateException("추천 처리 실패");
@@ -349,7 +349,7 @@ public class CommentService {
         String recommendCountKey = RECOMMEND_COUNT_KEY_PREFIX + commentId;
 
         Long result = redisTemplate.execute(removeRecommendScript,
-            List.of(recommendSetKey, recommendCountKey), memberId.toString());
+            List.of(recommendSetKey, recommendCountKey), String.valueOf(memberId));
 
         if (result == null || result != -1) {
             throw new IllegalStateException("추천 해제 실패");
@@ -376,7 +376,7 @@ public class CommentService {
         String notRecommendCountKey = NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId;
 
         Long result = redisTemplate.execute(notRecommendScript,
-            List.of(notRecommendSetKey, notRecommendCountKey), memberId.toString());
+            List.of(notRecommendSetKey, notRecommendCountKey), String.valueOf(memberId));
         if (result == null || result != 1) {
             throw new IllegalStateException("비추천 처리 실패");
         }
@@ -406,7 +406,7 @@ public class CommentService {
         String notRecommendCountKey = NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId;
 
         Long result = redisTemplate.execute(removeNotRecommendScript,
-            List.of(notRecommendSetKey, notRecommendCountKey), memberId.toString());
+            List.of(notRecommendSetKey, notRecommendCountKey), String.valueOf(memberId));
 
         if (result == null || result != -1) {
             throw new IllegalStateException("비추천 해제 실패");
@@ -441,7 +441,8 @@ public class CommentService {
         String recommendRecommentCountKey = RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
 
         Long result = redisTemplate.execute(recommendScript,
-            List.of(recommendRecommentSetKey, recommendRecommentCountKey, memberId.toString()));
+            List.of(recommendRecommentSetKey, recommendRecommentCountKey,
+                String.valueOf(memberId)));
 
         if (result == null || result != 1) {
             throw new IllegalStateException("답글 추천 실패");
@@ -470,7 +471,8 @@ public class CommentService {
         String recommendRecommentCountKey = RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
 
         Long result = redisTemplate.execute(removeRecommendScript,
-            List.of(recommendRecommentSetKey, recommendRecommentCountKey), memberId.toString());
+            List.of(recommendRecommentSetKey, recommendRecommentCountKey),
+            String.valueOf(memberId));
 
         if (result == null || result != -1) {
             throw new IllegalStateException("추천 해제 실패");
@@ -500,7 +502,8 @@ public class CommentService {
             RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
 
         Long result = redisTemplate.execute(notRecommendScript,
-            List.of(notRecommendRecommentKey, notRecommendRecommentCountKey), memberId.toString());
+            List.of(notRecommendRecommentKey, notRecommendRecommentCountKey),
+            String.valueOf(memberId));
 
         if (result == null || result != 1) {
             throw new IllegalStateException("비추천 처리 실패");
@@ -531,7 +534,7 @@ public class CommentService {
 
         Long result = redisTemplate.execute(removeNotRecommendScript,
             List.of(notRecommentRecommendSetKey, notRecommentRecommendCountKey),
-            memberId.toString());
+            String.valueOf(memberId));
 
         if (result == null || result != -1) {
             throw new IllegalStateException("비추천 해제 실패");
