@@ -1,7 +1,9 @@
 package pretzel.dreamketcherbe.domain.comment.service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -292,6 +294,7 @@ public class CommentService {
     /**
      * 내 댓글, 답글 조회
      */
+    @Transactional(readOnly = true)
     public PageResDto<MyCommentsAndRecommentsListResDto> getMyCommentsAndRecomments(Long memberId,
         String type,
         PageReqDto pageReqDto) {
@@ -300,21 +303,25 @@ public class CommentService {
 
         Pageable pageable = PageRequest.of(pageReqDto.getPage(), pageReqDto.getSize());
 
-        Page<Comment> comments = commentRepository.findByMemberIdAndDeletedFalse(memberId,
-            pageable);
-        Page<Recomment> recomments = recommentRepository.findByMemberIdAndIsDeletedFalse(memberId,
-            pageable);
+        Page<Comment> comments = Page.empty();
+        Page<Recomment> recomments = Page.empty();
 
-        List<MyCommentsAndRecommentsListResDto> myCommentsAndRecommentsList = new ArrayList<>();
-        for (Comment comment : comments) {
-            myCommentsAndRecommentsList.add(MyCommentsAndRecommentsListResDto.from(comment));
+        if ("comment".equals(type) || type == null) {
+            comments = commentRepository.findByMemberIdAndDeletedFalse(memberId, pageable);
+        }
+        if ("recomment".equals(type) || type == null) {
+            recomments = recommentRepository.findByMemberIdAndIsDeletedFalse(memberId, pageable);
         }
 
-        for (Recomment recomment : recomments) {
-            myCommentsAndRecommentsList.add(MyCommentsAndRecommentsListResDto.from(recomment));
-        }
+        List<MyCommentsAndRecommentsListResDto> myCommentsAndRecommentsList = Stream.concat(
+                comments.getContent().stream().map(MyCommentsAndRecommentsListResDto::from),
+                recomments.getContent().stream().map(MyCommentsAndRecommentsListResDto::from)
+            )
+            .toList();
 
-        return new PageResDto<>(myCommentsAndRecommentsList, comments.getTotalElements());
+        long totalElements = comments.getTotalElements() + recomments.getTotalElements();
+
+        return new PageResDto<>(myCommentsAndRecommentsList, totalElements);
     }
 
     /**
