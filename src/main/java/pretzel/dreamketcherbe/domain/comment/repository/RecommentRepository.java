@@ -20,7 +20,7 @@ public interface RecommentRepository extends JpaRepository<Recomment, Long> {
     @Query("SELECT r.id FROM Recomment r")
     List<Long> findAllRecommentIds();
 
-    @Query("SELECT r.id FROM Recomment r WHERE r.member.id = :memberId AND r.isDeleted = false")
+    @Query("SELECT r FROM Recomment r WHERE r.member.id = :memberId AND r.isDeleted = false")
     Page<Recomment> findByMemberIdAndIsDeletedFalse(Long memberId, Pageable pageable);
 
     @Query("SELECT r.id FROM Recomment r WHERE r.comment.id = :commentId AND r.isDeleted = false")
