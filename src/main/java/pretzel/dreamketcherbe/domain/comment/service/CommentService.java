@@ -292,6 +292,7 @@ public class CommentService {
     /**
      * 내 댓글, 답글 조회
      */
+    @Transactional(readOnly = true)
     public PageResDto<MyCommentsAndRecommentsListResDto> getMyCommentsAndRecomments(Long memberId,
         String type,
         PageReqDto pageReqDto) {
