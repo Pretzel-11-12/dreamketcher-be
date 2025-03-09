@@ -23,6 +23,7 @@ import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentNotRecommendatio
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.MyCommentsAndRecommentsListResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.NotRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.RecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.entity.Comment;
@@ -286,6 +287,34 @@ public class CommentService {
                 .toList(),
             recomments.getTotalElements()
         );
+    }
+
+    /**
+     * 내 댓글, 답글 조회
+     */
+    public PageResDto<MyCommentsAndRecommentsListResDto> getMyCommentsAndRecomments(Long memberId,
+        String type,
+        PageReqDto pageReqDto) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Pageable pageable = PageRequest.of(pageReqDto.getPage(), pageReqDto.getSize());
+
+        Page<Comment> comments = commentRepository.findByMemberIdAndDeletedFalse(memberId,
+            pageable);
+        Page<Recomment> recomments = recommentRepository.findByMemberIdAndIsDeletedFalse(memberId,
+            pageable);
+
+        List<MyCommentsAndRecommentsListResDto> myCommentsAndRecommentsList = new ArrayList<>();
+        for (Comment comment : comments) {
+            myCommentsAndRecommentsList.add(MyCommentsAndRecommentsListResDto.from(comment));
+        }
+
+        for (Recomment recomment : recomments) {
+            myCommentsAndRecommentsList.add(MyCommentsAndRecommentsListResDto.from(recomment));
+        }
+
+        return new PageResDto<>(myCommentsAndRecommentsList, comments.getTotalElements());
     }
 
     /**

@@ -17,6 +17,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query("SELECT c.id FROM Comment c")
     List<Long> findAllCommentIds();
 
+    @Query("SELECT c FROM Comment c WHERE c.member.id = :memberId AND c.isDeleted = false")
+    Page<Comment> findByMemberIdAndDeletedFalse(Long memberId, Pageable pageable);
+
     @Query("SELECT c.id FROM Comment c WHERE c.episode.id IN :episodeIds AND c.isDeleted = false")
     List<Long> findByEpisodeId(@Param("episodeIds") List<Long> episodeIds);
 

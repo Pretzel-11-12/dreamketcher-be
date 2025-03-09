@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
+import pretzel.dreamketcherbe.common.dto.PageResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.MyCommentsAndRecommentsListResDto;
+import pretzel.dreamketcherbe.domain.comment.service.CommentService;
 import pretzel.dreamketcherbe.domain.member.dto.*;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.service.MemberService;
@@ -19,6 +22,7 @@ import java.util.List;
 public class MemberController {
 
     private final MemberService memberService;
+    private final CommentService commentService;
 
     @GetMapping("/me")
     public ResponseEntity<SelfInfoResponse> me(@Auth Long memberId) {
@@ -63,10 +67,28 @@ public class MemberController {
 
     @GetMapping("/works")
     public ResponseEntity<WorkResDto> getAllWorks(@Auth Long memberId,
-                                                  @RequestParam(defaultValue = "all") String status,
-                                                  @RequestParam(defaultValue = "0") int page,
-                                                  @RequestParam(defaultValue = "25") int size) {
+        @RequestParam(defaultValue = "all") String status,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "25") int size) {
         PageReqDto pageReqDto = PageReqDto.of(page, size);
         return ResponseEntity.ok(memberService.getAllWorks(memberId, status, pageReqDto));
+    }
+
+    /**
+     * 내 댓글, 답글 조회
+     */
+    @GetMapping("/comments-and-recomments")
+    public ResponseEntity<PageResDto<MyCommentsAndRecommentsListResDto>> getMyCommentsAndRecomments(
+        @Auth Long memberId,
+        @RequestParam int page,
+        @RequestParam int size,
+        @RequestParam(defaultValue = "DESC") String order,
+        @RequestParam(required = false) String type) {
+        PageReqDto pageReqDto = PageReqDto.of(null, page, size, order);
+
+        PageResDto<MyCommentsAndRecommentsListResDto> response = commentService.getMyCommentsAndRecomments(
+            memberId, type, pageReqDto);
+
+        return ResponseEntity.ok(response);
     }
 }
