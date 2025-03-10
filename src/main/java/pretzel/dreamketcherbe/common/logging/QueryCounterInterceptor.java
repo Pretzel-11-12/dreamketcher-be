@@ -15,6 +15,7 @@ public class QueryCounterInterceptor implements HandlerInterceptor {
     private static final String LOGGING_FORMAT = "|\n| QUERY_COUNT: {}";
 
     private final QueryCounter queryCounter;
+    private final LatencyContext latencyContext;
 
     @Override
     public void afterCompletion(
@@ -29,7 +30,7 @@ public class QueryCounterInterceptor implements HandlerInterceptor {
             request.getRequestURI(),
             response.getStatus(),
             queryCounter.getQueryCount(),
-            9999999999L
+            latencyContext.getFullTime()
         );
     }
 }
