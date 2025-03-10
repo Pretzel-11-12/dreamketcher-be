@@ -19,6 +19,7 @@ public class QueryCounterAop {
         throws Throwable {
         Object connection = joinpoint.proceed();
         ProxyFactory proxyFactory = new ProxyFactory(connection);
+        proxyFactory.addAdvice(new PreparedStatementProxyInterceptor(queryCounter));
         return proxyFactory.getProxy();
     }
 }
