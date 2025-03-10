@@ -12,7 +12,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @RequiredArgsConstructor
 public class QueryCounterInterceptor implements HandlerInterceptor {
 
-    private static final String LOGGING_FORMAT = "|\n| QUERY_COUNT: {}";
+    private static final int WARN_QUERY_COUNT = 8;
+    private static final String LOG_FORMAT = "|\n| QUERY_COUNT: {}";
 
     private final QueryCounter queryCounter;
     private final LatencyContext latencyContext;
@@ -24,13 +25,12 @@ public class QueryCounterInterceptor implements HandlerInterceptor {
         Object handler,
         Exception exception
     ) throws Exception {
-        log.info(
-            LOGGING_FORMAT,
-            request.getMethod(),
-            request.getRequestURI(),
-            response.getStatus(),
-            queryCounter.getQueryCount(),
-            latencyContext.getFullTime()
-        );
+        int queryCount = queryCounter.getQueryCount();
+
+        if (queryCount < WARN_QUERY_COUNT) {
+            log.info(LOG_FORMAT, queryCount);
+        } else {
+            log.warn(LOG_FORMAT, queryCount);
+        }
     }
 }
