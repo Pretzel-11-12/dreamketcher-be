@@ -117,7 +117,7 @@ public class MemberService {
                 String newImageUrl;
 
                 if (!currentImageUrl.equals(defaultProfileImageUrl) && currentImageUrl != null) {
-                    newImageUrl = s3Service.imageUpdate(folderName, img, currentImageUrl);
+                    newImageUrl = s3Service.imageUpdate(currentImageUrl, img, folderName);
                 } else {
                     newImageUrl = s3Service.imageUpload(img, folderName);
                 }
