@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -301,27 +302,40 @@ public class CommentService {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        Pageable pageable = PageRequest.of(pageReqDto.getPage(), pageReqDto.getSize());
+        List<MyCommentsAndRecommentsListResDto> myCommentsAndRecommentsListResDtoList = new ArrayList<>();
 
-        Page<Comment> comments = Page.empty();
-        Page<Recomment> recomments = Page.empty();
+        Sort sort = Sort.by(Direction.DESC, "createdAt");
 
         if ("comment".equals(type) || type == null) {
-            comments = commentRepository.findByMemberIdAndDeletedFalse(memberId, pageable);
+            List<MyCommentsAndRecommentsListResDto> comments = commentRepository.findByMemberIdAndDeletedFalse(
+                    memberId, sort)
+                .stream()
+                .map(MyCommentsAndRecommentsListResDto::from)
+                .toList();
+            myCommentsAndRecommentsListResDtoList.addAll(comments);
         }
         if ("recomment".equals(type) || type == null) {
-            recomments = recommentRepository.findByMemberIdAndIsDeletedFalse(memberId, pageable);
+            List<MyCommentsAndRecommentsListResDto> recomments = recommentRepository.findByMemberIdAndIsDeletedFalse(
+                    memberId, sort)
+                .stream()
+                .map(MyCommentsAndRecommentsListResDto::from)
+                .toList();
+            myCommentsAndRecommentsListResDtoList.addAll(recomments);
         }
 
-        List<MyCommentsAndRecommentsListResDto> myCommentsAndRecommentsList = Stream.concat(
-                comments.getContent().stream().map(MyCommentsAndRecommentsListResDto::from),
-                recomments.getContent().stream().map(MyCommentsAndRecommentsListResDto::from)
-            )
-            .toList();
+        myCommentsAndRecommentsListResDtoList.sort(
+            Comparator.comparing(MyCommentsAndRecommentsListResDto::createdAt).reversed());
 
-        long totalElements = comments.getTotalElements() + recomments.getTotalElements();
+        long totalElements = myCommentsAndRecommentsListResDtoList.size();
 
-        return new PageResDto<>(myCommentsAndRecommentsList, totalElements);
+        int start = pageReqDto.getPage() * pageReqDto.getSize();
+        int end = Math.min(start + pageReqDto.getSize(),
+            myCommentsAndRecommentsListResDtoList.size());
+
+        List<MyCommentsAndRecommentsListResDto> pagingList = myCommentsAndRecommentsListResDtoList.subList(
+            start, end);
+
+        return new PageResDto<>(pagingList, totalElements);
     }
 
     /**
