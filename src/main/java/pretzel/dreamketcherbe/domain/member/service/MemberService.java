@@ -1,12 +1,19 @@
 package pretzel.dreamketcherbe.domain.member.service;
 
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
-import pretzel.dreamketcherbe.domain.member.dto.*;
+import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
+import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonSimpleResponse;
+import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
+import pretzel.dreamketcherbe.domain.member.dto.UpdateProfileRequest;
+import pretzel.dreamketcherbe.domain.member.dto.WorkResDto;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
@@ -18,9 +25,6 @@ import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -30,6 +34,9 @@ public class MemberService {
     private final InterestedWebtoonRepository interestedWebtoonRepository;
     private final WebtoonRepository webtoonRepository;
     private final S3Service s3Service;
+
+    @Value("${default.profile.image.url}")
+    private String defaultProfileImageUrl;
 
     public SelfInfoResponse getSelfInfo(Long memberId) {
         Member member = memberRepository.findById(memberId)
@@ -83,7 +90,7 @@ public class MemberService {
             member.updateShortIntroduction("");
         }
     }
-    
+
     @Transactional
     public void updateProfileWithImage(Long memberId, MultipartFile image,
         UpdateProfileRequest profileData) {
@@ -105,9 +112,16 @@ public class MemberService {
         Optional.ofNullable(image)
             .filter(img -> !img.isEmpty())
             .ifPresent(img -> {
-                String folderName = "profile-images";
-                String imageUrl = s3Service.imageUpload(img, folderName);
-                member.updateImageUrl(imageUrl);
+                String folderName = "profile-images/" + memberId;
+                String currentImageUrl = member.getImageUrl();
+                String newImageUrl;
+
+                if (!currentImageUrl.equals(defaultProfileImageUrl) && currentImageUrl != null) {
+                    newImageUrl = s3Service.imageUpdate(currentImageUrl, img, folderName);
+                } else {
+                    newImageUrl = s3Service.imageUpload(img, folderName);
+                }
+                member.updateImageUrl(newImageUrl);
             });
 
         memberRepository.save(member);
@@ -172,7 +186,8 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public WorkResDto getAllWorks(final Long memberId, final String status, final PageReqDto pageReqDto) {
+    public WorkResDto getAllWorks(final Long memberId, final String status,
+        final PageReqDto pageReqDto) {
         return memberRepository.findAllWorkWithPage(memberId, status, pageReqDto);
     }
 }
