@@ -91,6 +91,7 @@ public class MemberService {
         }
     }
 
+    // NOTE: s3Service 메서드 와 Transactional 관계 확인
     @Transactional
     public void updateProfileWithImage(Long memberId, MultipartFile image,
         UpdateProfileRequest profileData) {
@@ -103,27 +104,30 @@ public class MemberService {
             String newShortIntroduction = profileData.shortIntroduction();
 
             updateNickname(member, newNickname, memberId);
-
             updateBusinessEmail(member, newBusinessEmail, memberId);
-
             updateShortIntroduction(member, newShortIntroduction);
         }
 
-        Optional.ofNullable(image)
-            .filter(img -> !img.isEmpty())
-            .ifPresent(img -> {
-                String folderName = "profile-images/" + memberId;
-                String currentImageUrl = member.getImageUrl();
-                String newImageUrl;
+        if (profileData != null && profileData.isDeleteImage()) {
+            s3Service.deleteImage(member.getImageUrl());
+            member.updateImageUrl(defaultProfileImageUrl);
+        } else {
+            Optional.ofNullable(image)
+                .filter(img -> !img.isEmpty())
+                .ifPresent(img -> {
+                    String folderName = "profile-images/" + memberId;
+                    String currentImageUrl = member.getImageUrl();
+                    String newImageUrl;
 
-                if (!currentImageUrl.equals(defaultProfileImageUrl) && currentImageUrl != null) {
-                    newImageUrl = s3Service.imageUpdate(currentImageUrl, img, folderName);
-                } else {
-                    newImageUrl = s3Service.imageUpload(img, folderName);
-                }
-                member.updateImageUrl(newImageUrl);
-            });
-
+                    if (!currentImageUrl.equals(defaultProfileImageUrl)
+                        && currentImageUrl != null) {
+                        newImageUrl = s3Service.imageUpdate(currentImageUrl, img, folderName);
+                    } else {
+                        newImageUrl = s3Service.imageUpload(img, folderName);
+                    }
+                    member.updateImageUrl(newImageUrl);
+                });
+        }
         memberRepository.save(member);
     }
 
