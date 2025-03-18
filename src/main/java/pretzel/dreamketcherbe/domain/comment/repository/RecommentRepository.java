@@ -3,6 +3,7 @@ package pretzel.dreamketcherbe.domain.comment.repository;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -19,6 +20,9 @@ public interface RecommentRepository extends JpaRepository<Recomment, Long> {
 
     @Query("SELECT r.id FROM Recomment r")
     List<Long> findAllRecommentIds();
+
+    @Query("SELECT r FROM Recomment r WHERE r.member.id = :memberId AND r.isDeleted = false")
+    List<Recomment> findByMemberIdAndIsDeletedFalse(@Param("memberId") Long memberId, Sort sort);
 
     @Query("SELECT r.id FROM Recomment r WHERE r.comment.id = :commentId AND r.isDeleted = false")
     List<Long> findByComment(@Param("commentId") Long commentId);
