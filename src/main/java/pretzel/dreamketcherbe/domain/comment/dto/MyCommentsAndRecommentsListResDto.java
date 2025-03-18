@@ -8,6 +8,10 @@ import pretzel.dreamketcherbe.domain.comment.entity.Recomment;
 @Builder
 public record MyCommentsAndRecommentsListResDto(
     Long id,
+    String title,
+    int no,
+    String episodeTitle,
+    String episodeThumbnail,
     String content,
     int childCommentCount,
     int recommendationCount,
@@ -19,6 +23,10 @@ public record MyCommentsAndRecommentsListResDto(
     public static MyCommentsAndRecommentsListResDto from(Comment comment) {
         return MyCommentsAndRecommentsListResDto.builder()
             .id(comment.getId())
+            .title(comment.getWebtoon().getTitle())
+            .no(comment.getEpisode().getNo())
+            .episodeTitle(comment.getEpisode().getTitle())
+            .episodeThumbnail(comment.getEpisode().getThumbnail())
             .content(comment.getContent())
             .childCommentCount(comment.getChildCommentCount())
             .recommendationCount(comment.getRecommendationCount())
@@ -31,6 +39,10 @@ public record MyCommentsAndRecommentsListResDto(
     public static MyCommentsAndRecommentsListResDto from(Recomment recomment) {
         return MyCommentsAndRecommentsListResDto.builder()
             .id(recomment.getId())
+            .title(recomment.getWebtoon().getTitle())
+            .no(recomment.getEpisode().getNo())
+            .episodeTitle(recomment.getEpisode().getTitle())
+            .episodeThumbnail(recomment.getEpisode().getThumbnail())
             .content(recomment.getContent())
             .childCommentCount(0)
             .recommendationCount(recomment.getRecommendationCount())
