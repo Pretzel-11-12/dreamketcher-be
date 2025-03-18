@@ -1,7 +1,5 @@
 package pretzel.dreamketcherbe.domain.webtoon.entity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -80,31 +78,20 @@ public class Webtoon extends BaseTimeEntity {
         this.genre = genre;
     }
 
-    public static Webtoon addOf(CreateWebtoonReqDto dto, Member member, Genre genre,
-        ObjectMapper objectMapper) {
-        try {
-            return Webtoon.builder()
-                .title(dto.title())
-                .thumbnail(dto.thumbnail())
-                .prologue(objectMapper.writeValueAsString(dto.prologue()))
-                .story(dto.story())
-                .member(member)
-                .genre(genre)
-                .build();
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("직렬화에 실패하였습니다.", e);
-        }
+    public static Webtoon addOf(CreateWebtoonReqDto dto, Member member, Genre genre) {
+        return Webtoon.builder()
+            .title(dto.title())
+            .thumbnail(dto.thumbnail())
+            .story(dto.story())
+            .member(member)
+            .genre(genre)
+            .build();
     }
 
-    public void updateOf(UpdateWebtoonReqDto dto, ObjectMapper objectMapper) {
-        try {
-            this.title = dto.title();
-            this.thumbnail = dto.thumbnail();
-            this.prologue = objectMapper.writeValueAsString(dto.prologue());
-            this.story = dto.story();
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("직렬화에 실패하였습니다.", e);
-        }
+    public void updateOf(UpdateWebtoonReqDto dto) {
+        this.title = dto.title();
+        this.thumbnail = dto.thumbnail();
+        this.story = dto.story();
     }
 
     public void isAuthor(Long memberId) {
