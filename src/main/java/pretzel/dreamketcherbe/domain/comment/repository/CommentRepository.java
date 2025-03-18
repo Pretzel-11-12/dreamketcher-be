@@ -22,7 +22,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByMemberIdAndDeletedFalse(@Param("memberId") Long memberId, Sort sort);
 
     @Query("SELECT c.id FROM Comment c WHERE c.episode.id IN :episodeIds AND c.isDeleted = false AND c.episode.status = 'PUBLISHED'")
-    List<Long> findByEpisodeId(@Param("episodeIds") List<Long> episodeIds);
+    List<Long> findByEpisodeIds(@Param("episodeIds") List<Long> episodeIds);
 
     @Query("SELECT c.id FROM Comment c WHERE c.episode.id = :episodeId AND c.isDeleted = false AND c.episode.status = 'PUBLISHED'")
     List<Long> findByEpisodeId(@Param("episodeId") Long episodeId);

@@ -260,7 +260,7 @@ public class WebtoonService {
         episodeLikeRepository.deleteByEpisode(episodeIds);
         episodeRepository.deleteByWebtoonId(webtoonId);
 
-        List<Long> commentIds = commentRepository.findByEpisodeId(episodeIds);
+        List<Long> commentIds = commentRepository.findByEpisodeIds(episodeIds);
         recommendationRepository.deleteByComment(commentIds);
         notRecommendationRepository.deleteByComment(commentIds);
         commentRepository.deleteByEpisodeId(episodeIds);
