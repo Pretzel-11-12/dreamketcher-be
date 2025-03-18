@@ -16,7 +16,7 @@ public interface EpisodeRepository extends JpaRepository<Episode, Long> {
     List<Episode> findByPublishedAtAndPublishedFalse(LocalDate publishedAt);
 
     @Modifying
-    @Query("UPDATE Episode e SET e.viewCount = e.viewCount + 1 WHERE e.id = :episodeId")
+    @Query("UPDATE Episode e SET e.viewCount = e.viewCount + 1 WHERE e.id = :episodeId AND e.status = 'PUBLISHED'")
     void increaseViewCount(Long episodeId);
 
     Page<Episode> findByWebtoonIdOrderByPublishedAtDesc(Long webtoonId, Pageable pageable);
@@ -27,7 +27,7 @@ public interface EpisodeRepository extends JpaRepository<Episode, Long> {
 
     Long countByWebtoonId(Long webtoonId);
 
-    @Query("SELECT e.id FROM Episode e WHERE e.webtoon.id = :webtoonId AND e.isDeleted = false ")
+    @Query("SELECT e.id FROM Episode e WHERE e.webtoon.id = :webtoonId AND e.isDeleted = false AND e.status = 'PUBLISHED'")
     List<Long> findByWebtoonId(@Param("webtoonId") Long webtoonId);
 
     @Modifying

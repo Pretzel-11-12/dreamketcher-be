@@ -11,24 +11,24 @@ import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    @Query("SELECT c FROM Comment c WHERE c.episode.id = :episodeId AND c.isDeleted = false ")
+    @Query("SELECT c FROM Comment c WHERE c.episode.id = :episodeId AND c.isDeleted = false ANd c.episode.status = 'PUBLISHED'")
     Page<Comment> findByEpisodeId(Long episodeId, Pageable pageables);
 
     @Query("SELECT c.id FROM Comment c")
     List<Long> findAllCommentIds();
 
-    @Query("SELECT c.id FROM Comment c WHERE c.episode.id IN :episodeIds AND c.isDeleted = false")
+    @Query("SELECT c.id FROM Comment c WHERE c.episode.id IN :episodeIds AND c.isDeleted = false AND c.episode.status = 'PUBLISHED'")
     List<Long> findByEpisodeId(@Param("episodeIds") List<Long> episodeIds);
 
-    @Query("SELECT c.id FROM Comment c WHERE c.episode.id = :episodeId AND c.isDeleted = false")
+    @Query("SELECT c.id FROM Comment c WHERE c.episode.id = :episodeId AND c.isDeleted = false AND c.episode.status = 'PUBLISHED'")
     List<Long> findByEpisodeId(@Param("episodeId") Long episodeId);
 
     @Modifying
-    @Query("UPDATE Comment c SET c.isDeleted = true WHERE c.episode.id IN :episodeIds")
+    @Query("UPDATE Comment c SET c.isDeleted = true WHERE c.episode.id IN :episodeIds AND c.isDeleted = false AND c.episode.status = 'PUBLISHED'")
     void deleteByEpisodeId(@Param("episodeIds") List<Long> episodeIds);
 
     @Modifying
-    @Query("UPDATE Comment c SET c.isDeleted = true WHERE c.episode.id = :episodeId")
+    @Query("UPDATE Comment c SET c.isDeleted = true WHERE c.episode.id = :episodeId AND c.isDeleted = false AND c.episode.status = 'PUBLISHED'")
     void deleteByEpisode(@Param("episodeId") Long episodeId);
 
 }
