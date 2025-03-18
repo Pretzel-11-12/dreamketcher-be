@@ -143,7 +143,7 @@ public class WebtoonService {
         Genre genre = genreRepository.findById(request.genreId())
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
 
-        Webtoon newWebtoon = Webtoon.addOf(request, findMember, genre, new ObjectMapper());
+        Webtoon newWebtoon = Webtoon.addOf(request, findMember, genre);
         webtoonRepository.save(newWebtoon);
 
         ManagementWebtoon managementWebtoon = ManagementWebtoon.addOf(newWebtoon);
@@ -192,45 +192,6 @@ public class WebtoonService {
     }
 
     /**
-     * 웹툰 프롤로그 등록
-     */
-    public String uploadPrologue(Long memberId, List<MultipartFile> prologue,
-        ObjectMapper objectMapper) {
-        try {
-            Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
-
-            String folderName = "webtoon/" + memberId + "/prologue";
-
-            List<String> prologueImageUrls = s3Service.imagesUpload(prologue, folderName);
-
-            return objectMapper.writeValueAsString(prologueImageUrls);
-        } catch (Exception e) {
-            throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
-        }
-    }
-
-    /**
-     * 웹툰 프롤로그 수정
-     */
-    public String updatePrologue(String oldPrologueJson, List<MultipartFile> newPrologue,
-        List<Integer> replaceIndex, String folderName, ObjectMapper objectMapper) {
-        try {
-
-            List<String> oldPrologue = objectMapper.readValue(oldPrologueJson,
-                new TypeReference<>() {
-                });
-
-            List<String> updatedPrologueUrls = s3Service.updatePartialImages(oldPrologue,
-                newPrologue, replaceIndex, folderName);
-
-            return objectMapper.writeValueAsString(updatedPrologueUrls);
-        } catch (Exception e) {
-            throw new S3Exception(S3ExceptionType.UPDATE_FAILED);
-        }
-    }
-
-    /**
      * 관심 웹툰 추가
      */
     @Transactional
@@ -264,7 +225,7 @@ public class WebtoonService {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-        findWebtoon.updateOf(request, new ObjectMapper());
+        findWebtoon.updateOf(request);
 
         webtoonRepository.save(findWebtoon);
     }
