@@ -1,6 +1,5 @@
 package pretzel.dreamketcherbe.domain.webtoon.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -122,35 +121,6 @@ public class WebtoonController {
         @RequestParam("thumbnailUrl") String thumbnailUrl) {
         webtoonService.deleteThumbnail(thumbnailUrl);
         return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * 웹툰 프롤로그 등록
-     */
-    @PostMapping("/upload/prologue")
-    public ResponseEntity<String> uploadWebtoonPrologue(@Auth Long memberId,
-        @RequestParam("images") List<MultipartFile> images, ObjectMapper objectMapper) {
-        String prologueUrls = webtoonService.uploadPrologue(memberId, images, objectMapper);
-
-        return ResponseEntity.ok(prologueUrls);
-    }
-
-    /**
-     * 웹툰 프롤로그 수정
-     */
-    @PutMapping("/{webtoonId}/prologue")
-    public ResponseEntity<String> updateWebtoonPrologue(@Auth Long memberId,
-        @PathVariable Long webtoonId,
-        @RequestParam("existingUrls") String existingUrls,
-        @RequestParam("newImages") List<MultipartFile> newImages,
-        @RequestParam("replaceIndices") List<Integer> replaceIndices,
-        @RequestParam("folderName") String folderName,
-        ObjectMapper objectMapper) {
-        String updatedPrologueUrls = webtoonService.updatePrologue(existingUrls,
-            newImages,
-            replaceIndices, folderName, objectMapper);
-
-        return ResponseEntity.ok(updatedPrologueUrls);
     }
 
     /**
