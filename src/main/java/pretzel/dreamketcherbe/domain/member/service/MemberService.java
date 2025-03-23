@@ -108,7 +108,7 @@ public class MemberService {
             updateShortIntroduction(member, newShortIntroduction);
         }
 
-        if (profileData != null && profileData.isDeleteImage()) {
+        if (profileData.isDeleteImage()) {
             s3Service.deleteImage(member.getImageUrl());
             member.updateImageUrl(defaultProfileImageUrl);
         } else {
