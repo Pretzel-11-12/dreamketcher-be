@@ -163,7 +163,6 @@ public class CommentController {
     @PostMapping("/{commentId}/recomment/{recommentId}/recommend")
     public ResponseEntity<CreateRecommentRecommendationResDto> recommentRecommendation(
         @Auth Long memberId,
-        @PathVariable Long episodeId, @PathVariable Long commentId,
         @PathVariable Long recommentId) {
         CreateRecommentRecommendationResDto response = commentService.recommendRecomment(memberId,
             recommentId);
@@ -176,7 +175,6 @@ public class CommentController {
      */
     @DeleteMapping("/{commentId}/recomment/{recommentId}/recommend")
     public ResponseEntity<Integer> cancelRecommendRecomment(@Auth Long memberId,
-        @PathVariable Long episodeId, @PathVariable Long commentId,
         @PathVariable Long recommentId) {
         int updatedRecommentRecommendationCount = commentService.unrecommentRecommendation(memberId,
             recommentId);
@@ -190,7 +188,6 @@ public class CommentController {
     @PostMapping("/{commentId}/recomment/{recommentId}/not-recommend")
     public ResponseEntity<CreateRecommentNotRecommendationResDto> recommentNotRecommendation(
         @Auth Long memberId,
-        @PathVariable Long episodeId, @PathVariable Long commentId,
         @PathVariable Long recommentId) {
         CreateRecommentNotRecommendationResDto response = commentService.recommentNotRecommendation(
             memberId, recommentId);
@@ -203,7 +200,6 @@ public class CommentController {
      */
     @DeleteMapping("/{commentId}/recomment/{recommentId}/not-recommend")
     public ResponseEntity<Integer> cancelRecommentNotRecommend(@Auth Long memberId,
-        @PathVariable Long episodeId, @PathVariable Long commentId,
         @PathVariable Long recommentId) {
         int updatedRecommentNotRecommendationCount = commentService.unrecommentNotRecommendation(
             memberId, recommentId);
