@@ -51,6 +51,7 @@ import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
+import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
 
 @Service
 @AllArgsConstructor
@@ -94,6 +95,7 @@ public class EpisodeService {
     private final RecommentRepository recommentRepository;
     private final NotRecommendationRepository notRecommendationRepository;
     private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
+    private final WebtoonService webtoonService;
 
     /**
      * 에피소드 목록 조회
@@ -103,6 +105,8 @@ public class EpisodeService {
 
         Webtoon webtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        webtoonService.getEpisodeCount(webtoonId);
 
         PageRequest pageable = PageRequest.of(page, size);
         Page<Episode> episodePage = fromFirst

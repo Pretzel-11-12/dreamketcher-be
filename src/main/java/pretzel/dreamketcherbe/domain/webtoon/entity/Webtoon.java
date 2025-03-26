@@ -118,7 +118,7 @@ public class Webtoon extends BaseTimeEntity {
         }
     }
 
-    public void incrementEpisodeCount(int episodeCount) {
-        this.episodeCount = episodeCount;
+    public void incrementEpisodeCount(int count) {
+        this.episodeCount = count;
     }
 }

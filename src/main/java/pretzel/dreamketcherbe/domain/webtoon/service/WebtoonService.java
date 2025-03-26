@@ -135,12 +135,14 @@ public class WebtoonService {
     /**
      * 에피소드 카운트
      */
+    @Transactional
     public void getEpisodeCount(Long webtoonId) {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         int count = episodeRepository.CountByWebtoonId(webtoonId);
         findWebtoon.incrementEpisodeCount(count);
+        webtoonRepository.save(findWebtoon);
     }
 
     /**
@@ -254,6 +256,7 @@ public class WebtoonService {
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         findWebtoon.isAuthor(memberId);
+        getEpisodeCount(webtoonId);
         List<Long> episodeIds = episodeRepository.findByWebtoonId(webtoonId);
 
         if (episodeIds.isEmpty()) {
