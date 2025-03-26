@@ -133,6 +133,19 @@ public class WebtoonService {
     }
 
     /**
+     * 에피소드 카운트
+     */
+    @Transactional
+    public void getEpisodeCount(Long webtoonId) {
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        int count = episodeRepository.CountByWebtoonId(webtoonId);
+        findWebtoon.incrementEpisodeCount(count);
+        webtoonRepository.save(findWebtoon);
+    }
+
+    /**
      * 웹툰 등록
      */
     @Transactional
@@ -243,6 +256,7 @@ public class WebtoonService {
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         findWebtoon.isAuthor(memberId);
+        getEpisodeCount(webtoonId);
         List<Long> episodeIds = episodeRepository.findByWebtoonId(webtoonId);
 
         if (episodeIds.isEmpty()) {
@@ -260,7 +274,7 @@ public class WebtoonService {
         episodeLikeRepository.deleteByEpisode(episodeIds);
         episodeRepository.deleteByWebtoonId(webtoonId);
 
-        List<Long> commentIds = commentRepository.findByEpisodeId(episodeIds);
+        List<Long> commentIds = commentRepository.findByEpisodeIds(episodeIds);
         recommendationRepository.deleteByComment(commentIds);
         notRecommendationRepository.deleteByComment(commentIds);
         commentRepository.deleteByEpisodeId(episodeIds);
