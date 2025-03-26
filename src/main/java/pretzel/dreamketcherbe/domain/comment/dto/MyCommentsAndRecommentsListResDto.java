@@ -8,7 +8,9 @@ import pretzel.dreamketcherbe.domain.comment.entity.Recomment;
 @Builder
 public record MyCommentsAndRecommentsListResDto(
     Long id,
+    Long webtoonId,
     String title,
+    Long episodeId,
     int no,
     String episodeTitle,
     String episodeThumbnail,
@@ -23,7 +25,9 @@ public record MyCommentsAndRecommentsListResDto(
     public static MyCommentsAndRecommentsListResDto from(Comment comment) {
         return MyCommentsAndRecommentsListResDto.builder()
             .id(comment.getId())
+            .webtoonId(comment.getWebtoon().getId())
             .title(comment.getWebtoon().getTitle())
+            .episodeId(comment.getEpisode().getId())
             .no(comment.getEpisode().getNo())
             .episodeTitle(comment.getEpisode().getTitle())
             .episodeThumbnail(comment.getEpisode().getThumbnail())

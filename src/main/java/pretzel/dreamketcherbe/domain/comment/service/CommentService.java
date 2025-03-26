@@ -474,8 +474,8 @@ public class CommentService {
         String recommendRecommentCountKey = RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
 
         Long result = redisTemplate.execute(recommend,
-            List.of(recommendRecommentSetKey, recommendRecommentCountKey,
-                String.valueOf(memberId)));
+            List.of(recommendRecommentSetKey, recommendRecommentCountKey),
+            String.valueOf(memberId));
 
         if (result == null || result != 1) {
             throw new IllegalStateException("답글 추천 실패");

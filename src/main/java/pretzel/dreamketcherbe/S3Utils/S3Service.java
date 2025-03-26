@@ -2,6 +2,7 @@ package pretzel.dreamketcherbe.S3Utils;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -169,7 +170,7 @@ public class S3Service {
         }
 
         try {
-            amazonS3.deleteObject(bucketName, objectKey);
+            amazonS3.deleteObject(new DeleteObjectRequest(bucketName, objectKey));
         } catch (AmazonS3Exception e) {
             throw new S3Exception(S3ExceptionType.DELETE_FAILED);
         }
@@ -226,8 +227,9 @@ public class S3Service {
      */
     private String extractObjectKey(String fileUrl) {
         String decodedUrl = URLDecoder.decode(fileUrl, StandardCharsets.UTF_8);
-        String split = ".com/";
+        int index = decodedUrl.indexOf(".com/") + 5;
+        decodedUrl = decodedUrl.substring(index);
 
-        return decodedUrl.substring(decodedUrl.lastIndexOf(split) + split.length());
+        return decodedUrl.substring(decodedUrl.indexOf("/") + 1);
     }
 }
