@@ -43,7 +43,7 @@ public interface EpisodeRepository extends JpaRepository<Episode, Long> {
 
     Long countByWebtoonId(Long webtoonId);
 
-    @Query("SELECT e.id FROM Episode e WHERE e.webtoon.id = :webtoonId AND e.isDeleted = false AND e.status = 'PUBLISHED'")
+    @Query("SELECT e.id FROM Episode e WHERE e.webtoon.id = :webtoonId AND e.isDeleted = false AND e.published = true")
     List<Long> findByWebtoonId(@Param("webtoonId") Long webtoonId);
 
     @Modifying
