@@ -51,3 +51,6 @@ out/
 .vscode/
 
 .env
+
+### Log ###
+*.log

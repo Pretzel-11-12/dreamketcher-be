@@ -10,7 +10,8 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
-import pretzel.dreamketcherbe.domain.auth.entity.Token;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import pretzel.dreamketcherbe.domain.ranking.dto.WebtoonPopularityDataDto;
 
 @Configuration
 @EnableRedisRepositories
@@ -40,8 +41,12 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Token> reedisTemplate() {
-        RedisTemplate<String, Token> redisTemplate = new RedisTemplate<>();
+    public RedisTemplate<String, WebtoonPopularityDataDto> redisTemplate() {
+        RedisTemplate<String, WebtoonPopularityDataDto> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
         redisTemplate.setConnectionFactory(redisConnectionFactory());
         return redisTemplate;
     }

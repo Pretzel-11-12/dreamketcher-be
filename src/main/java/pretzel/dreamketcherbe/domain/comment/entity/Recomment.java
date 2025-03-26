@@ -13,12 +13,13 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
+import pretzel.dreamketcherbe.domain.comment.exception.CommentException;
+import pretzel.dreamketcherbe.domain.comment.exception.CommentExceptionType;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
@@ -46,12 +47,10 @@ public class Recomment extends BaseTimeEntity {
 
     @Column(name = "recommendation_count", nullable = false)
     @ColumnDefault("0")
-    @Setter
     private int recommendationCount;
 
     @Column(name = "not_recommendation_count", nullable = false)
     @ColumnDefault("0")
-    @Setter
     private int notRecommendationCount;
 
     @Column(name = "is_deleted", nullable = false)
@@ -104,7 +103,7 @@ public class Recomment extends BaseTimeEntity {
 
     public void isAuthor(Long memberId) {
         if (!member.getId().equals(memberId)) {
-            throw new IllegalStateException(memberId + ", 답글 작성자가 아닙니다.");
+            throw new CommentException(CommentExceptionType.UNAUTHORIZED_MEMBER);
         }
     }
 
@@ -112,5 +111,13 @@ public class Recomment extends BaseTimeEntity {
         if (!isDeleted) {
             this.isDeleted = true;
         }
+    }
+
+    public void updateRecommendationCount(int count) {
+        this.recommendationCount = count;
+    }
+
+    public void updateNotRecommendationCount(int count) {
+        this.notRecommendationCount = count;
     }
 }

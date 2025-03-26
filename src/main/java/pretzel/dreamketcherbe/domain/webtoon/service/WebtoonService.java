@@ -3,7 +3,9 @@ package pretzel.dreamketcherbe.domain.webtoon.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import lombok.AllArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.S3Utils.S3Service;
@@ -13,6 +15,14 @@ import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.admin.entity.ManagementWebtoon;
 import pretzel.dreamketcherbe.domain.admin.repository.ManagementWebtoonRespository;
+import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.NotRecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentNotRecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentRecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentRepository;
+import pretzel.dreamketcherbe.domain.episode.repository.EpisodeLikeRepository;
+import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
 import pretzel.dreamketcherbe.domain.episode.repository.EpisodeStarRepository;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
@@ -20,7 +30,9 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.member.service.MemberService;
 import pretzel.dreamketcherbe.domain.webtoon.dto.*;
+import pretzel.dreamketcherbe.domain.webtoon.entity.Genre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
@@ -48,7 +60,40 @@ public class WebtoonService {
 
     private final ManagementWebtoonRespository managementWebtoonRespository;
 
+    private final EpisodeRepository episodeRepository;
+
+    private final CommentRepository commentRepository;
+
+    private final RecommentRepository recommentRepository;
+
     private final EpisodeStarRepository episodeStarRepository;
+
+    private final EpisodeLikeRepository episodeLikeRepository;
+
+    private final RecommendationRepository recommendationRepository;
+
+    private final NotRecommendationRepository notRecommendationRepository;
+
+    private final RecommentRecommendationRepository recommentRecomendationRepository;
+
+    private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
+
+    private final MemberService memberService;
+
+    public final RedisTemplate<String, String> redisTemplate;
+
+    private static final String RECOMMEND_SET_KEY_PREFIX = "comment:recommend:";
+    private static final String RECOMMEND_COUNT_KEY_PREFIX = "comment:recommendCount:";
+    private static final String NOT_RECOMMEND_SET_KEY_PREFIX = "comment:notRecommend:";
+    private static final String NOT_RECOMMEND_COUNT_KEY_PREFIX = "comment:notRecommendCount:";
+
+    private static final String RECOMMENT_RECOMMEND_SET_KEY_PREFIX = "recomment:recommend:";
+    private static final String RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX = "recomment:recommendCount:";
+    private static final String RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX = "recomment:notRecommend:";
+    private static final String RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX = "recomment:notRecommendCount:";
+
+    public static final String EPISODE_LIKE_COUNT_KEY_PREFIX = "episode:likeCount:";
+    private static final String EPISODE_LIKE_USER_KEY_PREFIX = "episode:likeUser:";
 
     /**
      * 연재중인 웹툰 목록 조회
@@ -88,6 +133,19 @@ public class WebtoonService {
     }
 
     /**
+     * 에피소드 카운트
+     */
+    @Transactional
+    public void getEpisodeCount(Long webtoonId) {
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        int count = episodeRepository.CountByWebtoonId(webtoonId);
+        findWebtoon.incrementEpisodeCount(count);
+        webtoonRepository.save(findWebtoon);
+    }
+
+    /**
      * 웹툰 등록
      */
     @Transactional
@@ -95,7 +153,10 @@ public class WebtoonService {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        Webtoon newWebtoon = Webtoon.addOf(request, findMember, new ObjectMapper());
+        Genre genre = genreRepository.findById(request.genreId())
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.GENRE_NOT_FOUND));
+
+        Webtoon newWebtoon = Webtoon.addOf(request, findMember, genre);
         webtoonRepository.save(newWebtoon);
 
         ManagementWebtoon managementWebtoon = ManagementWebtoon.addOf(newWebtoon);
@@ -133,41 +194,13 @@ public class WebtoonService {
     }
 
     /**
-     * 웹툰 프롤로그 등록
+     * 웹툰 썸네일 삭제
      */
-    public String uploadPrologue(Long memberId, List<MultipartFile> prologue,
-        ObjectMapper objectMapper) {
+    public void deleteThumbnail(String imageUrl) {
         try {
-            Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
-
-            String folderName = "webtoon/" + memberId + "/prologue";
-
-            List<String> prologueImageUrls = s3Service.imagesUpload(prologue, folderName);
-
-            return objectMapper.writeValueAsString(prologueImageUrls);
+            s3Service.deleteImage(imageUrl);
         } catch (Exception e) {
-            throw new S3Exception(S3ExceptionType.UPLOAD_FAILED);
-        }
-    }
-
-    /**
-     * 웹툰 프롤로그 수정
-     */
-    public String updatePrologue(String oldPrologueJson, List<MultipartFile> newPrologue,
-        List<Integer> replaceIndex, String folderName, ObjectMapper objectMapper) {
-        try {
-
-            List<String> oldPrologue = objectMapper.readValue(oldPrologueJson,
-                new TypeReference<>() {
-                });
-
-            List<String> updatedPrologueUrls = s3Service.updatePartialImages(oldPrologue,
-                newPrologue, replaceIndex, folderName);
-
-            return objectMapper.writeValueAsString(updatedPrologueUrls);
-        } catch (Exception e) {
-            throw new S3Exception(S3ExceptionType.UPDATE_FAILED);
+            throw new S3Exception(S3ExceptionType.DELETE_FAILED);
         }
     }
 
@@ -205,14 +238,15 @@ public class WebtoonService {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-        findWebtoon.updateOf(request, new ObjectMapper());
+        findWebtoon.updateOf(request);
 
         webtoonRepository.save(findWebtoon);
     }
 
     /**
-     * 웹툰 삭제
+     * 웹툰 논리 삭제
      */
+    @Transactional
     public void deleteWebtoon(Long memberId, Long webtoonId) {
 
         Member findMember = memberRepository.findById(memberId)
@@ -221,7 +255,69 @@ public class WebtoonService {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-        webtoonRepository.delete(findWebtoon);
+        findWebtoon.isAuthor(memberId);
+        getEpisodeCount(webtoonId);
+        List<Long> episodeIds = episodeRepository.findByWebtoonId(webtoonId);
+
+        if (episodeIds.isEmpty()) {
+            findWebtoon.softDelete();
+            webtoonRepository.save(findWebtoon);
+            memberService.deleteFavoriteWebtoon(memberId, webtoonId);
+            return;
+        }
+
+        findWebtoon.softDelete();
+        webtoonRepository.save(findWebtoon);
+        memberService.deleteFavoriteWebtoon(memberId, webtoonId);
+
+        episodeStarRepository.deleteByEpisode(episodeIds);
+        episodeLikeRepository.deleteByEpisode(episodeIds);
+        episodeRepository.deleteByWebtoonId(webtoonId);
+
+        List<Long> commentIds = commentRepository.findByEpisodeIds(episodeIds);
+        recommendationRepository.deleteByComment(commentIds);
+        notRecommendationRepository.deleteByComment(commentIds);
+        commentRepository.deleteByEpisodeId(episodeIds);
+
+        List<Long> recommentIds = recommentRepository.findBycommentId(commentIds);
+        recommentRecomendationRepository.deleteByRecommentId(recommentIds);
+        recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
+        recommentRepository.deleteByCommentId(commentIds);
+
+        deleteRedisKeys(episodeIds, commentIds, recommentIds);
+    }
+
+    /**
+     * redis 삭제
+     */
+    private void deleteRedisKeys(List<Long> episodeIds, List<Long> commentIds,
+        List<Long> recommentIds) {
+        List<String> deleteKeys = new ArrayList<>();
+
+        // 좋아요 관련 키
+        for (Long episodeId : episodeIds) {
+            deleteKeys.add(EPISODE_LIKE_COUNT_KEY_PREFIX + episodeId);
+            deleteKeys.add(EPISODE_LIKE_USER_KEY_PREFIX + episodeId);
+        }
+
+        // 댓글 관련 키
+        for (Long commentId : commentIds) {
+            deleteKeys.add(RECOMMEND_SET_KEY_PREFIX + commentId);
+            deleteKeys.add(RECOMMEND_COUNT_KEY_PREFIX + commentId);
+            deleteKeys.add(NOT_RECOMMEND_SET_KEY_PREFIX + commentId);
+            deleteKeys.add(NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId);
+        }
+
+        // 답글 관련 키
+        for (Long recommentId : recommentIds) {
+            deleteKeys.add(RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+            deleteKeys.add(RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+            deleteKeys.add(RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+            deleteKeys.add(RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+        }
+
+        // Redis 키 일괄 삭제
+        redisTemplate.delete(deleteKeys);
     }
 
     /**

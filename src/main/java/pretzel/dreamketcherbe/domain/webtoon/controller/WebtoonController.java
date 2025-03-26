@@ -1,6 +1,5 @@
 package pretzel.dreamketcherbe.domain.webtoon.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -8,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
-import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
@@ -27,7 +26,6 @@ import pretzel.dreamketcherbe.domain.webtoon.dto.SearchWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
-import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
 
 @RestController
@@ -36,8 +34,6 @@ import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
 public class WebtoonController {
 
     private final WebtoonService webtoonService;
-    private final WebtoonRepository webtoonRepository;
-    private final MemberRepository memberRepository;
 
     /**
      * 연재중인 웹툰 목록 조회
@@ -117,34 +113,15 @@ public class WebtoonController {
     }
 
     /**
-     * 웹툰 프롤로그 등록
+     * 웹툰 썸네일 삭제
      */
-    @PostMapping("/upload/prologue")
-    public ResponseEntity<String> uploadWebtoonPrologue(@Auth Long memberId,
-        @RequestParam("images") List<MultipartFile> images, ObjectMapper objectMapper) {
-        String prologueUrls = webtoonService.uploadPrologue(memberId, images, objectMapper);
-
-        return ResponseEntity.ok(prologueUrls);
-    }
-
-    /**
-     * 웹툰 프롤로그 수정
-     */
-    @PutMapping("/{webtoonId}/prologue")
-    public ResponseEntity<String> updateWebtoonPrologue(@Auth Long memberId,
+    @DeleteMapping("/{webtoonId}/thumbnail")
+    public ResponseEntity<Void> deleteWebtoonThumbnail(@Auth Long memberId,
         @PathVariable Long webtoonId,
-        @RequestParam("existingUrls") String existingUrls,
-        @RequestParam("newImages") List<MultipartFile> newImages,
-        @RequestParam("replaceIndices") List<Integer> replaceIndices,
-        @RequestParam("folderName") String folderName,
-        ObjectMapper objectMapper) {
-        String updatedPrologueUrls = webtoonService.updatePrologue(existingUrls,
-            newImages,
-            replaceIndices, folderName, objectMapper);
-
-        return ResponseEntity.ok(updatedPrologueUrls);
+        @RequestParam("thumbnailUrl") String thumbnailUrl) {
+        webtoonService.deleteThumbnail(thumbnailUrl);
+        return ResponseEntity.noContent().build();
     }
-
 
     /**
      * 관심 웹툰 추가
@@ -194,7 +171,7 @@ public class WebtoonController {
      */
     @GetMapping("/search")
     public ResponseEntity<List<SearchedWebtoonResDto>> searchWebtoon(
-        @RequestParam SearchWebtoonReqDto request) {
+        @Valid @ModelAttribute SearchWebtoonReqDto request) {
         return ResponseEntity.ok(webtoonService.searchWebtoon(request.keyword()));
     }
 }

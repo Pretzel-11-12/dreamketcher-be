@@ -16,6 +16,8 @@ import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
+import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
+import pretzel.dreamketcherbe.domain.episode.exception.EpisodeExceptionType;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
@@ -53,7 +55,6 @@ public class Episode extends BaseTimeEntity {
     private LocalDate publishedAt;
 
     @ColumnDefault("false")
-    @Setter
     private boolean published;
 
     @ColumnDefault("0")
@@ -124,7 +125,7 @@ public class Episode extends BaseTimeEntity {
 
     public void isAuthor(Long memberId) {
         if (!member.getId().equals(memberId)) {
-            throw new IllegalStateException(memberId + ", 작성자가 아닙니다.");
+            throw new EpisodeException(EpisodeExceptionType.UNAUTHORIZED);
         }
     }
 
@@ -136,5 +137,9 @@ public class Episode extends BaseTimeEntity {
         if (!this.isDeleted) {
             this.isDeleted = true;
         }
+    }
+
+    public void updatePublished(boolean published) {
+        this.published = published;
     }
 }

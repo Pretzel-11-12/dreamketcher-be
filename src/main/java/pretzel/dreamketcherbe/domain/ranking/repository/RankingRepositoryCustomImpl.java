@@ -33,7 +33,7 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
                     webtoon.id,
                     webtoon.title,
                     webtoon.member.name,
-                    webtoon.description,
+                    webtoon.story,
                     webtoon.thumbnail,
                     webtoon.genre.name,
                     webtoon.episodeCount,
@@ -77,6 +77,8 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
     private BooleanBuilder getWhereConditions(String status, String genreType) {
         BooleanBuilder builder = new BooleanBuilder();
 
+        status = status.equals("none") ? WebtoonStatus.IN_SERIES.getStatus() : status;
+
         return builder
             .and(genreType.equals("none") ? null : webtoon.genre.name.eq(genreType))
             .and(status.equals("NEW")
@@ -88,10 +90,15 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
     /**
      * 인기도 계산
      */
-    private NumberExpression<Float> calculatePopularity(NumberPath<Float> averageStar, NumberExpression<Long> likeCount, NumberExpression<Long> viewCount, NumberExpression<Long> interestedCount) {
-        NumberExpression<Double> logLikes = Expressions.numberTemplate(Double.class, "log10({0} + 1)", likeCount);
-        NumberExpression<Double> logViews = Expressions.numberTemplate(Double.class, "log10({0} + 1)", viewCount);
-        NumberExpression<Double> logInterested = Expressions.numberTemplate(Double.class, "log10({0} + 1)", interestedCount);
+    private NumberExpression<Float> calculatePopularity(NumberPath<Float> averageStar,
+        NumberExpression<Long> likeCount, NumberExpression<Long> viewCount,
+        NumberExpression<Long> interestedCount) {
+        NumberExpression<Double> logLikes = Expressions.numberTemplate(Double.class,
+            "log10({0} + 1)", likeCount);
+        NumberExpression<Double> logViews = Expressions.numberTemplate(Double.class,
+            "log10({0} + 1)", viewCount);
+        NumberExpression<Double> logInterested = Expressions.numberTemplate(Double.class,
+            "log10({0} + 1)", interestedCount);
 
         return averageStar.multiply(0.3)
             .add(logLikes.multiply(0.3))

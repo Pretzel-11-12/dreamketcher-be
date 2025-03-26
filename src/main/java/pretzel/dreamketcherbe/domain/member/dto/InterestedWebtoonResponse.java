@@ -1,16 +1,15 @@
 package pretzel.dreamketcherbe.domain.member.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
-
 import java.time.LocalDateTime;
+import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 
 public record InterestedWebtoonResponse(
     Long interestedWebtoonId,
     Long webtoonId,
     String title,
     String thumbnail,
-    String AuthorNickname,
+    String authorNickname,
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     LocalDateTime updatedAt,
     int episodeCount,

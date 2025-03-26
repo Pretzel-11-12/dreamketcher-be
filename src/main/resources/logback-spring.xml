@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+
+  <conversionRule conversionWord="clr"
+    converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+
+  <property name="APP_NAME" value="my-app"/>
+  <property name="LOG_PATH" value="./logs"/>
+
+  <property name="CONSOLE_LOG_PATTERN"
+    value="%clr([%d{yyyy-MM-dd HH:mm:ss.SSS}]){faint} %clr([%thread]){magenta} %clr(%-5level) %clr(%logger{36}){cyan} : %msg%n"/>
+  <property name="FILE_LOG_PATTERN"
+    value="[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %-5level %logger{36} : %msg%n"/>
+
+  <!-- Dev 환경: 파일(INFO) + 콘솔 -->
+  <springProfile name="dev">
+    <include resource="logs/console-appender.xml"/>
+    <include resource="logs/file-info-appender.xml"/>
+
+    <root level="INFO">
+      <appender-ref ref="CONSOLE"/>
+      <appender-ref ref="FILE-INFO"/>
+    </root>
+
+    <logger level="DEBUG" name="org.hibernate.SQL">
+      <appender-ref ref="FILE-INFO"/>
+    </logger>
+  </springProfile>
+
+  <!-- Prod 환경: 파일(INFO + ERROR), 콘솔은 옵션 -->
+  <springProfile name="prod">
+    <include resource="logs/file-info-appender.xml"/>
+    <include resource="logs/file-error-appender.xml"/>
+
+    <root level="INFO">
+      <appender-ref ref="FILE-INFO"/>
+      <appender-ref ref="FILE-ERROR"/>
+    </root>
+
+    <!-- 시스템 크리티컬 로그 (예시) -->
+    <logger level="ERROR" name="com.mycompany.critical">
+      <appender-ref ref="FILE-ERROR"/>
+    </logger>
+  </springProfile>
+
+</configuration>

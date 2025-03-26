@@ -1,5 +1,7 @@
 package pretzel.dreamketcherbe.domain.comment.service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -22,6 +25,7 @@ import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentNotRecommendatio
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
+import pretzel.dreamketcherbe.domain.comment.dto.MyCommentsAndRecommentsListResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.NotRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.RecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.entity.Comment;
@@ -36,7 +40,7 @@ import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.NotRecommendationRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.RecommendationRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.RecommentNotRecommendationRepository;
-import pretzel.dreamketcherbe.domain.comment.repository.RecommentRecomendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentRecommendationRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.RecommentRepository;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
@@ -58,7 +62,7 @@ public class CommentService {
     private final RecommentRepository recommentRepository;
     private final RecommendationRepository recommendationRepository;
     private final NotRecommendationRepository notRecommendationRepository;
-    private final RecommentRecomendationRepository recommentRecommendationRepository;
+    private final RecommentRecommendationRepository recommentRecommendationRepository;
     private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
@@ -72,33 +76,44 @@ public class CommentService {
     private static final String RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX = "recomment:notRecommend:";
     private static final String RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX = "recomment:notRecommendCount:";
 
-    private static final String RECOMMEND_LUA_SCRIPT = """
-        if redis.call('sismember', KEYS[1], ARGV[1]) == 1 then
-            redis.call('srem', KEYS[1], ARGV[1])
-            redis.call('decr', KEYS[2])
-            return -1
-        else
+    private static final String ADD_LUA_SCRIPT = """
+        local isMember = redis.call('sismember', KEYS[1], ARGV[1])
+        if isMember == 0 then
             redis.call('sadd', KEYS[1], ARGV[1])
             redis.call('incr', KEYS[2])
             return 1
+        else
+            return 0
         end
         """;
-    private final RedisScript<Long> recommendScript = new DefaultRedisScript<>(RECOMMEND_LUA_SCRIPT,
+    private final RedisScript<Long> addRecommendScript = new DefaultRedisScript<>(
+        ADD_LUA_SCRIPT,
         Long.class);
 
-    private static final String NOT_RECOMMEND_LUA_SCRIPT = """
-        if redis.call('sismember', KEYS[1], ARGV[1]) == 1 then
-            redis.call('srem', KEYS[1], ARGV[1])
-            redis.call('decr', KEYS[2])
-            return -1
-        else
-            redis.call('sadd', KEYS[1], ARGV[1])
-            redis.call('incr', KEYS[2])
-            return 1
-        end
+    private final RedisScript<Long> recommend = addRecommendScript;
+    private final RedisScript<Long> notRecommend = addRecommendScript;
+
+    private static final String REMOVE_LUA_SCRIPT = """
+        local isMember = redis.call('sismember', KEYS[1], ARGV[1])
+            if isMember == 1 then
+                redis.call('srem', KEYS[1], ARGV[1])
+        
+                local currentCount = tonumber(redis.call('get', KEYS[2]) or "0")
+                if currentCount > 0 then
+                    redis.call('decr', KEYS[2])
+                end
+                return -1
+            else
+                return 0
+            end
         """;
-    private final RedisScript<Long> notRecommendScript = new DefaultRedisScript<>(
-        NOT_RECOMMEND_LUA_SCRIPT, Long.class);
+    private final RedisScript<Long> removeRecommendScript = new DefaultRedisScript<>(
+        REMOVE_LUA_SCRIPT,
+        Long.class);
+
+    private final RedisScript<Long> removeRecommend = removeRecommendScript;
+    private final RedisScript<Long> removeNotRecommend = removeRecommendScript;
+
 
     /**
      * 댓글 생성
@@ -119,7 +134,7 @@ public class CommentService {
     }
 
     /**
-     * 댓글 삭제
+     * 댓글 논리 삭제
      */
     @Transactional
     public void deleteComment(Long memberId, Long episodeId, Long commentId) {
@@ -127,9 +142,41 @@ public class CommentService {
             .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
 
         findComment.isAuthor(memberId);
+        List<Long> recommentIds = recommentRepository.findByComment(commentId);
 
+        if (recommentIds.isEmpty()) {
+            recommendationRepository.deleteBycommentId(commentId);
+            notRecommendationRepository.deleteBycommentId(commentId);
+            redisTemplate.delete(RECOMMEND_SET_KEY_PREFIX + commentId);
+            redisTemplate.delete(RECOMMEND_COUNT_KEY_PREFIX + commentId);
+            redisTemplate.delete(NOT_RECOMMEND_SET_KEY_PREFIX + commentId);
+            redisTemplate.delete(NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId);
+            findComment.softDelete();
+            commentRepository.save(findComment);
+            return;
+        }
+
+        recommendationRepository.deleteBycommentId(commentId);
+        notRecommendationRepository.deleteBycommentId(commentId);
+        redisTemplate.delete(RECOMMEND_SET_KEY_PREFIX + commentId);
+        redisTemplate.delete(RECOMMEND_COUNT_KEY_PREFIX + commentId);
+        redisTemplate.delete(NOT_RECOMMEND_SET_KEY_PREFIX + commentId);
+        redisTemplate.delete(NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId);
         findComment.softDelete();
         commentRepository.save(findComment);
+
+        recommentRecommendationRepository.deleteByRecommentId(recommentIds);
+        recommentNotRecommendationRepository.deleteByRecomment(recommentIds);
+
+        List<String> redisDeleteKeys = new ArrayList<>();
+        for (Long recommentId : recommentIds) {
+            redisDeleteKeys.add(RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+            redisDeleteKeys.add(RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+            redisDeleteKeys.add(RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+            redisDeleteKeys.add(RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+        }
+        redisTemplate.delete(redisDeleteKeys);
+        recommentRepository.deleteByComment(commentId);
     }
 
     /**
@@ -191,7 +238,7 @@ public class CommentService {
     }
 
     /**
-     * 답글 삭제
+     * 답글 논리 삭제
      */
     @Transactional
     public void deleteRecomment(Long memberId, Long episodeId, Long commentId, Long recommentId) {
@@ -203,12 +250,19 @@ public class CommentService {
 
         findRecomment.isAuthor(memberId);
 
+        recommentRecommendationRepository.deleteByRecomment(recommentId);
+        recommentNotRecommendationRepository.deleteByRecomment(recommentId);
+        redisTemplate.delete(RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+        redisTemplate.delete(RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
+        redisTemplate.delete(RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX + recommentId);
+        redisTemplate.delete(RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId);
         findRecomment.softDelete();
         recommentRepository.save(findRecomment);
 
         int childCommentCount = (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(
             findComment.getId());
         findComment.updateChildCommentCount(childCommentCount);
+
         commentRepository.save(findComment);
     }
 
@@ -238,6 +292,52 @@ public class CommentService {
     }
 
     /**
+     * 내 댓글, 답글 조회
+     */
+    @Transactional(readOnly = true)
+    public PageResDto<MyCommentsAndRecommentsListResDto> getMyCommentsAndRecomments(Long memberId,
+        String type,
+        PageReqDto pageReqDto) {
+        Member findMember = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        List<MyCommentsAndRecommentsListResDto> myCommentsAndRecommentsListResDtoList = new ArrayList<>();
+
+        Sort sort = Sort.by(Direction.DESC, "createdAt");
+
+        if ("comment".equals(type) || type == null) {
+            List<MyCommentsAndRecommentsListResDto> comments = commentRepository.findByMemberIdAndDeletedFalse(
+                    memberId, sort)
+                .stream()
+                .map(MyCommentsAndRecommentsListResDto::from)
+                .toList();
+            myCommentsAndRecommentsListResDtoList.addAll(comments);
+        }
+        if ("recomment".equals(type) || type == null) {
+            List<MyCommentsAndRecommentsListResDto> recomments = recommentRepository.findByMemberIdAndIsDeletedFalse(
+                    memberId, sort)
+                .stream()
+                .map(MyCommentsAndRecommentsListResDto::from)
+                .toList();
+            myCommentsAndRecommentsListResDtoList.addAll(recomments);
+        }
+
+        myCommentsAndRecommentsListResDtoList.sort(
+            Comparator.comparing(MyCommentsAndRecommentsListResDto::createdAt).reversed());
+
+        long totalElements = myCommentsAndRecommentsListResDtoList.size();
+
+        int start = pageReqDto.getPage() * pageReqDto.getSize();
+        int end = Math.min(start + pageReqDto.getSize(),
+            myCommentsAndRecommentsListResDtoList.size());
+
+        List<MyCommentsAndRecommentsListResDto> pagingList = myCommentsAndRecommentsListResDtoList.subList(
+            start, end);
+
+        return new PageResDto<>(pagingList, totalElements);
+    }
+
+    /**
      * 댓글 추천
      */
     @Transactional
@@ -251,14 +351,17 @@ public class CommentService {
         String recommendSetKey = RECOMMEND_SET_KEY_PREFIX + commentId;
         String recommendCountKey = RECOMMEND_COUNT_KEY_PREFIX + commentId;
 
-        Long result = redisTemplate.execute(recommendScript,
-            List.of(recommendSetKey, recommendCountKey), memberId.toString());
+        Long result = redisTemplate.execute(recommend,
+            List.of(recommendSetKey, recommendCountKey), String.valueOf(memberId));
+
         if (result == null || result != 1) {
             throw new IllegalStateException("추천 처리 실패");
         }
 
         Recommendation recommendation = Recommendation.addOf(findComment, findMember);
         recommendationRepository.save(recommendation);
+
+        findComment.updateRecommendationCount(getRecommendationCount(recommendCountKey));
 
         return CreateRecommendationResDto.of(recommendation,
             getRecommendationCount(recommendCountKey));
@@ -278,13 +381,15 @@ public class CommentService {
         String recommendSetKey = RECOMMEND_SET_KEY_PREFIX + commentId;
         String recommendCountKey = RECOMMEND_COUNT_KEY_PREFIX + commentId;
 
-        Long result = redisTemplate.execute(recommendScript,
-            List.of(recommendSetKey, recommendCountKey), memberId.toString());
+        Long result = redisTemplate.execute(removeRecommend,
+            List.of(recommendSetKey, recommendCountKey), String.valueOf(memberId));
+
         if (result == null || result != -1) {
             throw new IllegalStateException("추천 해제 실패");
         }
 
         recommendationRepository.deleteByMemberAndComment(memberId, commentId);
+        findComment.updateRecommendationCount(getRecommendationCount(recommendCountKey));
 
         return getRecommendationCount(recommendCountKey);
     }
@@ -303,14 +408,16 @@ public class CommentService {
         String notRecommendSetKey = NOT_RECOMMEND_SET_KEY_PREFIX + commentId;
         String notRecommendCountKey = NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId;
 
-        Long result = redisTemplate.execute(notRecommendScript,
-            List.of(notRecommendSetKey, notRecommendCountKey), memberId.toString());
+        Long result = redisTemplate.execute(notRecommend,
+            List.of(notRecommendSetKey, notRecommendCountKey), String.valueOf(memberId));
         if (result == null || result != 1) {
             throw new IllegalStateException("비추천 처리 실패");
         }
 
         NotRecommendation notRecommendation = NotRecommendation.addOf(findComment, findMember);
         notRecommendationRepository.save(notRecommendation);
+
+        findComment.updateNotRecommendationCount(getRecommendationCount(notRecommendCountKey));
 
         return NotRecommendationResDto.of(notRecommendation,
             getRecommendationCount(notRecommendCountKey));
@@ -331,13 +438,16 @@ public class CommentService {
         String notRecommendSetKey = NOT_RECOMMEND_SET_KEY_PREFIX + commentId;
         String notRecommendCountKey = NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId;
 
-        Long result = redisTemplate.execute(notRecommendScript,
-            List.of(notRecommendSetKey, notRecommendCountKey), memberId.toString());
+        Long result = redisTemplate.execute(removeNotRecommend,
+            List.of(notRecommendSetKey, notRecommendCountKey), String.valueOf(memberId));
+
         if (result == null || result != -1) {
             throw new IllegalStateException("비추천 해제 실패");
         }
 
         notRecommendationRepository.deleteByMemberAndComment(memberId, commentId);
+        findComment.updateNotRecommendationCount(getRecommendationCount(notRecommendCountKey));
+
         return getRecommendationCount(notRecommendCountKey);
     }
 
@@ -363,8 +473,10 @@ public class CommentService {
         String recommendRecommentSetKey = RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId;
         String recommendRecommentCountKey = RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
 
-        Long result = redisTemplate.execute(recommendScript,
-            List.of(recommendRecommentSetKey, recommendRecommentCountKey, memberId.toString()));
+        Long result = redisTemplate.execute(recommend,
+            List.of(recommendRecommentSetKey, recommendRecommentCountKey),
+            String.valueOf(memberId));
+
         if (result == null || result != 1) {
             throw new IllegalStateException("답글 추천 실패");
         }
@@ -372,6 +484,9 @@ public class CommentService {
         RecommentRecommendation newRecommentRecommendation = RecommentRecommendation.addOf(
             findMember, findRecomment);
         recommentRecommendationRepository.save(newRecommentRecommendation);
+
+        findRecomment.updateRecommendationCount(
+            getRecommentRecommendationCount(recommendRecommentCountKey));
 
         return CreateRecommentRecommendationResDto.of(newRecommentRecommendation,
             getRecommentRecommendationCount(recommendRecommentCountKey));
@@ -382,16 +497,24 @@ public class CommentService {
      */
     @Transactional
     public int unrecommentRecommendation(Long memberId, Long recommentId) {
+        Recomment findRecomment = recommentRepository.findById(recommentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
+
         String recommendRecommentSetKey = RECOMMENT_RECOMMEND_SET_KEY_PREFIX + recommentId;
         String recommendRecommentCountKey = RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
 
-        Long result = redisTemplate.execute(recommendScript,
-            List.of(recommendRecommentSetKey, recommendRecommentCountKey), memberId.toString());
+        Long result = redisTemplate.execute(removeRecommend,
+            List.of(recommendRecommentSetKey, recommendRecommentCountKey),
+            String.valueOf(memberId));
+
         if (result == null || result != -1) {
             throw new IllegalStateException("추천 해제 실패");
         }
 
         recommentRecommendationRepository.deleteByMemberAndRecomment(memberId, recommentId);
+        findRecomment.updateRecommendationCount(
+            getRecommentRecommendationCount(recommendRecommentCountKey));
+
         return getRecommentRecommendationCount(recommendRecommentCountKey);
     }
 
@@ -411,8 +534,10 @@ public class CommentService {
         String notRecommendRecommentCountKey =
             RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
 
-        Long result = redisTemplate.execute(notRecommendScript,
-            List.of(notRecommendRecommentKey, notRecommendRecommentCountKey), memberId.toString());
+        Long result = redisTemplate.execute(notRecommend,
+            List.of(notRecommendRecommentKey, notRecommendRecommentCountKey),
+            String.valueOf(memberId));
+
         if (result == null || result != 1) {
             throw new IllegalStateException("비추천 처리 실패");
         }
@@ -420,6 +545,9 @@ public class CommentService {
         RecommentNotRecommendation newRecommentNotRecommendation = RecommentNotRecommendation.addOf(
             findMember, findRecomment);
         recommentNotRecommendationRepository.save(newRecommentNotRecommendation);
+
+        findRecomment.updateNotRecommendationCount(
+            getRecommentRecommendationCount(notRecommendRecommentCountKey));
 
         return CreateRecommentNotRecommendationResDto.of(newRecommentNotRecommendation,
             getRecommentRecommendationCount(notRecommendRecommentCountKey));
@@ -430,18 +558,25 @@ public class CommentService {
      */
     @Transactional
     public int unrecommentNotRecommendation(Long memberId, Long recommentId) {
+        Recomment findRecomment = recommentRepository.findById(recommentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
+
         String notRecommentRecommendSetKey = RECOMMENT_NOT_RECOMMEND_SET_KEY_PREFIX + recommentId;
         String notRecommentRecommendCountKey =
             RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
 
-        Long result = redisTemplate.execute(notRecommendScript,
+        Long result = redisTemplate.execute(removeNotRecommend,
             List.of(notRecommentRecommendSetKey, notRecommentRecommendCountKey),
-            memberId.toString());
+            String.valueOf(memberId));
+
         if (result == null || result != -1) {
             throw new IllegalStateException("비추천 해제 실패");
         }
 
         recommentNotRecommendationRepository.deleteByMemberAndRecomment(memberId, recommentId);
+        findRecomment.updateNotRecommendationCount(
+            getRecommentRecommendationCount(notRecommentRecommendCountKey));
+
         return getRecommentRecommendationCount(notRecommentRecommendCountKey);
     }
 
@@ -474,8 +609,8 @@ public class CommentService {
             Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
 
-            comment.setRecommendationCount(recommendCount);
-            comment.setNotRecommendationCount(notRecommendCount);
+            comment.updateRecommendationCount(recommendCount);
+            comment.updateNotRecommendationCount(notRecommendCount);
             commentRepository.save(comment);
         }
     }
@@ -504,8 +639,8 @@ public class CommentService {
             Recomment recomment = recommentRepository.findById(recommentId)
                 .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
 
-            recomment.setRecommendationCount(recommendCount);
-            recomment.setNotRecommendationCount(notRecommendCount);
+            recomment.updateRecommendationCount(recommendCount);
+            recomment.updateNotRecommendationCount(notRecommendCount);
             recommentRepository.save(recomment);
         }
     }

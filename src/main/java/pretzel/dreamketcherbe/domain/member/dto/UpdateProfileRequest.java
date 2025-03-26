@@ -2,6 +2,7 @@ package pretzel.dreamketcherbe.domain.member.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record UpdateProfileRequest(
@@ -12,7 +13,10 @@ public record UpdateProfileRequest(
     String shortIntroduction,
 
     @Email(message = "이메일 형식이 올바르지 않습니다.")
-    String businessEmail
+    String businessEmail,
+
+    @NotNull(message = "이미지 삭제 여부는 필수 입력 값입니다.")
+    Boolean isDeleteImage
 ) {
 
 }
