@@ -117,4 +117,8 @@ public class Webtoon extends BaseTimeEntity {
             this.isDeleted = true;
         }
     }
+
+    public void incrementEpisodeCount(int episodeCount) {
+        this.episodeCount = episodeCount;
+    }
 }

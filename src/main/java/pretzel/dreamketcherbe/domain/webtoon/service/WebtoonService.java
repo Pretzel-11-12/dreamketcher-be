@@ -133,6 +133,17 @@ public class WebtoonService {
     }
 
     /**
+     * 에피소드 카운트
+     */
+    public void getEpisodeCount(Long webtoonId) {
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        int count = episodeRepository.CountByWebtoonId(webtoonId);
+        findWebtoon.incrementEpisodeCount(count);
+    }
+
+    /**
      * 웹툰 등록
      */
     @Transactional
