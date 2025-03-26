@@ -384,7 +384,6 @@ public class EpisodeService {
 
     /**
      * 에피소드 조회
-     * TODO: 조회수 중복 관리 부분 리팩토링
      */
     @Transactional
     public EpisodeResDto getEpisode(Long webtoonId, Long episodeId, HttpServletRequest request,
@@ -392,49 +391,56 @@ public class EpisodeService {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-        Episode findEpisode = episodeRepository.findById(episodeId)
+        Episode findEpisode = episodeRepository.findByIsDeletedFalseAndPublishedTrue(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
         if (!findEpisode.getWebtoon().getId().equals(webtoonId)) {
             throw new EpisodeException(EpisodeExceptionType.INVALID_EPISODE);
         }
 
+        addViewCount(request, episodeId);
+
         calculateAverageStar(episodeId);
 
-        // 조회수 중복 방지
-        Cookie oldCookie = null;
+        return EpisodeResDto.of(findEpisode);
+    }
+
+    @Transactional
+    public Cookie addViewCount(HttpServletRequest request, Long episodeId) {
+
         Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("viewCount")) {
-                    oldCookie = cookie;
-                }
-            }
-        }
+        Cookie oldCookie = this.getCookie(cookies, "view_count");
 
         if (oldCookie != null) {
             if (!oldCookie.getValue().contains("[" + episodeId + "]")) {
-                increaseViewCount(episodeId);
-                oldCookie.setValue(oldCookie.getValue() + "_" + episodeId);
                 oldCookie.setPath("/");
                 oldCookie.setMaxAge(60 * 60 * 24);
-                response.addCookie(oldCookie);
+                increaseViewCount(episodeId);
             }
+            return oldCookie;
         } else {
-            increaseViewCount(episodeId);
-            Cookie newCookie = new Cookie("viewCount", "_" + episodeId);
+            Cookie newCookie = new Cookie("view_count", "[" + episodeId + "]");
             newCookie.setPath("/");
             newCookie.setMaxAge(60 * 60 * 24);
-            response.addCookie(newCookie);
+            increaseViewCount(episodeId);
+            return newCookie;
         }
+    }
 
-        return EpisodeResDto.of(findEpisode);
+    private Cookie getCookie(Cookie[] cookies, String name) {
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(name)) {
+                    return cookie;
+                }
+            }
+        }
+        return null;
     }
 
     /**
      * 조회수 증가
      */
-    @Transactional
     public void increaseViewCount(Long episodeId) {
         episodeRepository.increaseViewCount(episodeId);
     }

@@ -3,6 +3,7 @@ package pretzel.dreamketcherbe.domain.episode.repository;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.time.LocalDate;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,9 +17,16 @@ public interface EpisodeRepository extends JpaRepository<Episode, Long> {
     // 동일 날짜 미발행 웹툰 조회
     List<Episode> findByPublishedAtAndPublishedFalse(LocalDate publishedAt);
 
+    @Query("SELECT e FROM Episode e WHERE e.id = :episodeId AND e.published = true")
+    Optional<Episode> findByIsDeletedFalseAndPublishedTrue(@Param("episodeId") Long episodeId);
+
+    // 에피소드 카운트
+    @Query("SELECT COUNT(e) FROM Episode e WHERE e.webtoon.id = :webtoonId AND e.isDeleted = false AND e.published = true")
+    int CountByWebtoonId(@Param("webtoonId") Long webtoonId);
+
     @Modifying
-    @Query("UPDATE Episode e SET e.viewCount = e.viewCount + 1 WHERE e.id = :episodeId AND e.status = 'PUBLISHED'")
-    void increaseViewCount(Long episodeId);
+    @Query("UPDATE Episode e SET e.viewCount = e.viewCount + 1 WHERE e.id = :episodeId AND e.published = true AND e.isDeleted = false")
+    void increaseViewCount(@Param("episodeId") Long episodeId);
 
     Page<Episode> findByWebtoonIdOrderByPublishedAtDesc(Long webtoonId, Pageable pageable);
 
