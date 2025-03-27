@@ -14,6 +14,7 @@ public record MyCommentsAndRecommentsListResDto(
     int no,
     String episodeTitle,
     String episodeThumbnail,
+    Long commentId,
     String content,
     int childCommentCount,
     int recommendationCount,
@@ -31,6 +32,7 @@ public record MyCommentsAndRecommentsListResDto(
             .no(comment.getEpisode().getNo())
             .episodeTitle(comment.getEpisode().getTitle())
             .episodeThumbnail(comment.getEpisode().getThumbnail())
+            .commentId(null)
             .content(comment.getContent())
             .childCommentCount(comment.getChildCommentCount())
             .recommendationCount(comment.getRecommendationCount())
@@ -43,11 +45,14 @@ public record MyCommentsAndRecommentsListResDto(
     public static MyCommentsAndRecommentsListResDto from(Recomment recomment) {
         return MyCommentsAndRecommentsListResDto.builder()
             .id(recomment.getId())
+            .webtoonId(recomment.getWebtoon().getId())
             .title(recomment.getWebtoon().getTitle())
+            .episodeId(recomment.getEpisode().getId())
             .no(recomment.getEpisode().getNo())
             .episodeTitle(recomment.getEpisode().getTitle())
             .episodeThumbnail(recomment.getEpisode().getThumbnail())
             .content(recomment.getContent())
+            .commentId(recomment.getComment().getId())
             .childCommentCount(0)
             .recommendationCount(recomment.getRecommendationCount())
             .notRecommendationCount(recomment.getNotRecommendationCount())
