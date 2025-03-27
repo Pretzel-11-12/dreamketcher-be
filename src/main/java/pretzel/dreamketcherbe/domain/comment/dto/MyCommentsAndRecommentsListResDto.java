@@ -7,7 +7,6 @@ import pretzel.dreamketcherbe.domain.comment.entity.Recomment;
 
 @Builder
 public record MyCommentsAndRecommentsListResDto(
-    Long id,
     Long webtoonId,
     String title,
     Long episodeId,
@@ -15,6 +14,7 @@ public record MyCommentsAndRecommentsListResDto(
     String episodeTitle,
     String episodeThumbnail,
     Long commentId,
+    Long recommentId,
     String content,
     int childCommentCount,
     int recommendationCount,
@@ -25,14 +25,14 @@ public record MyCommentsAndRecommentsListResDto(
 
     public static MyCommentsAndRecommentsListResDto from(Comment comment) {
         return MyCommentsAndRecommentsListResDto.builder()
-            .id(comment.getId())
             .webtoonId(comment.getWebtoon().getId())
             .title(comment.getWebtoon().getTitle())
             .episodeId(comment.getEpisode().getId())
             .no(comment.getEpisode().getNo())
             .episodeTitle(comment.getEpisode().getTitle())
             .episodeThumbnail(comment.getEpisode().getThumbnail())
-            .commentId(null)
+            .commentId(comment.getId())
+            .recommentId(null)
             .content(comment.getContent())
             .childCommentCount(comment.getChildCommentCount())
             .recommendationCount(comment.getRecommendationCount())
@@ -44,7 +44,6 @@ public record MyCommentsAndRecommentsListResDto(
 
     public static MyCommentsAndRecommentsListResDto from(Recomment recomment) {
         return MyCommentsAndRecommentsListResDto.builder()
-            .id(recomment.getId())
             .webtoonId(recomment.getWebtoon().getId())
             .title(recomment.getWebtoon().getTitle())
             .episodeId(recomment.getEpisode().getId())
@@ -53,6 +52,7 @@ public record MyCommentsAndRecommentsListResDto(
             .episodeThumbnail(recomment.getEpisode().getThumbnail())
             .content(recomment.getContent())
             .commentId(recomment.getComment().getId())
+            .recommentId(recomment.getId())
             .childCommentCount(0)
             .recommendationCount(recomment.getRecommendationCount())
             .notRecommendationCount(recomment.getNotRecommendationCount())
