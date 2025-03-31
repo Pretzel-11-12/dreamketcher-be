@@ -1,5 +1,6 @@
 <included>
   <appender name="ERROR-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${ERROR_FILE_PATH}/error.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
       <maxHistory>5</maxHistory>
       <maxFileSize>500MB</maxFileSize>
