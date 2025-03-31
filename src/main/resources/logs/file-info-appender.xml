@@ -1,5 +1,5 @@
 <included>
-  <appender name="FILE-INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+  <appender name="INFO-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>${LOG_PATH}/${APP_NAME}-info.log</file>
     <encoder>
       <pattern>${FILE_LOG_PATTERN}</pattern>
