@@ -1,10 +1,15 @@
 package pretzel.dreamketcherbe.domain.webtoon.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,7 +36,13 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.member.service.MemberService;
-import pretzel.dreamketcherbe.domain.webtoon.dto.*;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonPageResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Genre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
@@ -39,10 +50,6 @@ import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.GenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -340,19 +347,27 @@ public class WebtoonService {
     /**
      * 웹툰, 작가 검색
      */
-    public List<SearchedWebtoonResDto> searchWebtoon(String keyword) {
+    public SearchedWebtoonPageResDto searchWebtoon(
+        String keyword, boolean fromFirst, int page, int size) {
+
         if (keyword == null || keyword.trim().isEmpty()) {
             throw new WebtoonException(WebtoonExceptionType.SEARCH_KEYWORD_NOT_FOUND);
         }
 
         String normalizedKeyword = keyword.trim().toLowerCase();
-        List<Webtoon> webtoons = webtoonRepository.findByTitleOrMemberNickname(normalizedKeyword);
 
-        if (webtoons.isEmpty()) {
-            return List.of();
+        // fromFirst 값에 따라 정렬 기준 지정 (예시로 id 기준 오름차순/내림차순)
+        Sort sort = fromFirst ? Sort.by("id").ascending() : Sort.by("id").descending();
+        PageRequest pageable = PageRequest.of(page, size, sort);
+
+        Page<Webtoon> webtoonPage = webtoonRepository.findByTitleOrMemberNickname(normalizedKeyword,
+            pageable);
+
+        if (webtoonPage.isEmpty()) {
+            return SearchedWebtoonPageResDto.of(Collections.emptyList(), page, 0, 0);
         }
 
-        List<Long> webtoonIds = webtoons.stream()
+        List<Long> webtoonIds = webtoonPage.getContent().stream()
             .map(Webtoon::getId)
             .collect(Collectors.toList());
 
@@ -363,12 +378,19 @@ public class WebtoonService {
                 obj -> (Long) obj[1]
             ));
 
-        return webtoons.stream()
+        List<SearchedWebtoonResDto> results = webtoonPage.getContent().stream()
             .map(webtoon -> SearchedWebtoonResDto.of(
                 webtoon,
                 webtoon.getGenre().getName(),
                 webtoonIdToStars.getOrDefault(webtoon.getId(), 0L)
             ))
             .collect(Collectors.toList());
+
+        return SearchedWebtoonPageResDto.of(
+            results,
+            webtoonPage.getNumber(),
+            webtoonPage.getTotalPages(),
+            (int) webtoonPage.getTotalElements()
+        );
     }
 }

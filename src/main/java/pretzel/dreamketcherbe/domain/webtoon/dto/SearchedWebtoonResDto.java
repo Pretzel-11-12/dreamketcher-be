@@ -16,8 +16,8 @@ public record SearchedWebtoonResDto(
     Long numOfStars
 ) {
 
-    public static SearchedWebtoonResDto of(Webtoon webtoon, String genreName,
-        Long numOfStars) {
+    public static SearchedWebtoonResDto of(
+        Webtoon webtoon, String genreName, Long numOfStars) {
         return SearchedWebtoonResDto.builder()
             .id(webtoon.getId())
             .thumbnail(webtoon.getThumbnail())
