@@ -1,7 +1,6 @@
 package pretzel.dreamketcherbe.domain.webtoon.controller;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +22,7 @@ import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchWebtoonReqDto;
-import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonPageResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
@@ -170,8 +169,13 @@ public class WebtoonController {
      * 웹툰, 작가 검색
      */
     @GetMapping("/search")
-    public ResponseEntity<List<SearchedWebtoonResDto>> searchWebtoon(
-        @Valid @ModelAttribute SearchWebtoonReqDto request) {
-        return ResponseEntity.ok(webtoonService.searchWebtoon(request.keyword()));
+    public ResponseEntity<SearchedWebtoonPageResDto> searchWebtoon(
+        @Valid @ModelAttribute SearchWebtoonReqDto request,
+        @RequestParam(defaultValue = "false") boolean fromFirst,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size
+    ) {
+        return ResponseEntity.ok(webtoonService.searchWebtoon(
+            request.keyword(), fromFirst, page, size));
     }
 }
