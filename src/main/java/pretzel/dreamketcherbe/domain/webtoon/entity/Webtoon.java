@@ -46,9 +46,6 @@ public class Webtoon extends BaseTimeEntity {
     private String thumbnail;
 
     @Column(nullable = false)
-    private String prologue;
-
-    @Column(nullable = false)
     private String story;
 
     @ColumnDefault("'PRE_SERIES'")
@@ -82,11 +79,10 @@ public class Webtoon extends BaseTimeEntity {
     private List<WebtoonTag> webtoonTags = new ArrayList<>();
 
     @Builder
-    private Webtoon(String title, String thumbnail, String prologue, String story,
+    private Webtoon(String title, String thumbnail, String story,
         String status, Member member, Genre genre) {
         this.title = title;
         this.thumbnail = thumbnail;
-        this.prologue = prologue;
         this.story = story;
         this.status = status;
         this.member = member;
