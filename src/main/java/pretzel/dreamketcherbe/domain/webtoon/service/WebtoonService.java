@@ -2,8 +2,10 @@ package pretzel.dreamketcherbe.domain.webtoon.service;
 
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -47,6 +49,7 @@ import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.GenreRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.TagRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
+import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonTagRepository;
 
 @Service
 @AllArgsConstructor
@@ -83,6 +86,8 @@ public class WebtoonService {
     private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
 
     private final TagRepository tagRepository;
+
+    private final WebtoonTagRepository webtoonTagRepository;
 
     private final MemberService memberService;
 
@@ -154,7 +159,6 @@ public class WebtoonService {
     /**
      * 웹툰 등록
      */
-    //TODO: 태그 추가
     @Transactional
     public CreateWebtoonResDto createWebtoon(Long memberId, CreateWebtoonReqDto request) {
         Member findMember = memberRepository.findById(memberId)
@@ -246,7 +250,7 @@ public class WebtoonService {
     /**
      * 웹툰 수정
      */
-    //TODO: 태그 추가
+    @Transactional
     public void updateWebtoon(Long memberId, Long webtoonId, UpdateWebtoonReqDto request) {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
@@ -254,7 +258,10 @@ public class WebtoonService {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
+        findWebtoon.isAuthor(memberId);
+
         findWebtoon.updateOf(request);
+        updateTags(findWebtoon, request.tagsInput());
 
         webtoonRepository.save(findWebtoon);
     }
@@ -389,6 +396,45 @@ public class WebtoonService {
     }
 
     /**
+     * 태그 수정
+     */
+    @Transactional
+    public void updateTags(Webtoon webtoon, String tagsInput) {
+        Map<String, Long> oldTagMap = webtoon.getWebtoonTags()
+            .stream()
+            .collect(Collectors.toMap(
+                wt -> wt.getTag().getContent(),
+                wt -> wt.getTag().getId()
+            ));
+
+        Set<String> newTagNames = new HashSet<>(parseTagString(tagsInput));
+
+        Set<String> tagsToRemove = oldTagMap.keySet().stream()
+            .filter(oldTag -> !newTagNames.contains(oldTag))
+            .collect(Collectors.toSet());
+
+        Set<String> tagsToAdd = newTagNames.stream()
+            .filter(newTag -> !oldTagMap.containsKey(newTag))
+            .collect(Collectors.toSet());
+
+        for (String content : tagsToRemove) {
+            Tag tag = tagRepository.findById(oldTagMap.get(content))
+                .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.TAG_NOT_FOUND));
+            webtoon.removeTag(tag);
+        }
+
+        for (String content : tagsToAdd) {
+            Tag tag = tagRepository.findByContent(content)
+                .orElseGet(() -> tagRepository.save(new Tag(content)));
+
+            if (webtoon.getWebtoonTags().stream()
+                .noneMatch(wt -> wt.getTag().getId().equals(tag.getId()))) {
+                webtoon.addTag(tag);
+            }
+        }
+    }
+
+    /**
      * 해시태그 입력 파싱 "#로맨스 #액션" -> ["로맨스", "액션"]
      */
     private List<String> parseTagString(String tagsInput) {
@@ -405,10 +451,5 @@ public class WebtoonService {
     }
 
     //TODO: 태그 검색 Service 추가
-    /**
-     * 태그 검색
-     */
 
-    //TODO: 태그 삭제(웹툰)
-    //TODO: 태그 추가(웹툰)
 }

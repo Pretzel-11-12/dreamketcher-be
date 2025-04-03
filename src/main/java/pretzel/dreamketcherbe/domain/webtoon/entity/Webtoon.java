@@ -134,9 +134,12 @@ public class Webtoon extends BaseTimeEntity {
     }
 
     public void addTag(Tag tag) {
-        WebtoonTag wt = new WebtoonTag(this, tag);
-        webtoonTags.add(wt);
-        tag.getWebtoonTags().add(wt);
+        if (webtoonTags.stream().anyMatch(wt -> wt.getTag().equals(tag))) {
+            throw new WebtoonException(WebtoonExceptionType.ALREADY_EXIST_TAG);
+        } else {
+            WebtoonTag webtoonTag = new WebtoonTag(this, tag);
+            webtoonTags.add(webtoonTag);
+        }
     }
 
     public void removeTag(Tag tag) {
