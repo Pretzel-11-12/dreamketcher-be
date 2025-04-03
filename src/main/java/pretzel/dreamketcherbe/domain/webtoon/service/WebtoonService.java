@@ -1,9 +1,10 @@
 package pretzel.dreamketcherbe.domain.webtoon.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -31,18 +32,21 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.InterestedWebtoonRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.member.service.MemberService;
-import pretzel.dreamketcherbe.domain.webtoon.dto.*;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Genre;
+import pretzel.dreamketcherbe.domain.webtoon.entity.Tag;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.entity.WebtoonStatus;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.GenreRepository;
+import pretzel.dreamketcherbe.domain.webtoon.repository.TagRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -77,6 +81,8 @@ public class WebtoonService {
     private final RecommentRecommendationRepository recommentRecomendationRepository;
 
     private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
+
+    private final TagRepository tagRepository;
 
     private final MemberService memberService;
 
@@ -148,6 +154,7 @@ public class WebtoonService {
     /**
      * 웹툰 등록
      */
+    //TODO: 태그 추가
     @Transactional
     public CreateWebtoonResDto createWebtoon(Long memberId, CreateWebtoonReqDto request) {
         Member findMember = memberRepository.findById(memberId)
@@ -158,6 +165,14 @@ public class WebtoonService {
 
         Webtoon newWebtoon = Webtoon.addOf(request, findMember, genre);
         webtoonRepository.save(newWebtoon);
+
+        List<String> tagContents = parseTagString(request.tagsInput());
+        for (String content : tagContents) {
+            Tag tag = tagRepository.findByContent(content)
+                .orElseGet(() -> tagRepository.save(new Tag(content)));
+
+            newWebtoon.addTag(tag);
+        }
 
         ManagementWebtoon managementWebtoon = ManagementWebtoon.addOf(newWebtoon);
         managementWebtoonRespository.save(managementWebtoon);
@@ -231,6 +246,7 @@ public class WebtoonService {
     /**
      * 웹툰 수정
      */
+    //TODO: 태그 추가
     public void updateWebtoon(Long memberId, Long webtoonId, UpdateWebtoonReqDto request) {
         Member findMember = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
@@ -371,4 +387,28 @@ public class WebtoonService {
             ))
             .collect(Collectors.toList());
     }
+
+    /**
+     * 해시태그 입력 파싱 "#로맨스 #액션" -> ["로맨스", "액션"]
+     */
+    private List<String> parseTagString(String tagsInput) {
+        if (tagsInput == null || tagsInput.isEmpty()) {
+            return List.of();
+        }
+
+        return List.of(tagsInput.split("\\s+"))
+            .stream()
+            .map(tag -> tag.replace("#", "").trim())
+            .filter(tag -> !tag.isEmpty())
+            .distinct()
+            .collect(Collectors.toList());
+    }
+
+    //TODO: 태그 검색 Service 추가
+    /**
+     * 태그 검색
+     */
+
+    //TODO: 태그 삭제(웹툰)
+    //TODO: 태그 추가(웹툰)
 }
