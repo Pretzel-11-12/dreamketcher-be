@@ -1,6 +1,18 @@
 package pretzel.dreamketcherbe.domain.webtoon.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -66,6 +78,9 @@ public class Webtoon extends BaseTimeEntity {
     @JoinColumn(name = "genre_id")
     private Genre genre;
 
+    @OneToMany(mappedBy = "webtoon", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WebtoonTag> webtoonTags = new ArrayList<>();
+
     @Builder
     private Webtoon(String title, String thumbnail, String prologue, String story,
         String status, Member member, Genre genre) {
@@ -120,5 +135,16 @@ public class Webtoon extends BaseTimeEntity {
 
     public void incrementEpisodeCount(int count) {
         this.episodeCount = count;
+    }
+
+    public void addTag(Tag tag) {
+        WebtoonTag wt = new WebtoonTag(this, tag);
+        webtoonTags.add(wt);
+        tag.getWebtoonTags().add(wt);
+    }
+
+    public void removeTag(Tag tag) {
+        webtoonTags.removeIf(wt -> wt.getTag().equals(tag));
+        tag.getWebtoonTags().removeIf(wt -> wt.getWebtoon().equals(this));
     }
 }
