@@ -34,7 +34,6 @@ public class Tag {
 
     @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WebtoonTag> webtoonTags = new ArrayList<>();
-    ;
 
     public Tag(String content) {
         this.content = content;
