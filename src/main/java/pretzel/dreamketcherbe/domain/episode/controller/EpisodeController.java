@@ -183,8 +183,7 @@ public class EpisodeController {
      */
     @GetMapping("/{episodeId}")
     public ResponseEntity<EpisodeResDto> getEpisode(@PathVariable("episodeId") Long episodeId,
-        @PathVariable("webtoonId") Long webtoonId
-        , Model model,
+        @PathVariable("webtoonId") Long webtoonId,
         HttpServletRequest request, HttpServletResponse response) {
         EpisodeResDto episode = episodeService.getEpisode(webtoonId, episodeId, request, response);
 

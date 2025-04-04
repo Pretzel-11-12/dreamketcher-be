@@ -1,6 +1,18 @@
 package pretzel.dreamketcherbe.domain.webtoon.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,9 +46,6 @@ public class Webtoon extends BaseTimeEntity {
     private String thumbnail;
 
     @Column(nullable = false)
-    private String prologue;
-
-    @Column(nullable = false)
     private String story;
 
     @ColumnDefault("'PRE_SERIES'")
@@ -66,12 +75,14 @@ public class Webtoon extends BaseTimeEntity {
     @JoinColumn(name = "genre_id")
     private Genre genre;
 
+    @OneToMany(mappedBy = "webtoon", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WebtoonTag> webtoonTags = new ArrayList<>();
+
     @Builder
-    private Webtoon(String title, String thumbnail, String prologue, String story,
+    private Webtoon(String title, String thumbnail, String story,
         String status, Member member, Genre genre) {
         this.title = title;
         this.thumbnail = thumbnail;
-        this.prologue = prologue;
         this.story = story;
         this.status = status;
         this.member = member;
@@ -116,5 +127,23 @@ public class Webtoon extends BaseTimeEntity {
         if (!this.isDeleted) {
             this.isDeleted = true;
         }
+    }
+
+    public void incrementEpisodeCount(int count) {
+        this.episodeCount = count;
+    }
+
+    public void addTag(Tag tag) {
+        if (webtoonTags.stream().anyMatch(wt -> wt.getTag().equals(tag))) {
+            throw new WebtoonException(WebtoonExceptionType.ALREADY_EXIST_TAG);
+        } else {
+            WebtoonTag webtoonTag = new WebtoonTag(this, tag);
+            webtoonTags.add(webtoonTag);
+        }
+    }
+
+    public void removeTag(Tag tag) {
+        webtoonTags.removeIf(wt -> wt.getTag().equals(tag));
+        tag.getWebtoonTags().removeIf(wt -> wt.getWebtoon().equals(this));
     }
 }

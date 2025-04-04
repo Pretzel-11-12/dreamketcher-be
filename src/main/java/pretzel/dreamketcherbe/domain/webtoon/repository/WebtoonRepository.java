@@ -1,7 +1,6 @@
 package pretzel.dreamketcherbe.domain.webtoon.repository;
 
 import io.lettuce.core.dynamic.annotation.Param;
-import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,8 +15,10 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long>, Webtoon
         "JOIN w.member m " +
         "WHERE (LOWER(w.title) LIKE %:keyword% OR LOWER(REPLACE(w.title, ' ', '')) LIKE %:keyword%) "
         +
-        "OR (LOWER(m.nickname) LIKE %:keyword% OR LOWER(REPLACE(m.nickname, ' ', '')) LIKE %:keyword%)")
-    List<Webtoon> findByTitleOrMemberNickname(@Param("keyword") String keyword);
+        "OR (LOWER(m.nickname) LIKE %:keyword% OR LOWER(REPLACE(m.nickname, ' ', '')) LIKE %:keyword%)"
+        +
+        "AND w.isDeleted = false")
+    Page<Webtoon> findByTitleOrMemberNickname(@Param("keyword") String keyword, Pageable pageable);
 
     Page<Webtoon> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

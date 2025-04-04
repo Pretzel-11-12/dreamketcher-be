@@ -75,7 +75,7 @@ public class S3Controller {
      */
     @DeleteMapping("/delete")
     public ResponseEntity<Void> s3Delete(
-        @RequestParam String imageUrl) {
+        @RequestParam("imageUrl") String imageUrl) {
         s3Service.deleteImage(imageUrl);
         return ResponseEntity.noContent().build();
     }

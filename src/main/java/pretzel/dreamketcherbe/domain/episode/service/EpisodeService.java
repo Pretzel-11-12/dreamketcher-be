@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
@@ -22,19 +22,19 @@ import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
 import pretzel.dreamketcherbe.S3Utils.exception.S3ExceptionType;
+import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.NotRecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentNotRecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentRepository;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeLikeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarResDto;
+import pretzel.dreamketcherbe.domain.episode.dto.MemberEpisodeLikeAndStarResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
-import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
-import pretzel.dreamketcherbe.domain.comment.repository.NotRecommendationRepository;
-import pretzel.dreamketcherbe.domain.comment.repository.RecommentNotRecommendationRepository;
-import pretzel.dreamketcherbe.domain.comment.repository.RecommentRepository;
-import pretzel.dreamketcherbe.domain.episode.dto.*;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.entity.EpisodeLike;
 import pretzel.dreamketcherbe.domain.episode.entity.EpisodeStar;
@@ -51,6 +51,7 @@ import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
+import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
 
 @Service
 @AllArgsConstructor
@@ -94,6 +95,7 @@ public class EpisodeService {
     private final RecommentRepository recommentRepository;
     private final NotRecommendationRepository notRecommendationRepository;
     private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
+    private final WebtoonService webtoonService;
 
     /**
      * 에피소드 목록 조회
@@ -103,6 +105,8 @@ public class EpisodeService {
 
         Webtoon webtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        webtoonService.getEpisodeCount(webtoonId);
 
         PageRequest pageable = PageRequest.of(page, size);
         Page<Episode> episodePage = fromFirst
@@ -116,13 +120,7 @@ public class EpisodeService {
 
         return WebtoonEpisodeListResDto.of(
             webtoon.getId(),
-            webtoon.getTitle(),
-            webtoon.getThumbnail(),
-            webtoon.getStory(),
-            webtoon.getMember().getNickname(),
             (int) episodePage.getTotalElements(),
-            webtoon.getInterestCount(),
-            webtoon.getGenre().getName(),
             episodePage.getNumber(),
             episodePage.getTotalPages(),
             episodes
@@ -155,13 +153,7 @@ public class EpisodeService {
 
         return WebtoonEpisodeListResDto.of(
             webtoon.getId(),
-            webtoon.getTitle(),
-            webtoon.getThumbnail(),
-            webtoon.getStory(),
-            webtoon.getMember().getNickname(),
             totalEpisodes,
-            webtoon.getInterestCount(),
-            webtoon.getGenre().getName(),
             0,
             0,
             episodes
@@ -384,7 +376,6 @@ public class EpisodeService {
 
     /**
      * 에피소드 조회
-     * TODO: 조회수 중복 관리 부분 리팩토링
      */
     @Transactional
     public EpisodeResDto getEpisode(Long webtoonId, Long episodeId, HttpServletRequest request,
@@ -392,49 +383,56 @@ public class EpisodeService {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-        Episode findEpisode = episodeRepository.findById(episodeId)
+        Episode findEpisode = episodeRepository.findByIsDeletedFalseAndPublishedTrue(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
         if (!findEpisode.getWebtoon().getId().equals(webtoonId)) {
             throw new EpisodeException(EpisodeExceptionType.INVALID_EPISODE);
         }
 
+        addViewCount(request, episodeId);
+
         calculateAverageStar(episodeId);
 
-        // 조회수 중복 방지
-        Cookie oldCookie = null;
+        return EpisodeResDto.of(findEpisode);
+    }
+
+    @Transactional
+    public Cookie addViewCount(HttpServletRequest request, Long episodeId) {
+
         Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("viewCount")) {
-                    oldCookie = cookie;
-                }
-            }
-        }
+        Cookie oldCookie = this.getCookie(cookies, "view_count");
 
         if (oldCookie != null) {
             if (!oldCookie.getValue().contains("[" + episodeId + "]")) {
-                increaseViewCount(episodeId);
-                oldCookie.setValue(oldCookie.getValue() + "_" + episodeId);
                 oldCookie.setPath("/");
                 oldCookie.setMaxAge(60 * 60 * 24);
-                response.addCookie(oldCookie);
+                increaseViewCount(episodeId);
             }
+            return oldCookie;
         } else {
-            increaseViewCount(episodeId);
-            Cookie newCookie = new Cookie("viewCount", "_" + episodeId);
+            Cookie newCookie = new Cookie("view_count", "[" + episodeId + "]");
             newCookie.setPath("/");
             newCookie.setMaxAge(60 * 60 * 24);
-            response.addCookie(newCookie);
+            increaseViewCount(episodeId);
+            return newCookie;
         }
+    }
 
-        return EpisodeResDto.of(findEpisode);
+    private Cookie getCookie(Cookie[] cookies, String name) {
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(name)) {
+                    return cookie;
+                }
+            }
+        }
+        return null;
     }
 
     /**
      * 조회수 증가
      */
-    @Transactional
     public void increaseViewCount(Long episodeId) {
         episodeRepository.increaseViewCount(episodeId);
     }

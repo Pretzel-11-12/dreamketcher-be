@@ -7,13 +7,7 @@ import lombok.Builder;
 @Builder
 public record WebtoonEpisodeListResDto(
     Long webtoonId,
-    String webtoonTitle,
-    String webtoonThumbnail,
-    String webtoonStory,
-    String AuthorNickname,
     int episode_count,
-    int interestCount,
-    String genreName,
     int currentPage,
     int totalPages,
     List<EpisodeInfo> episodes
@@ -50,26 +44,14 @@ public record WebtoonEpisodeListResDto(
 
     public static WebtoonEpisodeListResDto of(
         Long webtoonId,
-        String webtoonTitle,
-        String webtoonThumbnail,
-        String webtoonStory,
-        String AuthorNickname,
-        int interestCount,
         int episode_count,
-        String genreName,
         int currentPage,
         int totalPages,
         List<EpisodeInfo> episodes
     ) {
         return WebtoonEpisodeListResDto.builder()
             .webtoonId(webtoonId)
-            .webtoonTitle(webtoonTitle)
-            .webtoonThumbnail(webtoonThumbnail)
-            .webtoonStory(webtoonStory)
-            .AuthorNickname(AuthorNickname)
-            .interestCount(interestCount)
             .episode_count(episode_count)
-            .genreName(genreName)
             .currentPage(currentPage)
             .totalPages(totalPages)
             .episodes(episodes)

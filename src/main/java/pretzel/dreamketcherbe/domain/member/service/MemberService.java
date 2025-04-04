@@ -98,7 +98,8 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        if (profileData != null) {
+        if (profileData.businessEmail() != null || profileData.nickname() != null
+            || profileData.shortIntroduction() != null) {
             String newNickname = profileData.nickname();
             String newBusinessEmail = profileData.businessEmail();
             String newShortIntroduction = profileData.shortIntroduction();
@@ -109,7 +110,10 @@ public class MemberService {
         }
 
         if (profileData.isDeleteImage()) {
-            s3Service.deleteImage(member.getImageUrl());
+            if (member.getImageUrl() != null && !member.getImageUrl()
+                .equals(defaultProfileImageUrl)) {
+                s3Service.deleteImage(member.getImageUrl());
+            }
             member.updateImageUrl(defaultProfileImageUrl);
         } else {
             Optional.ofNullable(image)
@@ -119,9 +123,13 @@ public class MemberService {
                     String currentImageUrl = member.getImageUrl();
                     String newImageUrl;
 
-                    if (!currentImageUrl.equals(defaultProfileImageUrl)
-                        && currentImageUrl != null) {
-                        newImageUrl = s3Service.imageUpdate(currentImageUrl, img, folderName);
+                    if (!currentImageUrl.equals(defaultProfileImageUrl)) {
+                        try {
+                            newImageUrl = s3Service.imageUpdate(currentImageUrl, img, folderName);
+                        } catch (Exception e) {
+                            // 기존 이미지 경로가 defaultProfileImageUrl인 경우
+                            newImageUrl = s3Service.imageUpload(img, folderName);
+                        }
                     } else {
                         newImageUrl = s3Service.imageUpload(img, folderName);
                     }
