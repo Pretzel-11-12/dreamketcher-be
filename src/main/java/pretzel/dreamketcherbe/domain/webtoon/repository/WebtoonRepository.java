@@ -15,7 +15,9 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long>, Webtoon
         "JOIN w.member m " +
         "WHERE (LOWER(w.title) LIKE %:keyword% OR LOWER(REPLACE(w.title, ' ', '')) LIKE %:keyword%) "
         +
-        "OR (LOWER(m.nickname) LIKE %:keyword% OR LOWER(REPLACE(m.nickname, ' ', '')) LIKE %:keyword%)")
+        "OR (LOWER(m.nickname) LIKE %:keyword% OR LOWER(REPLACE(m.nickname, ' ', '')) LIKE %:keyword%)"
+        +
+        "AND w.isDeleted = false")
     Page<Webtoon> findByTitleOrMemberNickname(@Param("keyword") String keyword, Pageable pageable);
 
     Page<Webtoon> findAllByOrderByCreatedAtDesc(Pageable pageable);
