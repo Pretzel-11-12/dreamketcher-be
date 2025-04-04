@@ -11,7 +11,7 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
-      - /home/ubuntu/logs:/logs
+      - ./logs:/app/logs
 
     depends_on:
       - redis
