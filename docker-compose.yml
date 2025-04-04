@@ -11,9 +11,8 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
-      - type: volume
-        source: dreammketcher-be-dev-log
-        target: /home/ubuntu/dreamketcher-be/logs
+      - dreammketcher-be-dev-log
+
     depends_on:
       - redis
 
