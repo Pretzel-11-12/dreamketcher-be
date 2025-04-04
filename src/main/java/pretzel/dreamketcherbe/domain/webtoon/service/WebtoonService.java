@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +40,7 @@ import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonDetailResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Genre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Tag;
@@ -51,6 +53,7 @@ import pretzel.dreamketcherbe.domain.webtoon.repository.TagRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonTagRepository;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class WebtoonService {
@@ -358,6 +361,16 @@ public class WebtoonService {
         }
 
         return MyWebtoonResDto.of(findWebtoon, findWebtoon.getGenre().getName());
+    }
+
+    /**
+     * 웹툰 상세 조회
+     */
+    public WebtoonDetailResDto getWebtoonDetail(Long webtoonId) {
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        return WebtoonDetailResDto.from(findWebtoon);
     }
 
     /**

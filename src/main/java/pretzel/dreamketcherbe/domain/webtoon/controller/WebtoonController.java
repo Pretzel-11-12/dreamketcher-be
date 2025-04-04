@@ -25,6 +25,7 @@ import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonDetailResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
 
@@ -143,6 +144,15 @@ public class WebtoonController {
         @Auth Long memberId,
         @PathVariable Long webtoonId) {
         return ResponseEntity.ok(webtoonService.getMyWebtoon(memberId, webtoonId));
+    }
+
+    /**
+     * 웹툰 상세 조회
+     */
+    @GetMapping("/detail/{webtoonId}")
+    public ResponseEntity<WebtoonDetailResDto> getWebtoonDetail(
+        @PathVariable Long webtoonId) {
+        return ResponseEntity.ok(webtoonService.getWebtoonDetail(webtoonId));
     }
 
     /**
