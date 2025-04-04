@@ -1,5 +1,7 @@
 package pretzel.dreamketcherbe.domain.webtoon.dto;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Builder;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
@@ -13,11 +15,16 @@ public record SearchedWebtoonResDto(
     String genre,
     int lastEpisode,
     float averageStar,
-    Long numOfStars
+    Long numOfStars,
+    List<TagDto> tags
 ) {
 
-    public static SearchedWebtoonResDto of(
-        Webtoon webtoon, String genreName, Long numOfStars) {
+    public static SearchedWebtoonResDto of(Webtoon webtoon, String genreName, Long numOfStars) {
+        List<TagDto> tagDtos = webtoon.getWebtoonTags()
+            .stream()
+            .map(wt -> TagDto.from(wt.getTag()))
+            .collect(Collectors.toList());
+
         return SearchedWebtoonResDto.builder()
             .id(webtoon.getId())
             .thumbnail(webtoon.getThumbnail())
@@ -28,6 +35,7 @@ public record SearchedWebtoonResDto(
             .lastEpisode(webtoon.getEpisodeCount())
             .averageStar(webtoon.getAverageStar())
             .numOfStars(numOfStars)
+            .tags(tagDtos)
             .build();
     }
 }
