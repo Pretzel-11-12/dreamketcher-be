@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
@@ -22,19 +22,19 @@ import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
 import pretzel.dreamketcherbe.S3Utils.exception.S3ExceptionType;
+import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.NotRecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentNotRecommendationRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentRepository;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeLikeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.CreateEpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.EpisodeStarResDto;
+import pretzel.dreamketcherbe.domain.episode.dto.MemberEpisodeLikeAndStarResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
-import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
-import pretzel.dreamketcherbe.domain.comment.repository.NotRecommendationRepository;
-import pretzel.dreamketcherbe.domain.comment.repository.RecommentNotRecommendationRepository;
-import pretzel.dreamketcherbe.domain.comment.repository.RecommentRepository;
-import pretzel.dreamketcherbe.domain.episode.dto.*;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.entity.EpisodeLike;
 import pretzel.dreamketcherbe.domain.episode.entity.EpisodeStar;
@@ -120,13 +120,7 @@ public class EpisodeService {
 
         return WebtoonEpisodeListResDto.of(
             webtoon.getId(),
-            webtoon.getTitle(),
-            webtoon.getThumbnail(),
-            webtoon.getStory(),
-            webtoon.getMember().getNickname(),
             (int) episodePage.getTotalElements(),
-            webtoon.getInterestCount(),
-            webtoon.getGenre().getName(),
             episodePage.getNumber(),
             episodePage.getTotalPages(),
             episodes
@@ -159,13 +153,7 @@ public class EpisodeService {
 
         return WebtoonEpisodeListResDto.of(
             webtoon.getId(),
-            webtoon.getTitle(),
-            webtoon.getThumbnail(),
-            webtoon.getStory(),
-            webtoon.getMember().getNickname(),
             totalEpisodes,
-            webtoon.getInterestCount(),
-            webtoon.getGenre().getName(),
             0,
             0,
             episodes
