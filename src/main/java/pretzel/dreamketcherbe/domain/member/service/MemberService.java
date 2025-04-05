@@ -25,7 +25,6 @@ import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
-@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -144,10 +143,6 @@ public class MemberService {
         Webtoon webtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-        log.info("webtoonId: {}", webtoonId);
-        log.info("memberId: {}", memberId);
-
-        log.info("---- interestedwebtoonId: {} ---------------",
             interestedWebtoonRepository.findByWebtoonIdAndMemberId(webtoonId, memberId));
         return interestedWebtoonRepository.findByWebtoonIdAndMemberId(webtoonId, memberId)
             .isPresent();
