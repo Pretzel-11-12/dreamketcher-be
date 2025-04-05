@@ -3,6 +3,7 @@ package pretzel.dreamketcherbe.domain.member.service;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
-import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonSimpleResponse;
 import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
 import pretzel.dreamketcherbe.domain.member.dto.UpdateProfileRequest;
 import pretzel.dreamketcherbe.domain.member.dto.WorkResDto;
@@ -25,6 +25,7 @@ import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -139,14 +140,17 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    public InterestedWebtoonSimpleResponse getFavoriteWebtoon(Long memberId, Long WebtoonId) {
+    public boolean isFavoriteWebtoon(Long memberId, Long webtoonId) {
+        Webtoon webtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-        InterestedWebtoon interestedWebtoon = interestedWebtoonRepository.findByWebtoonIdAndMemberId(
-                WebtoonId, memberId)
-            .orElseThrow(
-                () -> new MemberException(MemberExceptionType.INTERESTED_WEBTOON_NOT_FOUND));
+        log.info("webtoonId: {}", webtoonId);
+        log.info("memberId: {}", memberId);
 
-        return InterestedWebtoonSimpleResponse.from(interestedWebtoon);
+        log.info("---- interestedwebtoonId: {} ---------------",
+            interestedWebtoonRepository.findByWebtoonIdAndMemberId(webtoonId, memberId));
+        return interestedWebtoonRepository.findByWebtoonIdAndMemberId(webtoonId, memberId)
+            .isPresent();
     }
 
     public List<InterestedWebtoonResponse> getAllFavoriteWebtoon(Long memberId) {

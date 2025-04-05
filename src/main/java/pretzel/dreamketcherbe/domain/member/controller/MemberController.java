@@ -19,7 +19,6 @@ import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.MyCommentsAndRecommentsListResDto;
 import pretzel.dreamketcherbe.domain.comment.service.CommentService;
 import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
-import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonSimpleResponse;
 import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
 import pretzel.dreamketcherbe.domain.member.dto.UpdateProfileRequest;
 import pretzel.dreamketcherbe.domain.member.dto.WorkResDto;
@@ -55,11 +54,12 @@ public class MemberController {
         return ResponseEntity.ok(members);
     }
 
-    @GetMapping("/favorite/{WebtoonId}")
-    public ResponseEntity<InterestedWebtoonSimpleResponse> getFavoriteWebtoon(
+    @GetMapping("/favorite/{webtoonId}")
+    public ResponseEntity<Boolean> isFavoriteWebtoon(
         @Auth Long memberId,
-        @PathVariable Long WebtoonId) {
-        return ResponseEntity.ok(memberService.getFavoriteWebtoon(memberId, WebtoonId));
+        @PathVariable Long webtoonId) {
+        boolean isFavorite = memberService.isFavoriteWebtoon(memberId, webtoonId);
+        return ResponseEntity.ok(isFavorite);
     }
 
     @GetMapping("/favorite")
