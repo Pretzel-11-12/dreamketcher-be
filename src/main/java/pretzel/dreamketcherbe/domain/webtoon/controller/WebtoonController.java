@@ -1,6 +1,7 @@
 package pretzel.dreamketcherbe.domain.webtoon.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -187,5 +188,16 @@ public class WebtoonController {
     ) {
         return ResponseEntity.ok(webtoonService.searchWebtoon(
             request.keyword(), fromFirst, page, size));
+    }
+
+    /**
+     * 동일 태그 웹툰 검색
+     */
+    @GetMapping("/tag/{tagId}")
+    public ResponseEntity<List<WebtoonDetailResDto>> getWebtoonsByTag(
+        @PathVariable Long tagId
+        // TODO: 추후 페이지네이션 적용 고려
+    ) {
+        return ResponseEntity.ok(webtoonService.getWebtoonByTag(tagId));
     }
 }

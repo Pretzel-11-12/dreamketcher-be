@@ -3,7 +3,6 @@ package pretzel.dreamketcherbe.domain.member.service;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -143,7 +142,7 @@ public class MemberService {
         Webtoon webtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
-            interestedWebtoonRepository.findByWebtoonIdAndMemberId(webtoonId, memberId));
+        interestedWebtoonRepository.findByWebtoonIdAndMemberId(webtoonId, memberId);
         return interestedWebtoonRepository.findByWebtoonIdAndMemberId(webtoonId, memberId)
             .isPresent();
     }

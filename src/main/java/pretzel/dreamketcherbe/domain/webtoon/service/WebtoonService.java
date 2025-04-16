@@ -429,6 +429,21 @@ public class WebtoonService {
     }
 
     /**
+     * 동일 태그 웹툰 조회
+     */
+    public List<WebtoonDetailResDto> getWebtoonByTag(Long tagId) {
+        log.info(" getWebtoonByTag - tagId: {}", tagId);
+        Tag tag = tagRepository.findById(tagId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.TAG_NOT_FOUND));
+
+        List<Webtoon> webtoons = webtoonTagRepository.findWebtoonsByTagId(tagId);
+
+        return webtoons.stream()
+            .map(WebtoonDetailResDto::from)
+            .collect(Collectors.toList());
+    }
+
+    /**
      * 태그 수정
      */
     @Transactional
@@ -482,7 +497,4 @@ public class WebtoonService {
             .distinct()
             .collect(Collectors.toList());
     }
-
-    //TODO: 태그 검색 Service 추가
-
 }
