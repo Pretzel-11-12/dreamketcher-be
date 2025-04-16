@@ -2,7 +2,7 @@ FROM eclipse-temurin:17-jdk-alpine
 
 RUN apk add --no-cache tzdata \
   && cp /usr/share/zoneinfo/Asia/Seoul /etc/localtime \
-  && echo "Asia/Seoul" > /etc/timezone \
+  && echo "Asia/Seoul" > /etc/timezone
 
 WORKDIR /app
 COPY ./build/libs/*SNAPSHOT.jar project.jar
