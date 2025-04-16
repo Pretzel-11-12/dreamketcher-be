@@ -26,7 +26,7 @@
     <include resource="logs/file-info-appender.xml"/>
     <include resource="logs/file-error-appender.xml"/>
 
-    <root level="info">
+    <root level="DEBUG">
       <appender-ref ref="INFO-FILE"/>
       <appender-ref ref="ERROR-FILE"/>
     </root>

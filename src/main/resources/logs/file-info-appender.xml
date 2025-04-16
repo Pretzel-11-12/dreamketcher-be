@@ -12,15 +12,8 @@
       <maxHistory>30</maxHistory>
       <totalSizeCap>1GB</totalSizeCap>
     </rollingPolicy>
-    <filter class="ch.qos.logback.classic.filter.LevelFilter">
-      <level>INFO</level>
-      <onMatch>ACCEPT</onMatch>
-      <onMismatch>NEUTRAL</onMismatch>
-    </filter>
-    <filter class="ch.qos.logback.classic.filter.LevelFilter">
-      <level>WARN</level>
-      <onMatch>ACCEPT</onMatch>
-      <onMismatch>DENY</onMismatch>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>DEBUG</level>
     </filter>
   </appender>
 </included>
