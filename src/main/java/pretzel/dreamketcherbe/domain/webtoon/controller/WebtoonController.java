@@ -180,7 +180,7 @@ public class WebtoonController {
     /**
      * 웹툰 검색
      */
-    @GetMapping("/search")
+    @GetMapping("/search/webtoon")
     public ResponseEntity<SearchedWebtoonPageResDto> searchWebtoon(
         @Valid @ModelAttribute SearchWebtoonReqDto request,
         @RequestParam(defaultValue = "false") boolean fromFirst,
