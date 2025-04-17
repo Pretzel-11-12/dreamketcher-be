@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -61,7 +60,6 @@ import pretzel.dreamketcherbe.domain.webtoon.repository.TagRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonTagRepository;
 
-@Slf4j
 @Service
 @AllArgsConstructor
 public class WebtoonService {
@@ -434,6 +432,7 @@ public class WebtoonService {
     /**
      * 작가 검색
      */
+    @Transactional(readOnly = true)
     public List<SearchedAuthorResDto> searchAuthor(String Keyword) {
         if (Keyword == null || Keyword.isBlank()) {
             throw new WebtoonException(WebtoonExceptionType.SEARCH_KEYWORD_NOT_FOUND);
@@ -471,7 +470,6 @@ public class WebtoonService {
      * 동일 태그 웹툰 조회
      */
     public List<WebtoonDetailResDto> getWebtoonByTag(Long tagId) {
-        log.info(" getWebtoonByTag - tagId: {}", tagId);
         Tag tag = tagRepository.findById(tagId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.TAG_NOT_FOUND));
 
