@@ -1,10 +1,13 @@
 package pretzel.dreamketcherbe.domain.webtoon.repository;
 
 import io.lettuce.core.dynamic.annotation.Param;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.ranking.repository.RankingRepositoryCustom;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
@@ -21,4 +24,22 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long>, Webtoon
     Page<Webtoon> findByTitleOrMemberNickname(@Param("keyword") String keyword, Pageable pageable);
 
     Page<Webtoon> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    @Query("""
+            SELECT DISTINCT w.member
+            FROM Webtoon w
+            WHERE (LOWER(w.member.nickname) LIKE %:keyword%
+            OR LOWER(REPLACE(w.member.nickname,' ','')) LIKE %:keyword%)
+            AND w.isDeleted = false
+        """)
+    List<Member> findDistinctMembersByNickname(
+        @Param("keyword") String keyword,
+        Pageable pageable
+    );
+
+    // 특정 작가의 첫 작품 (등록일 오름차순)
+    Optional<Webtoon> findFirstByMemberAndIsDeletedFalseOrderByCreatedAtAsc(Member member);
+
+    // 특정 작가의 작품 수
+    long countByMemberAndIsDeletedFalse(Member member);
 }

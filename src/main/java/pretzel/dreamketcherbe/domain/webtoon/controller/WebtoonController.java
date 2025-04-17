@@ -23,6 +23,7 @@ import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchWebtoonReqDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedAuthorResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonPageResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonDetailResDto;
@@ -188,6 +189,16 @@ public class WebtoonController {
     ) {
         return ResponseEntity.ok(webtoonService.searchWebtoon(
             request.keyword(), fromFirst, page, size));
+    }
+
+    /**
+     * 작가 검색
+     */
+    @GetMapping("/search/author")
+    public ResponseEntity<List<SearchedAuthorResDto>> searchAuthor(
+        @Valid @ModelAttribute SearchWebtoonReqDto request
+    ) {
+        return ResponseEntity.ok(webtoonService.searchAuthor(request.keyword()));
     }
 
     /**
