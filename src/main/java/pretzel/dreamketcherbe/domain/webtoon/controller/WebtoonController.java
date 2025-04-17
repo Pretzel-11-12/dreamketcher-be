@@ -178,7 +178,7 @@ public class WebtoonController {
     }
 
     /**
-     * 웹툰, 작가 검색
+     * 웹툰 검색
      */
     @GetMapping("/search")
     public ResponseEntity<SearchedWebtoonPageResDto> searchWebtoon(

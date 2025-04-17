@@ -382,7 +382,7 @@ public class WebtoonService {
     }
 
     /**
-     * 웹툰, 작가 검색
+     * 웹툰 검색
      */
     public SearchedWebtoonPageResDto searchWebtoon(
         String keyword, boolean fromFirst, int page, int size) {
@@ -397,7 +397,7 @@ public class WebtoonService {
         Sort sort = fromFirst ? Sort.by("id").ascending() : Sort.by("id").descending();
         PageRequest pageable = PageRequest.of(page, size, sort);
 
-        Page<Webtoon> webtoonPage = webtoonRepository.findByTitleOrMemberNickname(normalizedKeyword,
+        Page<Webtoon> webtoonPage = webtoonRepository.findByTitle(normalizedKeyword,
             pageable);
 
         if (webtoonPage.isEmpty()) {
