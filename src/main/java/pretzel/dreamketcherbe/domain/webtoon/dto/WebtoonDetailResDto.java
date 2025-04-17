@@ -11,7 +11,7 @@ public record WebtoonDetailResDto(
     String webtoonTitle,
     String webtoonThumbnail,
     String webtoonStory,
-    String AuthorNickname,
+    String authorNickname,
     int interestCount,
     String genreName,
     List<TagDto> tags
@@ -28,7 +28,7 @@ public record WebtoonDetailResDto(
             .webtoonTitle(webtoon.getTitle())
             .webtoonThumbnail(webtoon.getThumbnail())
             .webtoonStory(webtoon.getStory())
-            .AuthorNickname(webtoon.getMember().getName())
+            .authorNickname(webtoon.getMember().getName())
             .interestCount(webtoon.getInterestCount())
             .genreName(webtoon.getGenre().getName())
             .tags(tagDtos)
