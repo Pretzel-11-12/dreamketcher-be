@@ -22,8 +22,8 @@ import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.SearchKeywordReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedAuthorResDto;
-import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonPageResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonDetailResDto;
@@ -182,7 +182,7 @@ public class WebtoonController {
      */
     @GetMapping("/search/title")
     public ResponseEntity<SearchedWebtoonPageResDto> searchWebtoon(
-        @Valid @ModelAttribute SearchedReqDto request,
+        @Valid @ModelAttribute SearchKeywordReqDto request,
         @RequestParam(defaultValue = "false") boolean fromFirst,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size
@@ -196,7 +196,7 @@ public class WebtoonController {
      */
     @GetMapping("/search/author")
     public ResponseEntity<List<SearchedAuthorResDto>> searchAuthor(
-        @Valid @ModelAttribute SearchedReqDto request
+        @Valid @ModelAttribute SearchKeywordReqDto request
     ) {
         return ResponseEntity.ok(webtoonService.searchAuthor(request.keyword()));
     }
