@@ -441,7 +441,7 @@ public class WebtoonService {
         String normalizedKeyword = Keyword.trim().toLowerCase();
         Pageable limit20 = PageRequest.of(0, 20);
 
-        List<Member> authors = webtoonRepository
+        List<Member> authors = memberRepository
             .findDistinctMembersByNickname(normalizedKeyword, limit20);
 
         // DTO 변환 (대표작 없으면 제외 → countBy... 로 걸러짐)
