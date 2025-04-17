@@ -9,7 +9,7 @@ import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 public record SearchedWebtoonResDto(
     Long id,
     String thumbnail,
-    String member,
+    String authorNickname,
     String title,
     String story,
     String genre,
@@ -28,7 +28,7 @@ public record SearchedWebtoonResDto(
         return SearchedWebtoonResDto.builder()
             .id(webtoon.getId())
             .thumbnail(webtoon.getThumbnail())
-            .member(webtoon.getMember().getNickname())
+            .authorNickname(webtoon.getMember().getNickname())
             .story(webtoon.getStory())
             .title(webtoon.getTitle())
             .genre(genreName)

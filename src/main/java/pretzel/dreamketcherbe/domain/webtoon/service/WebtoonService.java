@@ -1,20 +1,21 @@
 package pretzel.dreamketcherbe.domain.webtoon.service;
 
-import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
@@ -42,6 +43,7 @@ import pretzel.dreamketcherbe.domain.member.service.MemberService;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.CreateWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.MyWebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedAuthorResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonPageResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
@@ -58,7 +60,6 @@ import pretzel.dreamketcherbe.domain.webtoon.repository.TagRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonTagRepository;
 
-@Slf4j
 @Service
 @AllArgsConstructor
 public class WebtoonService {
@@ -379,7 +380,7 @@ public class WebtoonService {
     }
 
     /**
-     * 웹툰, 작가 검색
+     * 웹툰 검색
      */
     public SearchedWebtoonPageResDto searchWebtoon(
         String keyword, boolean fromFirst, int page, int size) {
@@ -394,7 +395,7 @@ public class WebtoonService {
         Sort sort = fromFirst ? Sort.by("id").ascending() : Sort.by("id").descending();
         PageRequest pageable = PageRequest.of(page, size, sort);
 
-        Page<Webtoon> webtoonPage = webtoonRepository.findByTitleOrMemberNickname(normalizedKeyword,
+        Page<Webtoon> webtoonPage = webtoonRepository.findByTitle(normalizedKeyword,
             pageable);
 
         if (webtoonPage.isEmpty()) {
@@ -429,10 +430,46 @@ public class WebtoonService {
     }
 
     /**
+     * 작가 검색
+     */
+    @Transactional(readOnly = true)
+    public List<SearchedAuthorResDto> searchAuthor(String Keyword) {
+        if (Keyword == null || Keyword.isBlank()) {
+            throw new WebtoonException(WebtoonExceptionType.SEARCH_KEYWORD_NOT_FOUND);
+        }
+        String normalizedKeyword = Keyword.trim().toLowerCase();
+        Pageable limit20 = PageRequest.of(0, 20);
+
+        List<Member> authors = memberRepository
+            .findDistinctMembersByNickname(normalizedKeyword, limit20);
+
+        // DTO 변환 (대표작 없으면 제외 → countBy... 로 걸러짐)
+        return authors.stream()
+            .map(member -> {
+                long workCount = webtoonRepository
+                    .countByMemberAndIsDeletedFalse(member);
+                if (workCount == 0) {
+                    return null; // 작품 없는 작가 제외
+                }
+                Webtoon rep = webtoonRepository
+                    .findFirstByMemberAndIsDeletedFalseOrderByCreatedAtAsc(member)
+                    .orElseThrow(); // 로직상 무조건 존재
+                return SearchedAuthorResDto.of(
+                    member.getId(),
+                    member.getNickname(),
+                    member.getImageUrl(),
+                    rep.getTitle(),
+                    (int) workCount
+                );
+            })
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
+    /**
      * 동일 태그 웹툰 조회
      */
     public List<WebtoonDetailResDto> getWebtoonByTag(Long tagId) {
-        log.info(" getWebtoonByTag - tagId: {}", tagId);
         Tag tag = tagRepository.findById(tagId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.TAG_NOT_FOUND));
 

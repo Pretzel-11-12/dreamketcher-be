@@ -1,21 +1,19 @@
-
 package pretzel.dreamketcherbe.domain.admin.dto;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import lombok.Builder;
 import pretzel.dreamketcherbe.domain.admin.entity.ManagementWebtoon;
 import pretzel.dreamketcherbe.domain.admin.entity.Reason;
 import pretzel.dreamketcherbe.domain.webtoon.entity.SerializationPeriod;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
-import java.time.format.DateTimeFormatter;
-import java.util.Optional;
-
 @Builder
 public record ManageWebtoonResDto(
     long id,
     String title,
     String genre,
-    String author,
+    String authorNickname,
     int episodeCount,
     String createAt,
     String endedAt,
@@ -24,7 +22,8 @@ public record ManageWebtoonResDto(
     String reason
 ) {
 
-    public static ManageWebtoonResDto of(Webtoon webtoon, String genre, ManagementWebtoon managementWebtoon, SerializationPeriod serializationPeriod) {
+    public static ManageWebtoonResDto of(Webtoon webtoon, String genre,
+        ManagementWebtoon managementWebtoon, SerializationPeriod serializationPeriod) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         String reasonContent = Optional.ofNullable(managementWebtoon.getReason())
@@ -32,15 +31,15 @@ public record ManageWebtoonResDto(
             .orElse("N/A");
 
         String endedAt = Optional.ofNullable(serializationPeriod)
-                .map(SerializationPeriod::getEndDate)
-                .map(endDate -> endDate.format(formatter))
-                .orElse("-");
+            .map(SerializationPeriod::getEndDate)
+            .map(endDate -> endDate.format(formatter))
+            .orElse("-");
 
         return ManageWebtoonResDto.builder()
             .id(webtoon.getId())
             .title(webtoon.getTitle())
             .genre(genre)
-            .author(webtoon.getMember().getName())
+            .authorNickname(webtoon.getMember().getName())
             .episodeCount(webtoon.getEpisodeCount())
             .createAt(webtoon.getCreatedAt().format(formatter))
             .endedAt(endedAt)
