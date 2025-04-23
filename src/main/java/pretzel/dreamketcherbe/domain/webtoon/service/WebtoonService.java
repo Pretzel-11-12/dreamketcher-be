@@ -49,6 +49,7 @@ import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonDetailResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonsByTagResDto;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Genre;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Tag;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
@@ -469,15 +470,20 @@ public class WebtoonService {
     /**
      * 동일 태그 웹툰 조회
      */
-    public List<WebtoonDetailResDto> getWebtoonByTag(Long tagId) {
+    public WebtoonsByTagResDto getWebtoonByTag(Long tagId) {
         Tag tag = tagRepository.findById(tagId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.TAG_NOT_FOUND));
 
-        List<Webtoon> webtoons = webtoonTagRepository.findWebtoonsByTagId(tagId);
-
-        return webtoons.stream()
+        List<WebtoonDetailResDto> dtos = webtoonTagRepository
+            .findWebtoonsByTagId(tagId).stream()
             .map(WebtoonDetailResDto::from)
             .collect(Collectors.toList());
+
+        return new WebtoonsByTagResDto(
+            tag.getId(),
+            tag.getContent(),
+            dtos
+        );
     }
 
     /**

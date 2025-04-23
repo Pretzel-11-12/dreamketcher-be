@@ -28,6 +28,7 @@ import pretzel.dreamketcherbe.domain.webtoon.dto.SearchedWebtoonPageResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.UpdateWebtoonReqDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonDetailResDto;
 import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonResDto;
+import pretzel.dreamketcherbe.domain.webtoon.dto.WebtoonsByTagResDto;
 import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
 
 @RestController
@@ -205,7 +206,7 @@ public class WebtoonController {
      * 동일 태그 웹툰 검색
      */
     @GetMapping("/tag/{tagId}")
-    public ResponseEntity<List<WebtoonDetailResDto>> getWebtoonsByTag(
+    public ResponseEntity<WebtoonsByTagResDto> getWebtoonsByTag(
         @PathVariable Long tagId
         // TODO: 추후 페이지네이션 적용 고려
     ) {
