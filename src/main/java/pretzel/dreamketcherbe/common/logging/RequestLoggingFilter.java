@@ -63,7 +63,6 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         logMessage.append("|\n| [REQUEST] (")
             .append(method).append(") ")
             .append(requestURI)
-            .append(queryString.isEmpty() ? "" : "?" + queryString)
             .append("\n| >> STATUS_CODE: ")
             .append(status);
 
@@ -80,13 +79,13 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         );
 
         String remoteIp = request.getRemoteAddr();
-        String ua = Optional.ofNullable(request.getHeader("User-Agent"))
-            .orElse("Unknown");
+        String xff = Optional.ofNullable(request.getHeader("X-Forwarded-For")).orElse("-");
+        String ua = Optional.ofNullable(request.getHeader("User-Agent")).orElse("Unknown");
 
-        logMessage.append("\n| >> CLIENT: ")
-            .append(remoteIp)
-            .append(" / ")
-            .append(ua);
+        logMessage
+            .append("\n| >> REMOTE_ADDR: ").append(remoteIp)
+            .append("\n| >> X-Forwarded-For: ").append(xff)
+            .append("\n| >> USER_AGENT: ").append(ua);
 
         ThreadMXBean tmxb = ManagementFactory.getThreadMXBean();
         int threadCount = tmxb.getThreadCount();
