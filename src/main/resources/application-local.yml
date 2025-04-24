@@ -7,6 +7,13 @@ spring:
     url: ${MYSQL_DATASOURCE_URL}
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
+    hikari:
+      maximum-pool-size: 50    # 45×(2−1)+1=46 → 약간의 버퍼(+4) 포함해서 50
+      minimum-idle: 10         # 유휴 최소 커넥션: 풀을 완전히 채워둘 필요가 없으면 좀 낮춰도 OK
+      connection-timeout: 30000
+      validation-timeout: 5000
+      idle-timeout: 300000         # 5분(300초) 동안 놀고 있으면빼고 새로 생성
+      max-lifetime: 1800000        # 30분마다 커넥션 교체 (DB 세션 재생성)
 
   data:
     redis:
