@@ -1,5 +1,6 @@
 package pretzel.dreamketcherbe.common.config;
 
+import com.zaxxer.hikari.HikariDataSource;
 import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -17,6 +18,8 @@ import pretzel.dreamketcherbe.common.logging.RequestLoggingFilter;
 public class LoggingConfig implements WebMvcConfigurer {
 
     private final QueryCounterInterceptor queryCounterInterceptor;
+
+    private final HikariDataSource hikariDataSource;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -37,12 +40,13 @@ public class LoggingConfig implements WebMvcConfigurer {
         return registrationBean;
     }
 
+
     @Bean
-    public FilterRegistrationBean<Filter> filterRegistration() {
+    public FilterRegistrationBean<Filter> requestLoiggingFilterRegistration() {
         FilterRegistrationBean<Filter> registrationBean =
             new FilterRegistrationBean<>();
 
-        registrationBean.setFilter(new RequestLoggingFilter());
+        registrationBean.setFilter(new RequestLoggingFilter(hikariDataSource));
         registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         registrationBean.addUrlPatterns("/*");
 
