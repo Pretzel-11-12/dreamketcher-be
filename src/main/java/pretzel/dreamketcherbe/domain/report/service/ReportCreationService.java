@@ -1,6 +1,8 @@
 package pretzel.dreamketcherbe.domain.report.service;
 
-public interface ReportService {
+import pretzel.dreamketcherbe.domain.report.dto.ReportCommand;
+
+public interface ReportCreationService {
 
     Long reportComment(Long commentId, ReportCommand cmd);
 

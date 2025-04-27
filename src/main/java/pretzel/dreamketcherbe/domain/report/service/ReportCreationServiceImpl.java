@@ -3,6 +3,7 @@ package pretzel.dreamketcherbe.domain.report.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pretzel.dreamketcherbe.domain.report.dto.ReportCommand;
 import pretzel.dreamketcherbe.domain.report.entity.CommentReport;
 import pretzel.dreamketcherbe.domain.report.entity.EpisodeReport;
 import pretzel.dreamketcherbe.domain.report.entity.ReportReason;
@@ -12,7 +13,7 @@ import pretzel.dreamketcherbe.domain.report.repository.ReportReasonRepository;
 
 @Service
 @RequiredArgsConstructor
-public class ReportServiceImpl implements ReportService {
+public class ReportCreationServiceImpl implements ReportCreationService {
 
     private final CommentReportRepository commentReportRepository;
     private final EpisodeReportRepository episodeReportRepository;
@@ -22,12 +23,12 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     public Long reportComment(Long commentId, ReportCommand cmd) {
 
-        var reason = findReportReason(cmd.getReasonId());
+        var reason = findReportReason(cmd.reasonId());
 
-        var report = cmd.getReporterMemberId() != null
-            ? CommentReport.forMember(commentId, cmd.getReporterMemberId(), reason,
-            cmd.getReasonText())
-            : CommentReport.forGuest(commentId, cmd.getReporterIp(), reason, cmd.getReasonText());
+        var report = cmd.reporterMemberId() != null
+            ? CommentReport.forMember(commentId, cmd.reporterMemberId(), reason,
+            cmd.reasonText())
+            : CommentReport.forGuest(commentId, cmd.reporterIp(), reason, cmd.reasonText());
 
         return commentReportRepository.save(report).getId();
     }
@@ -36,12 +37,12 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     public Long reportEpisode(Long episodeId, ReportCommand cmd) {
 
-        var reason = findReportReason(cmd.getReasonId());
+        var reason = findReportReason(cmd.reasonId());
 
-        var report = cmd.getReporterMemberId() != null
-            ? EpisodeReport.forMember(episodeId, cmd.getReporterMemberId(), reason,
-            cmd.getReasonText())
-            : EpisodeReport.forGuest(episodeId, cmd.getReporterIp(), reason, cmd.getReasonText());
+        var report = cmd.reporterMemberId() != null
+            ? EpisodeReport.forMember(episodeId, cmd.reporterMemberId(), reason,
+            cmd.reasonText())
+            : EpisodeReport.forGuest(episodeId, cmd.reporterIp(), reason, cmd.reasonText());
 
         return episodeReportRepository.save(report).getId();
 
