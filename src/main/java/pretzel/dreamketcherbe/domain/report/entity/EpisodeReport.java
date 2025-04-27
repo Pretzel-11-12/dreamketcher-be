@@ -43,7 +43,7 @@ public class EpisodeReport {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reason_id", nullable = false)
-    private ReportReason reasonId;
+    private ReportReason reason;
 
     @Column(name = "reason_text", columnDefinition = "TEXT")
     private String reasonText;
@@ -67,20 +67,20 @@ public class EpisodeReport {
      *
      * @param episodeId  댓글 ID
      * @param memberId   신고자 회원 ID
-     * @param reasonId   신고 사유 엔티티
+     * @param reason     신고 사유 엔티티
      * @param reasonText 텍스트 or null
      */
     public static EpisodeReport forMember(
         Long episodeId,
         Long memberId,
-        ReportReason reasonId,
+        ReportReason reason,
         String reasonText
     ) {
         return EpisodeReport.builder()
             .episodeId(episodeId)
             .reporterMemberId(memberId)
             .reporterIp(null)
-            .reasonId(reasonId)
+            .reason(reason)
             .reasonText(reasonText)
             .status(ReportStatus.PENDING)
             .build();
@@ -91,20 +91,20 @@ public class EpisodeReport {
      *
      * @param episodeId  댓글 ID
      * @param reporterIp 신고자 IP
-     * @param reasonId   신고 사유 엔티티
+     * @param reason     신고 사유 엔티티
      * @param reasonText 텍스트 or null
      */
     public static EpisodeReport forGuest(
         Long episodeId,
         String reporterIp,
-        ReportReason reasonId,
+        ReportReason reason,
         String reasonText
     ) {
         return EpisodeReport.builder()
             .episodeId(episodeId)
             .reporterMemberId(null)
             .reporterIp(reporterIp)
-            .reasonId(reasonId)
+            .reason(reason)
             .reasonText(reasonText)
             .status(ReportStatus.PENDING)
             .build();

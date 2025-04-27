@@ -43,7 +43,7 @@ public class CommentReport extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reason_id", nullable = false)
-    private ReportReason reasonId;
+    private ReportReason reason;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -67,20 +67,20 @@ public class CommentReport extends BaseTimeEntity {
      *
      * @param commentId  댓글 ID
      * @param memberId   신고자 회원 ID
-     * @param reasonId   신고 사유 엔티티
+     * @param reason     신고 사유 엔티티
      * @param reasonText 텍스트 or null
      */
     public static CommentReport forMember(
         Long commentId,
         Long memberId,
-        ReportReason reasonId,
+        ReportReason reason,
         String reasonText
     ) {
         return CommentReport.builder()
             .commentId(commentId)
             .reporterMemberId(memberId)
             .reporterIp(null)
-            .reasonId(reasonId)
+            .reason(reason)
             .reasonText(reasonText)
             .status(ReportStatus.PENDING)
             .build();
@@ -91,20 +91,20 @@ public class CommentReport extends BaseTimeEntity {
      *
      * @param commentId  댓글 ID
      * @param reporterIp 신고자 IP
-     * @param reasonId   신고 사유 엔티티
+     * @param reason     신고 사유 엔티티
      * @param reasonText ETC(기타) 텍스트 or null
      */
     public static CommentReport forGuest(
         Long commentId,
         String reporterIp,
-        ReportReason reasonId,
+        ReportReason reason,
         String reasonText
     ) {
         return CommentReport.builder()
             .commentId(commentId)
             .reporterMemberId(null)
             .reporterIp(reporterIp)
-            .reasonId(reasonId)
+            .reason(reason)
             .reasonText(reasonText)
             .status(ReportStatus.PENDING)
             .build();
