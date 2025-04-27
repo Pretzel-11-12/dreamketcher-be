@@ -12,12 +12,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.joda.time.DateTime;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 
 @Entity
@@ -54,7 +54,7 @@ public class CommentReport extends BaseTimeEntity {
 
     // 관리자가 처리 시
     @Column(name = "processed_at")
-    private DateTime processedAt;
+    private LocalDateTime processedAt;
 
     @Column(name = "processed_by")
     private Long processedBy;
