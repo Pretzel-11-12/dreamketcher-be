@@ -3,6 +3,7 @@ package pretzel.dreamketcherbe.domain.comment.dto;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import pretzel.dreamketcherbe.domain.comment.entity.Comment;
+import pretzel.dreamketcherbe.domain.comment.entity.CommentStatus;
 
 @Builder
 public record CommentResDto(
@@ -13,6 +14,7 @@ public record CommentResDto(
     int childCommentCount,
     int recommendationCount,
     int notRecommendationCount,
+    CommentStatus status,
     LocalDateTime createdAt
 
 ) {
@@ -26,6 +28,7 @@ public record CommentResDto(
             .childCommentCount(comment.getChildCommentCount())
             .recommendationCount(comment.getRecommendationCount())
             .notRecommendationCount(comment.getNotRecommendationCount())
+            .status(comment.getStatus())
             .createdAt(comment.getCreatedAt())
             .build();
     }

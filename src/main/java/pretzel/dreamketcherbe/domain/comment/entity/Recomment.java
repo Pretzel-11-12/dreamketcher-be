@@ -2,6 +2,8 @@ package pretzel.dreamketcherbe.domain.comment.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,8 +30,8 @@ import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLDelete(sql = "UPDATE re_comments SET is_deleted = true WHERE id = ?")
-@SQLRestriction("is_deleted = false")
+@SQLDelete(sql = "UPDATE re_comments SET status = 'DELETED' WHERE id = ?")
+@SQLRestriction("status != 'DELETED'")
 public class Recomment extends BaseTimeEntity {
 
     @Id
@@ -53,9 +55,9 @@ public class Recomment extends BaseTimeEntity {
     @ColumnDefault("0")
     private int notRecommendationCount;
 
-    @Column(name = "is_deleted", nullable = false)
-    @ColumnDefault("false")
-    private boolean isDeleted;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RecommentStatus status = RecommentStatus.NORMAL; // 상태 추가
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
@@ -86,6 +88,7 @@ public class Recomment extends BaseTimeEntity {
         this.webtoon = webtoon;
         this.episode = episode;
         this.comment = comment;
+        this.status = RecommentStatus.NORMAL;
     }
 
     public static Recomment addOf(CreateRecommentReqDto dto, int commentOrder, Member member,
@@ -108,8 +111,12 @@ public class Recomment extends BaseTimeEntity {
     }
 
     public void softDelete() {
-        if (!isDeleted) {
-            this.isDeleted = true;
+        this.status = RecommentStatus.DELETED;
+    }
+
+    public void report() {
+        if (this.status == RecommentStatus.NORMAL) {
+            this.status = RecommentStatus.REPORTED;
         }
     }
 
@@ -119,5 +126,13 @@ public class Recomment extends BaseTimeEntity {
 
     public void updateNotRecommendationCount(int count) {
         this.notRecommendationCount = count;
+    }
+
+    public boolean isDeleted() {
+        return this.status == RecommentStatus.DELETED;
+    }
+
+    public boolean isReported() {
+        return this.status == RecommentStatus.REPORTED;
     }
 }
