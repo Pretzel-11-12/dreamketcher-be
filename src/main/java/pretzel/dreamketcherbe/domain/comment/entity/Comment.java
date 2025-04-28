@@ -30,7 +30,7 @@ import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "comments")
 @SQLDelete(sql = "UPDATE comments SET status = 'DELETED' WHERE id = ?")
-@SQLRestriction("status != 'DELETED'")
+@SQLRestriction("status = 'NORMAL'")
 public class Comment extends BaseTimeEntity {
 
     @Id
@@ -53,7 +53,8 @@ public class Comment extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CommentStatus status = CommentStatus.NORMAL;
+    @ColumnDefault("'NORMAL'")
+    private CommentStatus status;
 
     @ManyToOne
     @JoinColumn(name = "member_id")
