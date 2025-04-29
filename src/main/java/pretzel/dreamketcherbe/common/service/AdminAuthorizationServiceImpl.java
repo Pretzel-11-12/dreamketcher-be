@@ -11,7 +11,7 @@ public class AdminAuthorizationServiceImpl implements AdminAuthorizationService 
     private final MemberRepository memberRepository;
 
     @Override
-    public boolean isAmdin(Long memberId) {
+    public boolean isAdmin(Long memberId) {
         return memberRepository.findById(memberId)
             .map(member -> "ADMIN".equals(member.getRole()))
             .orElse(false);
