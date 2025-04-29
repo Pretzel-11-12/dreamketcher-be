@@ -15,6 +15,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.member.dto.CreateFolderReqDto;
 
 @Entity
 @Getter
@@ -41,5 +42,12 @@ public class StorageFolder extends BaseTimeEntity {
     private StorageFolder(String name, Member member) {
         this.name = name;
         this.member = member;
+    }
+
+    public static StorageFolder create(CreateFolderReqDto dto, Member member) {
+        return StorageFolder.builder()
+            .name(dto.name())
+            .member(member)
+            .build();
     }
 }
