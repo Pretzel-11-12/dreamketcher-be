@@ -3,6 +3,7 @@ package pretzel.dreamketcherbe.domain.member.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,5 +38,11 @@ public class StorageFolderController {
         @RequestBody @Valid UpdateStorageFolderReqDto updateStorageFolderReqDto
     ) {
         return ResponseEntity.ok(storageFolderService.updateFolder(folderId, updateStorageFolderReqDto));
+    }
+
+    @DeleteMapping("/{folderId}")
+    public ResponseEntity<Void> deleteFolder(@PathVariable Long folderId) {
+        storageFolderService.deleteFolder(folderId);
+        return ResponseEntity.ok().build();
     }
 }

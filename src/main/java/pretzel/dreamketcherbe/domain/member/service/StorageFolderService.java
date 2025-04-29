@@ -39,6 +39,12 @@ public class StorageFolderService {
         return UpdateStorageFolderResDto.of(storageFolder);
     }
 
+    @Transactional
+    public void deleteFolder(final Long folderId) {
+        StorageFolder storageFolder = findByFolderId(folderId);
+        storageFolder.delete();
+    }
+
     private StorageFolder findByFolderId(final Long folderId) {
         return storageFolderRepository.findById(folderId)
             .orElseThrow(() -> new StorageFolderException(StorageFolderExceptionType.FOLDER_NOT_FOUND));

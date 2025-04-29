@@ -1,4 +1,4 @@
-package pretzel.dreamketcherbe.domain.member.controller;
+package pretzel.dreamketcherbe.domain.member.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,10 +21,9 @@ import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.entity.StorageFolder;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.member.repository.StorageFolderRepository;
-import pretzel.dreamketcherbe.domain.member.service.StorageFolderService;
 
 @ExtendWith(MockitoExtension.class)
-class StorageFolderControllerTest {
+class StorageFolderServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
@@ -82,6 +81,28 @@ class StorageFolderControllerTest {
             // then
             assertThat(result).isNotNull();
             assertThat(result.name()).isEqualTo(updateDto.name());
+        }
+    }
+
+    @Nested
+    @DisplayName("폴더 삭제 테스트")
+    class DeleteStorageFolderTests {
+        @Test
+        @DisplayName("폴더 삭제 성공 테스트")
+        void 폴더_삭제_성공_테스트() {
+            // given
+            Long folderId = 1L;
+
+            StorageFolder storageFolder = FixtureFactory.getStorageFolder(folderId);
+
+            given(storageFolderRepository.findById(folderId))
+                .willReturn(Optional.of(storageFolder));
+
+            // when
+            storageFolderService.deleteFolder(folderId);
+
+            // then
+            assertThat(storageFolder.isDeleted()).isTrue();
         }
     }
 }

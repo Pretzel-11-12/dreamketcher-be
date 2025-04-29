@@ -55,4 +55,10 @@ public class StorageFolder extends BaseTimeEntity {
     public void update(UpdateStorageFolderReqDto dto) {
         this.name = dto.name();
     }
+
+    public void delete() {
+        if (!this.isDeleted) {
+            this.isDeleted = true;
+        }
+    }
 }
