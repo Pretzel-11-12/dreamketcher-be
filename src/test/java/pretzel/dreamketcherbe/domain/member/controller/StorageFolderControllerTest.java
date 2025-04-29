@@ -15,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pretzel.dreamketcherbe.domain.fixture.FixtureFactory;
 import pretzel.dreamketcherbe.domain.member.dto.CreateFolderReqDto;
 import pretzel.dreamketcherbe.domain.member.dto.CreateFolderResDto;
+import pretzel.dreamketcherbe.domain.member.dto.UpdateStorageFolderReqDto;
+import pretzel.dreamketcherbe.domain.member.dto.UpdateStorageFolderResDto;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.entity.StorageFolder;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
@@ -56,6 +58,30 @@ class StorageFolderControllerTest {
             // then
             assertThat(result).isNotNull();
             assertThat(result.name()).isEqualTo("폴더 이름");
+        }
+    }
+
+    @Nested
+    @DisplayName("폴더 수정 테스트")
+    class UpdateStorageFolderTests {
+        @Test
+        @DisplayName("폴더 수정 성공 테스트")
+        void 폴더_수정_성공_테스트() {
+            // given
+            Long folderId = 1L;
+
+            StorageFolder storageFolder = FixtureFactory.getStorageFolder(folderId);
+            UpdateStorageFolderReqDto updateDto = new UpdateStorageFolderReqDto("새 폴더명");
+
+            given(storageFolderRepository.findById(folderId))
+                .willReturn(Optional.of(storageFolder));
+
+            // when
+            UpdateStorageFolderResDto result = storageFolderService.updateFolder(folderId, updateDto);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.name()).isEqualTo(updateDto.name());
         }
     }
 }
