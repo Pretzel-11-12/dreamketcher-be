@@ -27,8 +27,8 @@ import java.time.LocalDate;
 @Entity
 @DynamicInsert
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLDelete(sql = "UPDATE episodes SET is_deleted = true WHERE id = ?")
-@SQLRestriction("is_deleted = false")
+@SQLDelete(sql = "UPDATE episodes SET status = 'DELETED' WHERE id = ?")
+@SQLRestriction("status = 'NORMAL'")
 public class Episode extends BaseTimeEntity {
 
     @Id
@@ -69,12 +69,10 @@ public class Episode extends BaseTimeEntity {
     @Column(nullable = false, name = "average_star")
     private float averageStar;
 
-    @ColumnDefault("'NOT_APPROVAL'")
-    private String status;
-
-    @Column(nullable = false, name = "is_deleted")
-    @ColumnDefault("false")
-    private boolean isDeleted;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @ColumnDefault("'NORMAL'")
+    private EpisodeStatus status;
 
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
@@ -133,8 +131,12 @@ public class Episode extends BaseTimeEntity {
     }
 
     public void softDelete() {
-        if (!this.isDeleted) {
-            this.isDeleted = true;
+        this.status = EpisodeStatus.DELETED;
+    }
+
+    public void report() {
+        if (this.status == EpisodeStatus.NORMAL) {
+            this.status = EpisodeStatus.REPORTED;
         }
     }
 
