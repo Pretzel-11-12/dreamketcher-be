@@ -1,7 +1,6 @@
 package pretzel.dreamketcherbe.wordfilter.controller;
 
 import java.util.List;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +20,7 @@ import pretzel.dreamketcherbe.wordfilter.service.WordService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/word-filter")
-public class Controller {
+public class WordController {
 
     private final WordService wordService;
 
