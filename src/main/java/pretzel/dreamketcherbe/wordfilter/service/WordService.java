@@ -2,9 +2,11 @@ package pretzel.dreamketcherbe.wordfilter.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import pretzel.dreamketcherbe.wordfilter.entity.AllowedWord;
 import pretzel.dreamketcherbe.wordfilter.entity.BadWord;
+import pretzel.dreamketcherbe.wordfilter.event.WordReloadEvent;
 import pretzel.dreamketcherbe.wordfilter.filtering.WordFilter;
 import pretzel.dreamketcherbe.wordfilter.repository.AllowedWordRepository;
 import pretzel.dreamketcherbe.wordfilter.repository.BadWordRepository;
@@ -13,6 +15,7 @@ import pretzel.dreamketcherbe.wordfilter.repository.BadWordRepository;
 @RequiredArgsConstructor
 public class WordService {
 
+    private final ApplicationEventPublisher eventPublisher;
     private final BadWordRepository badWordRepository;
     private final AllowedWordRepository allowedWordRepository;
     private final WordFilter wordFilter;
@@ -23,12 +26,12 @@ public class WordService {
         }
 
         badWordRepository.save(new BadWord(word));
-        reloadWordFileter();
+        eventPublisher.publishEvent(new WordReloadEvent());
     }
 
     public void deleteBadWord(Long wordId) {
         badWordRepository.deleteById(wordId);
-        reloadWordFileter();
+        eventPublisher.publishEvent(new WordReloadEvent());
     }
 
     public List<BadWord> getAllBadWords() {
@@ -41,28 +44,15 @@ public class WordService {
         }
 
         allowedWordRepository.save(new AllowedWord(word));
-        reloadWordFileter();
+        eventPublisher.publishEvent(new WordReloadEvent());
     }
 
     public void deleteAllowedWord(Long wordId) {
         allowedWordRepository.deleteById(wordId);
-        reloadWordFileter();
+        eventPublisher.publishEvent(new WordReloadEvent());
     }
 
     public List<AllowedWord> getAllAllowedWords() {
         return allowedWordRepository.findAll();
     }
-
-    private void reloadWordFileter() {
-        List<String> badWords = badWordRepository.findAll().stream()
-            .map(BadWord::getWord)
-            .toList();
-
-        List<String> allowedWords = allowedWordRepository.findAll().stream()
-            .map(AllowedWord::getWord)
-            .toList();
-
-        wordFilter.reload(badWords, allowedWords);
-    }
-
 }
