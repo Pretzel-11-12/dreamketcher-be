@@ -1,7 +1,9 @@
 package pretzel.dreamketcherbe.wordfilter.filtering;
 
 import java.util.List;
+import org.springframework.stereotype.Component;
 
+@Component
 public class WordFilter {
 
     private WordTrie badWordTrie = new WordTrie();

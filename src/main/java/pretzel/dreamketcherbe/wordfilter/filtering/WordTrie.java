@@ -3,7 +3,9 @@ package pretzel.dreamketcherbe.wordfilter.filtering;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import lombok.Getter;
 
+@Getter
 public class WordTrie {
 
     private final WordNode root = new WordNode();
@@ -66,10 +68,6 @@ public class WordTrie {
             }
         }
         return false;
-    }
-
-    public WordNode getRoot() {
-        return root;
     }
 
     public String replaceWords(String input, char replaceChar) {
