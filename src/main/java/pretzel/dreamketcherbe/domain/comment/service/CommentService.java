@@ -50,6 +50,7 @@ import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.wordfilter.filtering.WordFilterService;
 
 @Slf4j
 @Service
@@ -113,6 +114,7 @@ public class CommentService {
 
     private final RedisScript<Long> removeRecommend = removeRecommendScript;
     private final RedisScript<Long> removeNotRecommend = removeRecommendScript;
+    private final WordFilterService wordFilterService;
 
 
     /**
@@ -127,7 +129,9 @@ public class CommentService {
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
-        Comment newComment = Comment.addOf(request, findMember, findEpisode);
+        String filteredContent = wordFilterService.filter(request.content());
+
+        Comment newComment = Comment.addOf(filteredContent, findMember, findEpisode);
         commentRepository.save(newComment);
 
         return CreateCommentResDto.of(newComment);
