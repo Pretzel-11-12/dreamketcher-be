@@ -30,8 +30,7 @@ public record ReportResDto(
     }
 
     public record ReporterDto(
-        Long memberId,
-        String ip
+        Long memberId
     ) {
 
     }
