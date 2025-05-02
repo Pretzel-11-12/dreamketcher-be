@@ -39,9 +39,6 @@ public class EpisodeReport extends BaseTimeEntity {
     @Column(name = "reporter_member_id")
     private Long reporterMemberId;
 
-    @Column(name = "reporter_ip", nullable = false, length = 45)
-    private String reporterIp;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reason_id", nullable = false)
     private ReportReason reason;
@@ -80,7 +77,6 @@ public class EpisodeReport extends BaseTimeEntity {
         return EpisodeReport.builder()
             .episodeId(episodeId)
             .reporterMemberId(memberId)
-            .reporterIp(null)
             .reason(reason)
             .reasonText(reasonText)
             .status(ReportStatus.PENDING)
@@ -91,20 +87,17 @@ public class EpisodeReport extends BaseTimeEntity {
      * 비회원(게스트)이 신고할 때 사용.
      *
      * @param episodeId  댓글 ID
-     * @param reporterIp 신고자 IP
      * @param reason     신고 사유 엔티티
      * @param reasonText 텍스트 or null
      */
     public static EpisodeReport forGuest(
         Long episodeId,
-        String reporterIp,
         ReportReason reason,
         String reasonText
     ) {
         return EpisodeReport.builder()
             .episodeId(episodeId)
             .reporterMemberId(null)
-            .reporterIp(reporterIp)
             .reason(reason)
             .reasonText(reasonText)
             .status(ReportStatus.PENDING)
@@ -118,12 +111,10 @@ public class EpisodeReport extends BaseTimeEntity {
     @PrePersist
     private void validateReporter() {
         boolean hasMember = reporterMemberId != null;
-        boolean hasIp = reporterIp != null && !reporterIp.isBlank();
 
-        if (hasMember == hasIp) {
-            // 둘 다 있거나, 둘 다 없는 경우 에러
+        if (!hasMember) {
             throw new IllegalStateException(
-                "신고자는 회원 또는 게스트(IP) 중 하나만 지정되어야 합니다."
+                "신고는 회원만 가능합니다."
             );
         }
     }

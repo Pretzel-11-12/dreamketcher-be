@@ -12,30 +12,30 @@ import pretzel.dreamketcherbe.domain.comment.entity.Recomment;
 
 public interface RecommentRepository extends JpaRepository<Recomment, Long> {
 
-    @Query("SELECT r FROM Recomment r WHERE r.comment.id = :commentId AND r.isDeleted = false ORDER BY r.commentOrder ASC")
+    @Query("SELECT r FROM Recomment r WHERE r.comment.id = :commentId AND r.status = 'NORMAL' ORDER BY r.commentOrder ASC")
     Page<Recomment> findActiveRecommentsByParentCommentId(Long commentId, Pageable pageable);
 
-    @Query("SELECT COUNT(r) FROM Recomment r WHERE r.comment.id = :commentId AND r.isDeleted = false ORDER BY r.commentOrder ASC")
+    @Query("SELECT COUNT(r) FROM Recomment r WHERE r.comment.id = :commentId AND r.status = 'NORMAL' ORDER BY r.commentOrder ASC")
     long countByParentCommentIdAndIsDeletedFalse(Long commentId);
 
     @Query("SELECT r.id FROM Recomment r")
     List<Long> findAllRecommentIds();
 
-    @Query("SELECT r FROM Recomment r WHERE r.member.id = :memberId AND r.isDeleted = false")
+    @Query("SELECT r FROM Recomment r WHERE r.member.id = :memberId AND r.status = 'NORMAL'")
     List<Recomment> findByMemberIdAndIsDeletedFalse(@Param("memberId") Long memberId, Sort sort);
 
-    @Query("SELECT r.id FROM Recomment r WHERE r.comment.id = :commentId AND r.isDeleted = false")
+    @Query("SELECT r.id FROM Recomment r WHERE r.comment.id = :commentId AND r.status = 'NORMAL'")
     List<Long> findByComment(@Param("commentId") Long commentId);
 
-    @Query("SELECT r.id FROM Recomment r WHERE r.comment.id IN :commentIds AND r.isDeleted = false")
+    @Query("SELECT r.id FROM Recomment r WHERE r.comment.id IN :commentIds AND r.status = 'NORMAL'")
     List<Long> findBycommentId(@Param("commentIds") List<Long> commentIds);
 
     @Modifying
-    @Query("UPDATE Recomment r SET r.isDeleted = true WHERE r.comment.id IN :commentIds")
+    @Query("UPDATE Recomment r SET r.status = 'DELETED' WHERE r.comment.id IN :commentIds")
     void deleteByCommentId(@Param("commentIds") List<Long> commentIds);
 
     @Modifying
-    @Query("UPDATE Recomment r SET r.isDeleted = true WHERE r.comment.id = :commentId")
+    @Query("UPDATE Recomment r SET r.status = 'DELETED' WHERE r.comment.id = :commentId")
     void deleteByComment(@Param("commentId") Long commentId);
 
 }
