@@ -599,18 +599,22 @@ public class EpisodeService {
     /**
      * 에피소드 신고
      */
-    public void reportEpisode(Long memberId, Long webtooonId, Long episodeId, Long reasonId,
+    public void reportEpisode(Long memberId, Long webtoonId, Long episodeId, Long reasonId,
         String reasonText) {
-        Webtoon findWebtoon = webtoonRepository.findById(webtooonId)
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
 
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
+        if (!findEpisode.getWebtoon().getId().equals(findWebtoon.getId())) {
+            throw new EpisodeException(EpisodeExceptionType.INVALID_EPISODE);
+        }
+
         ReportReason findReason = reportReasonRepository.findById(reasonId)
             .orElseThrow(() -> new IllegalStateException()); // 추후 수정
 
-        EpisodeReport findEpisodeReport = EpisodeReport.forMember(webtooonId, episodeId, memberId,
+        EpisodeReport findEpisodeReport = EpisodeReport.forMember(webtoonId, episodeId, memberId,
             findReason,
             reasonText);
         episodeReportRepository.save(findEpisodeReport);
