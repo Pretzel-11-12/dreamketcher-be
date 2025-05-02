@@ -714,6 +714,9 @@ public class CommentService {
 
         CommentReport findCommentReport = CommentReport.forMember(commentId, memberId, findReason,
             reasonText);
+        if (commentReportRepository.existsByCommentIdAndMemberId(commentId, memberId)) {
+            throw new CommentException(CommentExceptionType.REPORTED_COMMENT);
+        }
         commentReportRepository.save(findCommentReport);
 
         findComment.report();

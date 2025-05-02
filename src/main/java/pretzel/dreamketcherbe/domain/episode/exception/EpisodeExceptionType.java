@@ -10,7 +10,9 @@ public enum EpisodeExceptionType implements ExceptionType {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "작성자만 가능합니다."),
     INVALID_EPISODE(HttpStatus.BAD_REQUEST, "유효하지 않은 에피소드입니다."),
     EPISODE_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "에피소드 좋아요를 찾을 수 없습니다."),
-    CREATE_EPISODE_FAILED(HttpStatus.BAD_REQUEST, "에피소드 등록에 실패했습니다.");
+    CREATE_EPISODE_FAILED(HttpStatus.BAD_REQUEST, "에피소드 등록에 실패했습니다."),
+    REPORTED_EPISODE(HttpStatus.BAD_REQUEST, "이미 신고된 에피소드입니다.");
+
 
     private final HttpStatus status;
     private final String message;

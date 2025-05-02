@@ -10,7 +10,9 @@ public enum CommentExceptionType implements ExceptionType {
     NOT_RECOMMENDATION_NOT_FOUND(HttpStatus.NOT_FOUND, "비추천을 찾을 수 없습니다."),
     RECOMMENDATION_NOT_FOUND(HttpStatus.NOT_FOUND, "추천을 찾을 수 없습니다."),
     RECOMMENT_RECOMMENDATION_NOT_FOUND(HttpStatus.NOT_FOUND, "대댓글 추천을 찾을 수 없습니다."),
-    RECOMMENT_NOT_RECOMMENDATION_NOT_FOUND(HttpStatus.NOT_FOUND, "대댓글 비추천을 찾을 수 없습니다.");
+    RECOMMENT_NOT_RECOMMENDATION_NOT_FOUND(HttpStatus.NOT_FOUND, "대댓글 비추천을 찾을 수 없습니다."),
+    REPORTED_COMMENT(HttpStatus.BAD_REQUEST, "이미 신고된 댓글입니다."),
+    REPORTED_RECOMMENT(HttpStatus.BAD_REQUEST, "이미 신고된 대댓글입니다.");
 
 
     private final HttpStatus status;
