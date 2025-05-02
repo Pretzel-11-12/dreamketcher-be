@@ -84,7 +84,7 @@ public class Episode extends BaseTimeEntity {
 
     @Builder
     public Episode(int no, String title, String thumbnail, String content, String authorNote,
-        int likeCount, LocalDate publishedAt,
+        int likeCount, LocalDate publishedAt, EpisodeStatus status,
         Webtoon webtoon, Member member) {
         this.no = no;
         this.title = title;
@@ -93,6 +93,7 @@ public class Episode extends BaseTimeEntity {
         this.authorNote = authorNote;
         this.publishedAt = publishedAt;
         this.likeCount = likeCount;
+        this.status = EpisodeStatus.NORMAL;
         this.webtoon = webtoon;
         this.member = member;
     }
