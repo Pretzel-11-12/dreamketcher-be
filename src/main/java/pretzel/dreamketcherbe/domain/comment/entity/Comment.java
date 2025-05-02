@@ -30,7 +30,7 @@ import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "comments")
 @SQLDelete(sql = "UPDATE comments SET status = 'DELETED' WHERE id = ?")
-@SQLRestriction("status = 'NORMAL'")
+//@SQLRestriction("status = 'NORMAL'")
 public class Comment extends BaseTimeEntity {
 
     @Id
