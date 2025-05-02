@@ -610,7 +610,8 @@ public class EpisodeService {
         ReportReason findReason = reportReasonRepository.findById(reasonId)
             .orElseThrow(() -> new IllegalStateException()); // 추후 수정
 
-        EpisodeReport findEpisodeReport = EpisodeReport.forMember(episodeId, memberId, findReason,
+        EpisodeReport findEpisodeReport = EpisodeReport.forMember(webtooonId, episodeId, memberId,
+            findReason,
             reasonText);
         episodeReportRepository.save(findEpisodeReport);
 
