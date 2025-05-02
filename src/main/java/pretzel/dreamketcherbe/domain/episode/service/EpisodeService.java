@@ -618,6 +618,10 @@ public class EpisodeService {
         EpisodeReport findEpisodeReport = EpisodeReport.forMember(webtoonId, episodeId, memberId,
             findReason,
             reasonText);
+        
+        if (episodeReportRepository.existsByEpisodeIdAndMemberId(episodeId, memberId)) {
+            throw new IllegalStateException("이미 신고한 에피소드입니다.");
+        }
         episodeReportRepository.save(findEpisodeReport);
 
         findEpisode.report();
