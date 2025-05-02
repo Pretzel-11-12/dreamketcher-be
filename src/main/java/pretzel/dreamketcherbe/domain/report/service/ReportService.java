@@ -25,6 +25,13 @@ public class ReportService {
     private final EpisodeReportRepository episodeReportRepository;
     private final CommentRepository commentRepository;
 
+    /**
+     * ReportService의 인스턴스를 생성하고 필요한 리포지토리 의존성을 주입합니다.
+     *
+     * @param commentReportRepository 댓글 신고 관련 데이터 접근을 위한 리포지토리
+     * @param episodeReportRepository 에피소드 신고 관련 데이터 접근을 위한 리포지토리
+     * @param commentRepository 댓글 데이터 접근을 위한 리포지토리
+     */
     public ReportService(CommentReportRepository commentReportRepository,
         EpisodeReportRepository episodeReportRepository, CommentRepository commentRepository) {
         this.commentReportRepository = commentReportRepository;
@@ -32,6 +39,14 @@ public class ReportService {
         this.commentRepository = commentRepository;
     }
 
+    /**
+     * 신고 상태, 유형, 페이지 정보를 기준으로 댓글 및 에피소드 신고 목록을 조회하여 통합된 DTO 리스트로 반환합니다.
+     *
+     * @param status 조회할 신고 상태 (null이면 전체)
+     * @param type 조회할 신고 유형(COMMENT, EPISODE, 또는 null로 전체)
+     * @param pageable 페이지 번호와 크기 등 페이징 정보
+     * @return 필터링 및 페이징된 신고 목록과 전체 개수를 포함하는 ReportResDto
+     */
     @Transactional(readOnly = true)
     public ReportResDto getReports(
         ReportStatus status,
@@ -70,6 +85,13 @@ public class ReportService {
         );
     }
 
+    /**
+     * 주어진 상태에 따라 댓글 신고 목록을 페이지 단위로 조회합니다.
+     *
+     * @param status 필터링할 신고 상태. null이면 모든 상태의 신고를 조회합니다.
+     * @param pageable 페이지 정보
+     * @return 조회된 댓글 신고의 페이지 객체
+     */
     private Page<CommentReport> getCommentReports(ReportStatus status, Pageable pageable) {
         if (status == null) {
             return commentReportRepository.findAll(pageable);
@@ -77,6 +99,13 @@ public class ReportService {
         return commentReportRepository.findByStatus(status, pageable);
     }
 
+    /**
+     * 에피소드 신고 목록을 상태별로 조회하여 페이지로 반환합니다.
+     *
+     * @param status 조회할 신고 상태. null이면 모든 상태의 신고를 조회합니다.
+     * @param pageable 페이지네이션 정보
+     * @return 상태에 따라 필터링된 에피소드 신고의 페이지
+     */
     private Page<EpisodeReport> getEpisodeReports(ReportStatus status, Pageable pageable) {
         if (status == null) {
             return episodeReportRepository.findAll(pageable);
@@ -84,6 +113,14 @@ public class ReportService {
         return episodeReportRepository.findByStatus(status, pageable);
     }
 
+    /**
+     * CommentReport 엔티티 목록을 ReportDto 리스트로 변환합니다.
+     *
+     * 각 댓글 신고 정보를 공통 응답 DTO 형식(ReportDto)으로 매핑하여 반환합니다.
+     *
+     * @param reports 변환할 CommentReport 엔티티 리스트
+     * @return 변환된 ReportDto 리스트
+     */
     private List<ReportDto> mapCommentReportsToDto(List<CommentReport> reports) {
         return reports.stream()
             .map(report -> new ReportDto(
@@ -102,6 +139,14 @@ public class ReportService {
             .toList();
     }
 
+    /**
+     * EpisodeReport 엔티티 목록을 ReportDto 리스트로 변환합니다.
+     *
+     * 각 에피소드 신고 정보를 공통 응답 DTO 형식(ReportDto)으로 매핑하여 반환합니다.
+     *
+     * @param reports 변환할 EpisodeReport 엔티티 리스트
+     * @return 변환된 ReportDto 리스트
+     */
     private List<ReportDto> mapEpisodeReportsToDto(List<EpisodeReport> reports) {
         return reports.stream()
             .map(report -> new ReportDto(

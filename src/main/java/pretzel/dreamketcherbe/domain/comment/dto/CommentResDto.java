@@ -19,6 +19,12 @@ public record CommentResDto(
 
 ) {
 
+    /**
+     * Comment 엔티티로부터 CommentResDto 인스턴스를 생성합니다.
+     *
+     * @param comment 변환할 Comment 엔티티
+     * @return 주어진 Comment의 정보를 담은 CommentResDto 객체
+     */
     public static CommentResDto of(Comment comment) {
         return CommentResDto.builder()
             .id(comment.getId())

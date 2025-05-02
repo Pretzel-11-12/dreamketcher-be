@@ -20,6 +20,17 @@ public class RequesterInterceptor implements HandlerInterceptor {
     private final TokenExtractor tokenExtractor;
     private final RequesterContext requesterContext;
 
+    /**
+     * 컨트롤러 메서드에 @Requester 애노테이션이 있는 경우, 요청자의 정보를 추출하여 RequesterContext에 설정합니다.
+     *
+     * 인증 토큰이 있으면 회원 정보를, 없거나 유효하지 않으면 클라이언트 IP 기반의 게스트 정보를 설정합니다.
+     * 항상 true를 반환하여 요청 처리를 계속 진행합니다.
+     *
+     * @param request  현재 HTTP 요청
+     * @param response 현재 HTTP 응답
+     * @param handler  처리할 핸들러 객체
+     * @return 항상 true를 반환하여 요청 처리를 계속 진행함
+     */
     @Override
     public boolean preHandle(
         HttpServletRequest request,
@@ -55,6 +66,15 @@ public class RequesterInterceptor implements HandlerInterceptor {
         return true;
     }
 
+    /**
+     * HTTP 요청에서 클라이언트의 IP 주소를 추출합니다.
+     *
+     * 여러 프록시 및 네트워크 환경을 고려하여 다양한 HTTP 헤더에서 IP를 순차적으로 조회하며,
+     * 유효한 값이 없을 경우 기본적으로 request의 remote address를 반환합니다.
+     *
+     * @param request 클라이언트의 IP를 추출할 HTTP 요청 객체
+     * @return 추출된 클라이언트 IP 주소 문자열
+     */
     private String getClientIp(HttpServletRequest request) {
 
         String ip = request.getHeader("X-Forwarded-For");

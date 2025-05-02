@@ -17,12 +17,23 @@ public class RequesterArgumentResolver implements HandlerMethodArgumentResolver 
 
     private final RequesterContext requesterContext;
 
+    /**
+     * 메서드 파라미터가 {@code RequestInfo} 타입이고 {@link Requester} 애노테이션이 적용되어 있는지 여부를 반환합니다.
+     *
+     * @param parameter 검사할 메서드 파라미터
+     * @return 해당 파라미터가 지원 대상이면 {@code true}, 아니면 {@code false}
+     */
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.getParameterType().equals(RequestInfo.class) &&
             parameter.hasParameterAnnotation(Requester.class);
     }
 
+    /**
+     * 현재 요청자의 정보를 반환하여 컨트롤러 메서드의 인자로 주입합니다.
+     *
+     * @return 현재 요청자의 RequestInfo 객체
+     */
     @Override
     public Object resolveArgument(
         MethodParameter parameter,

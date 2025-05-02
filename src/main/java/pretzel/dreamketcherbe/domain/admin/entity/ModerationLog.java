@@ -41,6 +41,15 @@ public class ModerationLog extends BaseTimeEntity {
     @Column(name = "target_id", nullable = false)
     private Long targetId;
 
+    /**
+     * 주어진 정보로 ModerationLog 인스턴스를 생성합니다.
+     *
+     * @param actionType 수행된 모더레이션 작업의 유형
+     * @param targetType 모더레이션 대상의 유형
+     * @param detail 모더레이션 이벤트에 대한 상세 정보
+     * @param targetId 모더레이션 대상의 식별자
+     * @return 생성된 ModerationLog 객체
+     */
     public static ModerationLog of(ActionType actionType, TargetType targetType, String detail,
         Long targetId) {
         return ModerationLog.builder()

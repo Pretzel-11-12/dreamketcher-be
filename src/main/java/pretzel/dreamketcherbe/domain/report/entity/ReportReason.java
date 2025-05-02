@@ -33,6 +33,12 @@ public class ReportReason {
     @Column(name = "description", length = 100, nullable = false)
     private String description;
 
+    /**
+     * 주어진 ReportReasonCode로부터 기본 설명이 포함된 ReportReason 인스턴스를 생성합니다.
+     *
+     * @param code ReportReasonCode 열거형 값
+     * @return code와 해당 기본 설명이 설정된 ReportReason 객체
+     */
     public static ReportReason fromEnum(ReportReasonCode code) {
         return ReportReason.builder()
             .code(code)

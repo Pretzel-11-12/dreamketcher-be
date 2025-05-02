@@ -76,6 +76,19 @@ public class Recomment extends BaseTimeEntity {
     @JoinColumn(name = "comment_id")
     private Comment comment;
 
+    /**
+     * 새로운 대댓글 엔티티를 생성하고 초기 상태를 NORMAL로 설정합니다.
+     *
+     * @param content 대댓글의 내용
+     * @param parentCommentId 부모 댓글의 ID
+     * @param commentOrder 대댓글의 정렬 순서
+     * @param recommendationCount 추천 수
+     * @param notRecommendationCount 비추천 수
+     * @param member 작성자 회원 엔티티
+     * @param episode 관련 에피소드 엔티티
+     * @param webtoon 관련 웹툰 엔티티
+     * @param comment 부모 댓글 엔티티
+     */
     @Builder
     public Recomment(String content, Long parentCommentId, int commentOrder,
         int recommendationCount, int notRecommendationCount, Member member,
@@ -92,6 +105,16 @@ public class Recomment extends BaseTimeEntity {
         this.status = RecommentStatus.NORMAL;
     }
 
+    /**
+     * CreateRecommentReqDto와 관련 엔티티 정보를 기반으로 새로운 대댓글(Recomment) 인스턴스를 생성합니다.
+     *
+     * @param dto 대댓글 생성 요청 데이터 전송 객체
+     * @param commentOrder 대댓글의 정렬 순서
+     * @param member 대댓글 작성자
+     * @param episode 대댓글이 속한 에피소드
+     * @param comment 부모 댓글
+     * @return 생성된 Recomment 엔티티
+     */
     public static Recomment addOf(CreateRecommentReqDto dto, int commentOrder, Member member,
         Episode episode, Comment comment) {
         return Recomment.builder()
@@ -105,16 +128,29 @@ public class Recomment extends BaseTimeEntity {
             .build();
     }
 
+    /**
+     * 주어진 회원 ID가 이 대댓글의 작성자인지 검증하며, 작성자가 아닐 경우 예외를 발생시킵니다.
+     *
+     * @param memberId 검증할 회원의 ID
+     * @throws CommentException 작성자가 아닌 경우 UNAUTHORIZED_MEMBER 예외를 발생시킵니다.
+     */
     public void isAuthor(Long memberId) {
         if (!member.getId().equals(memberId)) {
             throw new CommentException(CommentExceptionType.UNAUTHORIZED_MEMBER);
         }
     }
 
+    /**
+     * 이 대댓글의 상태를 삭제됨(DELETED)으로 변경합니다.
+     */
     public void softDelete() {
         this.status = RecommentStatus.DELETED;
     }
 
+    /**
+     * 댓글의 상태를 신고됨(REPORTED)으로 변경합니다.
+     * 현재 상태가 NORMAL인 경우에만 상태가 변경됩니다.
+     */
     public void report() {
         if (this.status == RecommentStatus.NORMAL) {
             this.status = RecommentStatus.REPORTED;
@@ -125,14 +161,29 @@ public class Recomment extends BaseTimeEntity {
         this.recommendationCount = count;
     }
 
+    /**
+     * 비추천(반대) 수를 지정한 값으로 업데이트합니다.
+     *
+     * @param count 새로운 비추천(반대) 수
+     */
     public void updateNotRecommendationCount(int count) {
         this.notRecommendationCount = count;
     }
 
+    /**
+     * 현재 대댓글의 상태가 삭제됨(Deleted)인지 여부를 반환합니다.
+     *
+     * @return 삭제된 상태이면 true, 아니면 false
+     */
     public boolean isDeleted() {
         return this.status == RecommentStatus.DELETED;
     }
 
+    /**
+     * 이 대댓글의 상태가 신고됨(REPORTED)인지 여부를 반환합니다.
+     *
+     * @return 상태가 REPORTED이면 true, 그렇지 않으면 false
+     */
     public boolean isReported() {
         return this.status == RecommentStatus.REPORTED;
     }

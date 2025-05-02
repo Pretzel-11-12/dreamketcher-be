@@ -61,12 +61,13 @@ public class EpisodeReport extends BaseTimeEntity {
 
 
     /**
-     * 회원이 신고할 때 사용.
+     * 회원이 에피소드를 신고할 때 새로운 EpisodeReport 인스턴스를 생성합니다.
      *
-     * @param episodeId  댓글 ID
-     * @param memberId   신고자 회원 ID
-     * @param reason     신고 사유 엔티티
-     * @param reasonText 텍스트 or null
+     * @param episodeId 신고 대상 에피소드의 ID
+     * @param memberId 신고자 회원의 ID
+     * @param reason 신고 사유 엔티티
+     * @param reasonText 신고 상세 사유(선택)
+     * @return 생성된 EpisodeReport 객체
      */
     public static EpisodeReport forMember(
         Long episodeId,
@@ -84,11 +85,12 @@ public class EpisodeReport extends BaseTimeEntity {
     }
 
     /**
-     * 비회원(게스트)이 신고할 때 사용.
+     * 비회원(게스트)이 에피소드를 신고할 때 새로운 EpisodeReport 인스턴스를 생성합니다.
      *
-     * @param episodeId  댓글 ID
-     * @param reason     신고 사유 엔티티
-     * @param reasonText 텍스트 or null
+     * @param episodeId 신고 대상 에피소드의 ID
+     * @param reason 신고 사유 엔티티
+     * @param reasonText 추가 신고 사유 텍스트(선택)
+     * @return 비회원 신고용 EpisodeReport 객체
      */
     public static EpisodeReport forGuest(
         Long episodeId,
@@ -106,7 +108,11 @@ public class EpisodeReport extends BaseTimeEntity {
 
     // ---------------------------------------------------
     // JPA 콜백: 저장 전 검증
-    // ---------------------------------------------------
+    /**
+     * 엔티티가 저장되기 전에 신고자가 회원인지 검증합니다.
+     *
+     * 신고자 회원 ID가 없으면 {@code IllegalStateException}을 발생시켜, 비회원의 신고 저장을 방지합니다.
+     */
 
     @PrePersist
     private void validateReporter() {

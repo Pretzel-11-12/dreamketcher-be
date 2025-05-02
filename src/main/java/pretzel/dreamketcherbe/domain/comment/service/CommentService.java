@@ -675,7 +675,9 @@ public class CommentService {
     }
 
     /**
-     * Redis 답글 추천/비추천 데이터 복구
+     * 데이터베이스의 답글 추천 및 비추천 수를 Redis에 복구합니다.
+     *
+     * Redis에 해당 답글의 추천 또는 비추천 카운트 키가 없을 경우, 데이터베이스 값을 기반으로 Redis에 값을 설정합니다.
      */
     @Transactional(readOnly = true)
     public void reloadRecommentRedisFromDB() {
@@ -702,7 +704,18 @@ public class CommentService {
     }
 
     /**
-     * 댓글 신고 요청
+     * 댓글을 신고합니다.
+     *
+     * 지정한 회원, 댓글, 신고 사유 및 추가 사유 텍스트를 기반으로 댓글 신고를 생성하고 저장합니다.
+     * 신고된 댓글은 신고 상태로 변경됩니다.
+     *
+     * @param memberId 신고를 수행하는 회원의 ID
+     * @param commentId 신고 대상 댓글의 ID
+     * @param reasonId 신고 사유의 ID
+     * @param reasonText 추가 신고 사유(선택 사항)
+     *
+     * @throws CommentException 댓글이 존재하지 않을 경우 발생합니다.
+     * @throws IllegalStateException 신고 사유가 존재하지 않을 경우 발생합니다.
      */
     @Transactional
     public void reportComment(Long memberId, Long commentId, Long reasonId, String reasonText) {

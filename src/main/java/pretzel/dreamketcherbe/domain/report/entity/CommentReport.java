@@ -60,12 +60,13 @@ public class CommentReport extends BaseTimeEntity {
     private String adminNote;
 
     /**
-     * 회원이 신고할 때 사용.
+     * 회원이 댓글을 신고할 때 새로운 CommentReport 인스턴스를 생성합니다.
      *
-     * @param commentId  댓글 ID
-     * @param memberId   신고자 회원 ID
-     * @param reason     신고 사유 엔티티
-     * @param reasonText 텍스트 or null
+     * @param commentId 신고 대상 댓글의 ID
+     * @param memberId 신고자 회원의 ID
+     * @param reason 신고 사유 엔티티
+     * @param reasonText 추가 신고 사유(선택)
+     * @return 생성된 CommentReport 엔티티
      */
     public static CommentReport forMember(
         Long commentId,
@@ -83,11 +84,12 @@ public class CommentReport extends BaseTimeEntity {
     }
 
     /**
-     * 비회원(게스트)이 신고할 때 사용.
+     * 비회원(게스트)이 댓글을 신고할 수 있도록 CommentReport 인스턴스를 생성합니다.
      *
-     * @param commentId  댓글 ID
-     * @param reason     신고 사유 엔티티
-     * @param reasonText ETC(기타) 텍스트 or null
+     * @param commentId 신고 대상 댓글의 ID
+     * @param reason 신고 사유 엔티티
+     * @param reasonText 기타 사유 입력 시의 텍스트 또는 null
+     * @return 비회원 신고용 CommentReport 객체
      */
     public static CommentReport forGuest(
         Long commentId,
@@ -105,7 +107,13 @@ public class CommentReport extends BaseTimeEntity {
 
     // ---------------------------------------------------
     // JPA 콜백: 저장 전 검증
-    // ---------------------------------------------------
+    /**
+     * 엔티티가 저장되기 전에 신고자가 회원인지 검증합니다.
+     *
+     * reporterMemberId가 null인 경우 예외를 발생시켜, 비회원의 신고 저장을 방지합니다.
+     *
+     * @throws IllegalStateException reporterMemberId가 null일 때 "신고는 회원만 가능합니다." 메시지와 함께 예외가 발생합니다.
+     */
 
     @PrePersist
     private void validateReporter() {

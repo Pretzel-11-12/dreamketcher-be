@@ -198,7 +198,11 @@ public class CommentController {
     }
 
     /**
-     * 답글 비추천 해제
+     * 답글에 대한 비추천(싫어요)을 해제하고, 변경된 비추천 수를 반환합니다.
+     *
+     * @param memberId 인증된 회원의 ID
+     * @param recommentId 비추천을 해제할 답글의 ID
+     * @return 해제 후 답글의 비추천(싫어요) 수
      */
     @DeleteMapping("/{commentId}/recomment/{recommentId}/not-recommend")
     public ResponseEntity<Integer> cancelRecommentNotRecommend(@Auth Long memberId,
@@ -210,7 +214,13 @@ public class CommentController {
     }
 
     /**
-     * 댓글 신고
+     * 지정한 댓글을 신고합니다.
+     *
+     * 인증된 사용자가 댓글의 신고 사유와 함께 신고 요청을 보낼 때 사용됩니다.
+     *
+     * @param commentId 신고할 댓글의 ID
+     * @param request 신고 사유 정보가 담긴 요청 객체
+     * @return HTTP 201 Created 응답 (본문 없음)
      */
     @PostMapping("/{commentId}/report")
     public ResponseEntity<Void> reportComment(@Auth Long memberId,

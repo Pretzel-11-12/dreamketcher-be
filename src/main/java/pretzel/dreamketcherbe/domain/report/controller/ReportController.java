@@ -21,7 +21,15 @@ public class ReportController {
 
     private final ReportService reportService;
 
-    // todo: admin 확인 애노테이션 추가
+    /**
+     * 보고서 상태, 유형, 페이지네이션 정보를 기준으로 신고 목록을 조회합니다.
+     *
+     * @param status 조회할 신고 상태 (기본값: "PENDING")
+     * @param type   조회할 신고 유형 (선택 사항)
+     * @param page   페이지 번호 (기본값: 0)
+     * @param size   페이지 크기 (기본값: 20)
+     * @return 필터링 및 정렬된 신고 목록이 포함된 응답 객체
+     */
     @GetMapping
     public ResponseEntity<ReportResDto> getReports(
         @RequestParam(required = false, defaultValue = "PENDING") String status,
