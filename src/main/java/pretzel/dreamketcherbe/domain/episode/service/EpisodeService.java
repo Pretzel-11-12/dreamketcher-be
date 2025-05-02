@@ -599,6 +599,7 @@ public class EpisodeService {
     /**
      * 에피소드 신고
      */
+    @Transactional
     public void reportEpisode(Long memberId, Long webtoonId, Long episodeId, Long reasonId,
         String reasonText) {
         Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
