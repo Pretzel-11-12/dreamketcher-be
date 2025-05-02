@@ -33,6 +33,7 @@ import pretzel.dreamketcherbe.domain.episode.dto.MemberEpisodeLikeAndStarResDto;
 import pretzel.dreamketcherbe.domain.episode.dto.UpdateEpisodeReqDto;
 import pretzel.dreamketcherbe.domain.episode.dto.WebtoonEpisodeListResDto;
 import pretzel.dreamketcherbe.domain.episode.service.EpisodeService;
+import pretzel.dreamketcherbe.domain.report.dto.ReportEpisodeReqDto;
 
 @Slf4j
 @RestController
@@ -258,5 +259,19 @@ public class EpisodeController {
             int fallbackCount = episodeService.getLikeCountFallback(episodeId);
             return ResponseEntity.ok(fallbackCount);
         }
+    }
+
+    /**
+     * 에피소드 신고
+     */
+    @PostMapping("/{episodeId}/report")
+    public ResponseEntity<Void> reportEpisode(@Auth Long memberId,
+        @PathVariable("webtoonId") Long webtoonId,
+        @PathVariable("episodeId") Long episodeId,
+        @RequestBody @Valid ReportEpisodeReqDto request) {
+        episodeService.reportEpisode(memberId, webtoonId, episodeId, request.reasonId(),
+            request.reasonText());
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

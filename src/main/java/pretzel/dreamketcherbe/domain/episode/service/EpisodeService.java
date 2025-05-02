@@ -47,6 +47,10 @@ import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.report.entity.EpisodeReport;
+import pretzel.dreamketcherbe.domain.report.entity.ReportReason;
+import pretzel.dreamketcherbe.domain.report.repository.EpisodeReportRepository;
+import pretzel.dreamketcherbe.domain.report.repository.ReportReasonRepository;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonException;
 import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
@@ -96,6 +100,8 @@ public class EpisodeService {
     private final NotRecommendationRepository notRecommendationRepository;
     private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
     private final WebtoonService webtoonService;
+    private final ReportReasonRepository reportReasonRepository;
+    private final EpisodeReportRepository episodeReportRepository;
 
     /**
      * 에피소드 목록 조회
@@ -588,5 +594,33 @@ public class EpisodeService {
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_STAR_NOT_FOUND));
 
         episodeStarRepository.delete(episodeStar);
+    }
+
+    /**
+     * 에피소드 신고
+     */
+    @Transactional
+    public void reportEpisode(Long memberId, Long webtoonId, Long episodeId, Long reasonId,
+        String reasonText) {
+        Webtoon findWebtoon = webtoonRepository.findById(webtoonId)
+            .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));
+
+        Episode findEpisode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        if (!findEpisode.getWebtoon().getId().equals(findWebtoon.getId())) {
+            throw new EpisodeException(EpisodeExceptionType.INVALID_EPISODE);
+        }
+
+        ReportReason findReason = reportReasonRepository.findById(reasonId)
+            .orElseThrow(() -> new IllegalStateException()); // 추후 수정
+
+        EpisodeReport findEpisodeReport = EpisodeReport.forMember(webtoonId, episodeId, memberId,
+            findReason,
+            reasonText);
+        episodeReportRepository.save(findEpisodeReport);
+
+        findEpisode.report();
+        episodeRepository.save(findEpisode);
     }
 }

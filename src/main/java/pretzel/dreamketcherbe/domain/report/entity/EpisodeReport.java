@@ -33,6 +33,9 @@ public class EpisodeReport extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "webtoon_id", nullable = false)
+    private Long webtoonId;
+
     @Column(name = "episode_id", nullable = false)
     private Long episodeId;
 
@@ -69,12 +72,14 @@ public class EpisodeReport extends BaseTimeEntity {
      * @param reasonText 텍스트 or null
      */
     public static EpisodeReport forMember(
+        Long webtoonId,
         Long episodeId,
         Long memberId,
         ReportReason reason,
         String reasonText
     ) {
         return EpisodeReport.builder()
+            .webtoonId(webtoonId)
             .episodeId(episodeId)
             .reporterMemberId(memberId)
             .reason(reason)

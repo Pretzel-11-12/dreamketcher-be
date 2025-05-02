@@ -35,12 +35,12 @@ public class ReportCreationServiceImpl implements ReportCreationService {
 
     @Override
     @Transactional
-    public Long reportEpisode(Long episodeId, ReportCommand cmd) {
+    public Long reportEpisode(Long webtoonId, Long episodeId, ReportCommand cmd) {
 
         var reason = findReportReason(cmd.reasonId());
 
         var report = cmd.reporterMemberId() != null
-            ? EpisodeReport.forMember(episodeId, cmd.reporterMemberId(), reason,
+            ? EpisodeReport.forMember(webtoonId, episodeId, cmd.reporterMemberId(), reason,
             cmd.reasonText())
             : EpisodeReport.forGuest(episodeId, reason, cmd.reasonText());
 
