@@ -234,7 +234,9 @@ public class CommentService {
             (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(findComment.getId())
                 + 1;
 
-        Recomment newRecomment = Recomment.addOf(request, commentOrder, findMember, findEpisode,
+        String filteredContent = wordFilterService.filter(request.content());
+        Recomment newRecomment = Recomment.addOf(filteredContent, commentOrder, findMember,
+            findEpisode,
             findComment);
         recommentRepository.save(newRecomment);
 
