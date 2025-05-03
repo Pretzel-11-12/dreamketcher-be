@@ -14,8 +14,8 @@ public class LoggingEventPublisher implements AdminEventPublisher {
 
     @Override
     public void publish(Object event) {
-        LocalDateTime timesteamp = LocalDateTime.now();
-        System.out.println("이벤트 발행" + event.getClass().getSimpleName() + ": " + timesteamp);
+        LocalDateTime timestamp = LocalDateTime.now();
+        System.out.println("이벤트 발행" + event.getClass().getSimpleName() + ": " + timestamp);
 
         Arrays.stream(event.getClass().getDeclaredFields())
             .peek(f -> f.setAccessible(true))
