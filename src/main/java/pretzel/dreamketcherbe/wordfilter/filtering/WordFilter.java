@@ -41,7 +41,6 @@ public class WordFilter {
                 int start = i - node.word.length() + 1;
                 int end = i;
 
-                // 3️⃣ 이 구간이 허용어에 포함되면 패스
                 if (isInAllowedRanges(start, end, allowedRanges)) {
                     continue;
                 }
