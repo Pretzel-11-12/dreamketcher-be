@@ -3,9 +3,11 @@ package pretzel.dreamketcherbe.wordfilter.event;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class LoggingEventPublisher implements AdminEventPublisher {
@@ -15,18 +17,20 @@ public class LoggingEventPublisher implements AdminEventPublisher {
     @Override
     public void publish(Object event) {
         LocalDateTime timestamp = LocalDateTime.now();
-        System.out.println("이벤트 발행" + event.getClass().getSimpleName() + ": " + timestamp);
+        log.info("이벤트 발행{}: {}", event.getClass().getSimpleName(), timestamp);
 
         Arrays.stream(event.getClass().getDeclaredFields())
-            .peek(f -> f.setAccessible(true))
             .forEach(f -> {
+                boolean accessible = f.canAccess(event);
                 try {
-                    System.out.println("발행 내용" + f.getName() + ": " + f.get(event));
+                    f.setAccessible(true);
+                    System.out.println("발행 내용 " + f.getName() + ": " + f.get(event));
                 } catch (IllegalAccessException e) {
-                    System.out.println("발행 내용" + f.getName() + ": " + e.getMessage());
+                    System.out.println("발행 내용 " + f.getName() + ": " + e.getMessage());
+                } finally {
+                    f.setAccessible(accessible);
                 }
             });
         eventPublisher.publishEvent(event);
     }
-
 }
