@@ -54,8 +54,7 @@ public class EpisodeBatchConfig {
                     "JOIN FETCH e.webtoon w " +
                     "LEFT JOIN FETCH w.member m " +
                     "WHERE FUNCTION('DATE', e.publishedAt) = :today " +
-                    "AND e.published = false " +
-                    "AND e.status = 'APPROVAL'")
+                    "AND e.published = false")
             .parameterValues(Map.of("today", LocalDate.now()))
             .pageSize(10)
             .build();

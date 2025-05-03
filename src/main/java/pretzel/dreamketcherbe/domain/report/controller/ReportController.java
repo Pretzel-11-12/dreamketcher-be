@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto;
 import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
 import pretzel.dreamketcherbe.domain.report.entity.ReportType;
@@ -24,6 +25,7 @@ public class ReportController {
     // todo: admin 확인 애노테이션 추가
     @GetMapping
     public ResponseEntity<ReportResDto> getReports(
+        @Auth Long memberId,
         @RequestParam(required = false, defaultValue = "PENDING") String status,
         @RequestParam(required = false) String type,
         @RequestParam(required = false, defaultValue = "0") int page,
@@ -41,6 +43,7 @@ public class ReportController {
             Sort.by(Direction.DESC, "createdAt")
         );
 
-        return ResponseEntity.ok(reportService.getReports(reportStatus, reportType, pageRequest));
+        return ResponseEntity.ok(
+            reportService.getReports(memberId, reportStatus, reportType, pageRequest));
     }
 }
