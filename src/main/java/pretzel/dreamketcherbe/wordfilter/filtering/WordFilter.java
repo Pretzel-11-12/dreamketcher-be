@@ -21,11 +21,11 @@ public class WordFilter {
     }
 
     public String filter(String input) {
+        List<int[]> allowedRanges = findAllowedRanges(input);
+
         WordNode node = badWordTrie.getRoot();
         StringBuilder sb = new StringBuilder(input);
         int length = input.length();
-
-        List<int[]> allowedRanges = findAllowedRanges(input);
 
         for (int i = 0; i < length; i++) {
             char c = input.charAt(i);
@@ -76,7 +76,7 @@ public class WordFilter {
 
                 if (node.word != null) {
                     ranges.add(new int[]{j - node.word.length() + 1, j});
-                    break; // 허용어 하나 찾으면 바로 다음으로
+                    break;
                 }
             }
         }

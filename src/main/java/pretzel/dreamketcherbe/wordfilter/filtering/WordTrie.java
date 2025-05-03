@@ -40,7 +40,11 @@ public class WordTrie {
                     failNode = failNode.fail;
                 }
 
-                child.fail = failNode.children.getOrDefault(c, root);
+                if (failNode.children.containsKey(c) && failNode.children.get(c) != child) {
+                    child.fail = failNode.children.get(c);
+                } else {
+                    child.fail = root;
+                }
                 queue.add(child);
             }
         }
