@@ -36,15 +36,11 @@ public class WordTrie {
 
                 WordNode failNode = current.fail;
 
-                while (failNode != root && failNode.children.containsKey(c)) {
+                while (failNode != root && !failNode.children.containsKey(c)) {
                     failNode = failNode.fail;
                 }
 
-                if (failNode.children.containsKey(c) && failNode.children.get(c) != child) {
-                    child.fail = failNode.children.get(c);
-                } else {
-                    child.fail = root;
-                }
+                child.fail = failNode.children.getOrDefault(c, root);
                 queue.add(child);
             }
         }
