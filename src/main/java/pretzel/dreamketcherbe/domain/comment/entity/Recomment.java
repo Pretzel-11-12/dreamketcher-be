@@ -92,10 +92,10 @@ public class Recomment extends BaseTimeEntity {
         this.status = RecommentStatus.NORMAL;
     }
 
-    public static Recomment addOf(CreateRecommentReqDto dto, int commentOrder, Member member,
+    public static Recomment addOf(String content, int commentOrder, Member member,
         Episode episode, Comment comment) {
         return Recomment.builder()
-            .content(dto.content())
+            .content(content)
             .parentCommentId(comment.getId())
             .commentOrder(commentOrder)
             .member(member)
