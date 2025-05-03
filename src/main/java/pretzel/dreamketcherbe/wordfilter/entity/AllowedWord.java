@@ -12,12 +12,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
 
 @Table(name = "allowed_words")
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AllowedWord {
+public class AllowedWord extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,10 +26,6 @@ public class AllowedWord {
 
     @Column(nullable = false, unique = true)
     private String word;
-
-    @CreatedDate
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
 
     @Builder
     public AllowedWord(String word) {
