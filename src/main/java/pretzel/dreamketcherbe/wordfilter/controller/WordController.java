@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Auth;
+import pretzel.dreamketcherbe.wordfilter.dto.AllowedWordListResDto;
+import pretzel.dreamketcherbe.wordfilter.dto.BadWordListResDto;
 import pretzel.dreamketcherbe.wordfilter.dto.CreateWordReqDto;
 import pretzel.dreamketcherbe.wordfilter.entity.AllowedWord;
 import pretzel.dreamketcherbe.wordfilter.entity.BadWord;
@@ -41,10 +43,14 @@ public class WordController {
     }
 
     @GetMapping("/bad-words")
-    public ResponseEntity<List<BadWord>> getAllBadWords(@Auth Long memberId) {
+    public ResponseEntity<List<BadWordListResDto>> getAllBadWords(@Auth Long memberId) {
         List<BadWord> badWords = wordService.getAllBadWords();
 
-        return ResponseEntity.ok(badWords);
+        List<BadWordListResDto> response = badWords.stream()
+            .map(BadWordListResDto::of)
+            .toList();
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/add/allowed-word")
@@ -64,9 +70,13 @@ public class WordController {
     }
 
     @GetMapping("/allowed-words")
-    public ResponseEntity<List<AllowedWord>> getAllAllowedWords(@Auth Long memberId) {
+    public ResponseEntity<List<AllowedWordListResDto>> getAllAllowedWords(@Auth Long memberId) {
         List<AllowedWord> allowedWords = wordService.getAllAllowedWords();
 
-        return ResponseEntity.ok(allowedWords);
+        List<AllowedWordListResDto> response = allowedWords.stream()
+            .map(AllowedWordListResDto::of)
+            .toList();
+
+        return ResponseEntity.ok(response);
     }
 }
