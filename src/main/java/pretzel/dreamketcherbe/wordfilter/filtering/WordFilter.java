@@ -37,17 +37,19 @@ public class WordFilter {
             if (node.children.containsKey(c)) {
                 node = node.children.get(c);
             }
-            if (node.word != null) {
-                int start = i - node.word.length() + 1;
-                int end = i;
 
-                if (isInAllowedRanges(start, end, allowedRanges)) {
-                    continue;
+            WordNode temp = node;
+            while (temp != badWordTrie.getRoot()) {
+                if (temp.word != null) {
+                    int start = i - temp.word.length() + 1;
+                    int end = i;
+                    if (!isInAllowedRanges(start, end, allowedRanges)) {
+                        for (int j = start; j <= end; j++) {
+                            sb.setCharAt(j, '@');
+                        }
+                    }
                 }
-
-                for (int j = start; j <= end; j++) {
-                    sb.setCharAt(j, '@');
-                }
+                temp = temp.fail;
             }
         }
 
