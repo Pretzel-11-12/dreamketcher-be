@@ -10,7 +10,6 @@ import pretzel.dreamketcherbe.wordfilter.entity.BadWord;
 import pretzel.dreamketcherbe.wordfilter.event.WordReloadEvent;
 import pretzel.dreamketcherbe.wordfilter.exception.WordFilterException;
 import pretzel.dreamketcherbe.wordfilter.exception.WordFilteringExceptionType;
-import pretzel.dreamketcherbe.wordfilter.filtering.WordFilter;
 import pretzel.dreamketcherbe.wordfilter.repository.AllowedWordRepository;
 import pretzel.dreamketcherbe.wordfilter.repository.BadWordRepository;
 
@@ -21,7 +20,6 @@ public class WordService {
     private final ApplicationEventPublisher eventPublisher;
     private final BadWordRepository badWordRepository;
     private final AllowedWordRepository allowedWordRepository;
-    private final WordFilter wordFilter;
 
     @Transactional
     public void addBadWord(String word) {
