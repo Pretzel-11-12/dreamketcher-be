@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.wordfilter.entity.AllowedWord;
 import pretzel.dreamketcherbe.wordfilter.entity.BadWord;
 import pretzel.dreamketcherbe.wordfilter.event.WordReloadEvent;
@@ -28,6 +29,7 @@ public class WordFilterService {
         return wordFilter.filter(input);
     }
 
+    @Transactional(readOnly = true)
     public void reload() {
         List<String> badWords = badWordRepository.findAll().stream()
             .map(BadWord::getWord)
