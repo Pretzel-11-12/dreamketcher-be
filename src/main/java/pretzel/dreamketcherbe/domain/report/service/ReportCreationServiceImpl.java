@@ -28,21 +28,21 @@ public class ReportCreationServiceImpl implements ReportCreationService {
         var report = cmd.reporterMemberId() != null
             ? CommentReport.forMember(commentId, cmd.reporterMemberId(), reason,
             cmd.reasonText())
-            : CommentReport.forGuest(commentId, cmd.reporterIp(), reason, cmd.reasonText());
+            : CommentReport.forGuest(commentId, reason, cmd.reasonText());
 
         return commentReportRepository.save(report).getId();
     }
 
     @Override
     @Transactional
-    public Long reportEpisode(Long episodeId, ReportCommand cmd) {
+    public Long reportEpisode(Long webtoonId, Long episodeId, ReportCommand cmd) {
 
         var reason = findReportReason(cmd.reasonId());
 
         var report = cmd.reporterMemberId() != null
-            ? EpisodeReport.forMember(episodeId, cmd.reporterMemberId(), reason,
+            ? EpisodeReport.forMember(webtoonId, episodeId, cmd.reporterMemberId(), reason,
             cmd.reasonText())
-            : EpisodeReport.forGuest(episodeId, cmd.reporterIp(), reason, cmd.reasonText());
+            : EpisodeReport.forGuest(episodeId, reason, cmd.reasonText());
 
         return episodeReportRepository.save(report).getId();
 

@@ -1,11 +1,15 @@
 package pretzel.dreamketcherbe.common.logging;
 
+import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.HikariPoolMXBean;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +23,8 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 @Slf4j
 @RequiredArgsConstructor
 public class RequestLoggingFilter extends OncePerRequestFilter {
+
+    private final HikariDataSource hikariDataSource;
 
     @Override
     protected void doFilterInternal(
@@ -48,21 +54,21 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         ContentCachingResponseWrapper response,
         long totalTimeMillis
     ) {
-        int status = response.getStatus();
+        StringBuilder logMessage = new StringBuilder();
+
         String method = request.getMethod();
         String requestURI = request.getRequestURI();
         String queryString = request.getQueryString();
-        String statusCode = HttpStatus.valueOf(status).toString();
-
-        StringBuilder logMessage = new StringBuilder();
-
-        logMessage.append("|\n| [REQUEST] (").append(method).append(") ").append(requestURI);
+        String status = HttpStatus.valueOf(response.getStatus()).toString();
+        logMessage.append("|\n| [REQUEST] (")
+            .append(method).append(") ")
+            .append(requestURI)
+            .append("\n| >> STATUS_CODE: ")
+            .append(status);
 
         getFormattedQueryString(queryString).ifPresent(v ->
             logMessage.append(v).append(queryString)
         );
-
-        logMessage.append("\n| >> STATUS_CODE: ").append(statusCode);
 
         getRequestBody(request).ifPresent(v ->
             logMessage.append("\n| >> REQUEST_BODY: ").append(v)
@@ -72,9 +78,33 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             logMessage.append("\n| >> RESPONSE_BODY: ").append(v)
         );
 
-        logMessage.append("\n| >> TOTAL_LATENCY_TIME: ").append(totalTimeMillis).append("ms");
+        String remoteIp = request.getRemoteAddr();
+        String xff = Optional.ofNullable(request.getHeader("X-Forwarded-For")).orElse("-");
+        String ua = Optional.ofNullable(request.getHeader("User-Agent")).orElse("Unknown");
 
-        if (status < 500) {
+        logMessage
+            .append("\n| >> REMOTE_ADDR: ").append(remoteIp)
+            .append("\n| >> X-Forwarded-For: ").append(xff)
+            .append("\n| >> USER_AGENT: ").append(ua);
+
+        ThreadMXBean tmxb = ManagementFactory.getThreadMXBean();
+        int threadCount = tmxb.getThreadCount();
+        logMessage.append("\n| >> THREAD_COUNT: ").append(threadCount);
+
+        HikariPoolMXBean poolMXBean = hikariDataSource.getHikariPoolMXBean();
+        int totalConnections = poolMXBean.getTotalConnections();
+        int activeConnections = poolMXBean.getActiveConnections();
+        int idleConnections = poolMXBean.getIdleConnections();
+
+        logMessage.append("\n| >> DB_CONNECTION: ")
+            .append("totalConnections=").append(totalConnections)
+            .append(", activeConnections=").append(activeConnections)
+            .append(", idleConnections=").append(idleConnections);
+
+        logMessage.append("\n| >> TOTAL_LATENCY_TIME: ").append(totalTimeMillis)
+            .append("ms");
+
+        if (response.getStatus() < 500) {
             log.info(logMessage.toString());
         } else {
             log.error(logMessage.toString());

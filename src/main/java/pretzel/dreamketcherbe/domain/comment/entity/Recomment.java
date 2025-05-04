@@ -2,6 +2,8 @@ package pretzel.dreamketcherbe.domain.comment.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,8 +30,8 @@ import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLDelete(sql = "UPDATE re_comments SET is_deleted = true WHERE id = ?")
-@SQLRestriction("is_deleted = false")
+@SQLDelete(sql = "UPDATE re_comments SET status = 'DELETED' WHERE id = ?")
+@SQLRestriction("status = 'NORMAL'")
 public class Recomment extends BaseTimeEntity {
 
     @Id
@@ -53,9 +55,10 @@ public class Recomment extends BaseTimeEntity {
     @ColumnDefault("0")
     private int notRecommendationCount;
 
-    @Column(name = "is_deleted", nullable = false)
-    @ColumnDefault("false")
-    private boolean isDeleted;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @ColumnDefault("'NORMAL'")
+    private RecommentStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
@@ -86,12 +89,13 @@ public class Recomment extends BaseTimeEntity {
         this.webtoon = webtoon;
         this.episode = episode;
         this.comment = comment;
+        this.status = RecommentStatus.NORMAL;
     }
 
-    public static Recomment addOf(CreateRecommentReqDto dto, int commentOrder, Member member,
+    public static Recomment addOf(String content, int commentOrder, Member member,
         Episode episode, Comment comment) {
         return Recomment.builder()
-            .content(dto.content())
+            .content(content)
             .parentCommentId(comment.getId())
             .commentOrder(commentOrder)
             .member(member)
@@ -108,8 +112,12 @@ public class Recomment extends BaseTimeEntity {
     }
 
     public void softDelete() {
-        if (!isDeleted) {
-            this.isDeleted = true;
+        this.status = RecommentStatus.DELETED;
+    }
+
+    public void report() {
+        if (this.status == RecommentStatus.NORMAL) {
+            this.status = RecommentStatus.REPORTED;
         }
     }
 
@@ -119,5 +127,13 @@ public class Recomment extends BaseTimeEntity {
 
     public void updateNotRecommendationCount(int count) {
         this.notRecommendationCount = count;
+    }
+
+    public boolean isDeleted() {
+        return this.status == RecommentStatus.DELETED;
+    }
+
+    public boolean isReported() {
+        return this.status == RecommentStatus.REPORTED;
     }
 }

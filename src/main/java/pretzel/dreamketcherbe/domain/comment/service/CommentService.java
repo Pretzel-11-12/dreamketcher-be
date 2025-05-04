@@ -50,6 +50,11 @@ import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.wordfilter.filtering.WordFilterService;
+import pretzel.dreamketcherbe.domain.report.entity.CommentReport;
+import pretzel.dreamketcherbe.domain.report.entity.ReportReason;
+import pretzel.dreamketcherbe.domain.report.repository.CommentReportRepository;
+import pretzel.dreamketcherbe.domain.report.repository.ReportReasonRepository;
 
 @Slf4j
 @Service
@@ -113,6 +118,9 @@ public class CommentService {
 
     private final RedisScript<Long> removeRecommend = removeRecommendScript;
     private final RedisScript<Long> removeNotRecommend = removeRecommendScript;
+    private final WordFilterService wordFilterService;
+    private final ReportReasonRepository reportReasonRepository;
+    private final CommentReportRepository commentReportRepository;
 
 
     /**
@@ -127,7 +135,9 @@ public class CommentService {
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
-        Comment newComment = Comment.addOf(request, findMember, findEpisode);
+        String filteredContent = wordFilterService.filter(request.content());
+
+        Comment newComment = Comment.addOf(filteredContent, findMember, findEpisode);
         commentRepository.save(newComment);
 
         return CreateCommentResDto.of(newComment);
@@ -224,7 +234,9 @@ public class CommentService {
             (int) recommentRepository.countByParentCommentIdAndIsDeletedFalse(findComment.getId())
                 + 1;
 
-        Recomment newRecomment = Recomment.addOf(request, commentOrder, findMember, findEpisode,
+        String filteredContent = wordFilterService.filter(request.content());
+        Recomment newRecomment = Recomment.addOf(filteredContent, commentOrder, findMember,
+            findEpisode,
             findComment);
         recommentRepository.save(newRecomment);
 
@@ -694,4 +706,51 @@ public class CommentService {
             }
         }
     }
+
+    /**
+     * 댓글 신고 요청
+     */
+    @Transactional
+    public void reportComment(Long memberId, Long commentId, Long reasonId, String reasonText) {
+        Comment findComment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
+
+        ReportReason findReason = reportReasonRepository.findById(reasonId)
+            .orElseThrow(() -> new IllegalStateException()); // 추후 수정
+
+        CommentReport findCommentReport = CommentReport.forMember(commentId, memberId, findReason,
+            reasonText);
+        if (commentReportRepository.existsByCommentIdAndMemberId(commentId, memberId)) {
+            throw new CommentException(CommentExceptionType.REPORTED_COMMENT);
+        }
+        commentReportRepository.save(findCommentReport);
+
+        findComment.report();
+        commentRepository.save(findComment);
+    }
+
+//    /**
+//     * 답글 신고 요청
+//     */
+//    @Transactional
+//    public void reportRecomment(Long memberId, Long commentId, Long recommentId, Long reasonId,
+//        String reasonText) {
+//        Comment findComment = commentRepository.findById(commentId)
+//            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
+//
+//        Recomment findRecomment = recommentRepository.findById(recommentId)
+//            .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
+//
+//        ReportReason findReason = reportReasonRepository.findById(reasonId)
+//            .orElseThrow(() -> new IllegalStateException()); // 추후 수정
+//
+//        CommentReport findCommentReport = CommentReport.forMember(memberId, commentId, recommentId,
+//            findReason,
+//            reasonText);
+//        commentReportRepository.save(findCommentReport);
+//
+//        findRecomment.report();
+//        recommentRepository.save(findRecomment);
+//    }
+
 }

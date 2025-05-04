@@ -16,5 +16,4 @@ public class AdminAuthorizationServiceImpl implements AdminAuthorizationService 
             .map(member -> "ADMIN".equals(member.getRole()))
             .orElse(false);
     }
-
 }

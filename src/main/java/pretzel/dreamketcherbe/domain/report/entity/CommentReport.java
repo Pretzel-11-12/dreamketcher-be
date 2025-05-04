@@ -32,9 +32,6 @@ public class CommentReport extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "reporter_ip", length = 45)
-    private String reporterIp;
-
     @Column(name = "comment_id", nullable = false)
     private Long commentId;
 
@@ -79,7 +76,6 @@ public class CommentReport extends BaseTimeEntity {
         return CommentReport.builder()
             .commentId(commentId)
             .reporterMemberId(memberId)
-            .reporterIp(null)
             .reason(reason)
             .reasonText(reasonText)
             .status(ReportStatus.PENDING)
@@ -90,20 +86,17 @@ public class CommentReport extends BaseTimeEntity {
      * 비회원(게스트)이 신고할 때 사용.
      *
      * @param commentId  댓글 ID
-     * @param reporterIp 신고자 IP
      * @param reason     신고 사유 엔티티
      * @param reasonText ETC(기타) 텍스트 or null
      */
     public static CommentReport forGuest(
         Long commentId,
-        String reporterIp,
         ReportReason reason,
         String reasonText
     ) {
         return CommentReport.builder()
             .commentId(commentId)
             .reporterMemberId(null)
-            .reporterIp(reporterIp)
             .reason(reason)
             .reasonText(reasonText)
             .status(ReportStatus.PENDING)
@@ -117,12 +110,10 @@ public class CommentReport extends BaseTimeEntity {
     @PrePersist
     private void validateReporter() {
         boolean hasMember = reporterMemberId != null;
-        boolean hasIp = reporterIp != null && !reporterIp.isBlank();
 
-        if (hasMember == hasIp) {
-            // 둘 다 있거나, 둘 다 없는 경우 에러
+        if (!hasMember) {
             throw new IllegalStateException(
-                "신고자는 회원 또는 게스트(IP) 중 하나만 지정되어야 합니다."
+                "신고는 회원만 가능합니다."
             );
         }
     }
