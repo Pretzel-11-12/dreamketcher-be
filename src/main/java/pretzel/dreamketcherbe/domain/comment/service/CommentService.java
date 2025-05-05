@@ -603,58 +603,17 @@ public class CommentService {
     /**
      * Redis와 DB 댓글 동기화
      */
-    public void syncRecommendationCountToDatabase() {
-        List<Long> commentIds = commentRepository.findAllCommentIds();
-
-        for (Long commentId : commentIds) {
-            String recommendCountKey = RECOMMEND_COUNT_KEY_PREFIX + commentId;
-            String notRecommendCountKey = NOT_RECOMMEND_COUNT_KEY_PREFIX + commentId;
-
-            String recommendCountValue = redisTemplate.opsForValue().get(recommendCountKey);
-            String notRecommendCountValue = redisTemplate.opsForValue().get(notRecommendCountKey);
-
-            int recommendCount =
-                recommendCountValue == null ? 0 : Integer.parseInt(recommendCountValue);
-            int notRecommendCount =
-                notRecommendCountValue == null ? 0 : Integer.parseInt(notRecommendCountValue);
-
-            Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
-
-            comment.updateRecommendationCount(recommendCount);
-            comment.updateNotRecommendationCount(notRecommendCount);
-            commentRepository.save(comment);
-        }
+    public void syncRecommendationCountToDatabase(Long commentId, int recommendCount,
+        int notRecommendCount) {
+        commentRepository.updateCount(commentId, recommendCount, notRecommendCount);
     }
 
     /**
      * Redis와 DB 답글 동기화
      */
-    public void syncRecommentRecommendationCountToDatabase() {
-        List<Long> recommentIds = recommentRepository.findAllRecommentIds();
-
-        for (Long recommentId : recommentIds) {
-            String recommendRecommentCountKey = RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
-            String notRecommendRecommentCountKey =
-                RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recommentId;
-
-            String recommendCountValue = redisTemplate.opsForValue()
-                .get(recommendRecommentCountKey);
-            String notRecommendCountValue = redisTemplate.opsForValue()
-                .get(notRecommendRecommentCountKey);
-
-            int recommendCount =
-                recommendCountValue == null ? 0 : Integer.parseInt(recommendCountValue);
-            int notRecommendCount =
-                notRecommendCountValue == null ? 0 : Integer.parseInt(notRecommendCountValue);
-
-            Recomment recomment = recommentRepository.findById(recommentId)
-                .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
-
-            recomment.updateRecommendationCount(recommendCount);
-            recomment.updateNotRecommendationCount(notRecommendCount);
-            recommentRepository.save(recomment);
-        }
+    public void syncRecommentRecommendationCountToDatabase(Long recommentId, int recommendCount,
+        int notRecommendCount) {
+        recommentRepository.updateCount(recommentId, recommendCount, notRecommendCount);
     }
 
     /**

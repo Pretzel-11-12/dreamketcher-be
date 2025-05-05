@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
@@ -35,4 +36,17 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query("UPDATE Comment c SET c.status = 'DELETED' WHERE c.episode.id = :episodeId AND c.status = 'NORMAL' AND c.episode.published = true")
     void deleteByEpisode(@Param("episodeId") Long episodeId);
 
+    @Modifying
+    @Transactional
+    @Query(
+        "UPDATE Comment c " +
+            "SET c.recommendationCount    = :recommendCount, " +
+            "    c.notRecommendationCount = :notRecommendCount " +
+            "WHERE c.id = :commentId"
+    )
+    int updateCount(
+        @Param("commentId") Long commentId,
+        @Param("recommendCount") int recommendCount,
+        @Param("notRecommendCount") int notRecommendCount
+    );
 }
