@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.Cursor;
@@ -206,10 +207,22 @@ public class CommentService {
         Episode findEpisode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
+        Sort sort;
+        String order = pageReqDto.getOrder().toLowerCase();
+
+        if ("recommend".equals(order)) {
+            sort = Sort.by(
+                Order.desc("recommendationCount"),
+                Order.desc("createdAt")
+            );
+        } else {
+            sort = Sort.by(Order.desc("createdAt"));
+        }
+
         Pageable pageable = PageRequest.of(
             pageReqDto.getPage(),
             pageReqDto.getSize(),
-            Sort.by(Sort.Direction.fromString(pageReqDto.getOrder()), "createdAt")
+            sort
         );
 
         Page<Comment> comments = commentRepository.findByEpisodeId(episodeId,
