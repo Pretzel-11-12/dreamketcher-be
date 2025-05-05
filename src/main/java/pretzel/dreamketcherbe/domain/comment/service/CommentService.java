@@ -630,7 +630,7 @@ public class CommentService {
      * 누락된 댓글 복구
      */
     @Transactional(readOnly = true)
-    private void reloadCommentRedisFromDB() {
+    public void reloadCommentRedisFromDB() {
         List<Comment> comments = commentRepository.findAll();
         List<String> existingKeys = scanKeys("comment:recommendCount:*");
 
