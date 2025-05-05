@@ -1,8 +1,12 @@
 package pretzel.dreamketcherbe.domain.comment.service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -10,7 +14,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.StringRedisConnection;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
@@ -121,6 +130,7 @@ public class CommentService {
     private final WordFilterService wordFilterService;
     private final ReportReasonRepository reportReasonRepository;
     private final CommentReportRepository commentReportRepository;
+    private final CommentScheduler commentScheduler;
 
 
     /**
@@ -617,53 +627,97 @@ public class CommentService {
     }
 
     /**
-     * Redis 댓글 추천/비추천 데이터 복구
+     * 누락된 댓글 복구
      */
     @Transactional(readOnly = true)
-    public void reloadCommentRedisFromDB() {
+    private void reloadCommentRedisFromDB() {
         List<Comment> comments = commentRepository.findAll();
+        List<String> existingKeys = scanKeys("comment:recommendCount:*");
 
-        for (Comment comment : comments) {
-            String recommendCountKey = RECOMMEND_COUNT_KEY_PREFIX + comment.getId();
-            String notRecommendCountKey = NOT_RECOMMEND_COUNT_KEY_PREFIX + comment.getId();
+        Set<Long> existingIds = existingKeys.stream()
+            .map(this::extractId)
+            .collect(Collectors.toSet());
 
-            if (Boolean.FALSE.equals(redisTemplate.hasKey(recommendCountKey))) {
-                redisTemplate.opsForValue()
-                    .set(recommendCountKey, String.valueOf(comment.getRecommendationCount()));
+        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            StringRedisConnection stringConnection = (StringRedisConnection) connection;
+
+            for (Comment c : comments) {
+                Long id = c.getId();
+
+                if (!existingIds.contains(id)) {
+                    stringConnection.set(
+                        RECOMMEND_COUNT_KEY_PREFIX + id,
+                        String.valueOf(c.getRecommendationCount())
+                    );
+                }
+
+                if (existingIds.contains(id)) {
+                    stringConnection.set(
+                        NOT_RECOMMEND_COUNT_KEY_PREFIX + id,
+                        String.valueOf(c.getNotRecommendationCount())
+                    );
+                }
             }
-
-            if (Boolean.FALSE.equals(redisTemplate.hasKey(notRecommendCountKey))) {
-                redisTemplate.opsForValue()
-                    .set(notRecommendCountKey, String.valueOf(comment.getNotRecommendationCount()));
-            }
-        }
+            return null;
+        });
     }
 
     /**
-     * Redis 답글 추천/비추천 데이터 복구
+     * 누락된 답글 복구
      */
     @Transactional(readOnly = true)
     public void reloadRecommentRedisFromDB() {
         List<Recomment> recomments = recommentRepository.findAll();
+        List<String> existingRecommendKeys = scanKeys("recomment:recommendCount:*");
+        Set<Long> existingIds = existingRecommendKeys.stream()
+            .map(this::extractId)
+            .collect(Collectors.toSet());
 
-        for (Recomment recomment : recomments) {
-            String recommendRecommentCountKey =
-                RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + recomment.getId();
-            String notRecommendRecommentCountKey =
-                RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + recomment.getId();
-
-            if (Boolean.FALSE.equals(redisTemplate.hasKey(recommendRecommentCountKey))) {
-                redisTemplate.opsForValue()
-                    .set(recommendRecommentCountKey,
-                        String.valueOf(recomment.getRecommendationCount()));
+        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            StringRedisConnection stringConn = (StringRedisConnection) connection;
+            for (Recomment r : recomments) {
+                Long id = r.getId();
+                if (!existingIds.contains(id)) {
+                    stringConn.set(
+                        RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + id,
+                        String.valueOf(r.getRecommendationCount())
+                    );
+                }
+                if (!existingIds.contains(id)) {
+                    stringConn.set(
+                        RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + id,
+                        String.valueOf(r.getNotRecommendationCount())
+                    );
+                }
             }
+            return null;
+        });
+    }
 
-            if (Boolean.FALSE.equals(redisTemplate.hasKey(notRecommendRecommentCountKey))) {
-                redisTemplate.opsForValue()
-                    .set(notRecommendRecommentCountKey,
-                        String.valueOf(recomment.getNotRecommendationCount()));
+    private Long extractId(String key) {
+        String stringId = key.substring(key.lastIndexOf(':') + 1);
+        return Long.valueOf(stringId);
+    }
+
+    private List<String> scanKeys(String pattern) {
+        List<String> keys = new ArrayList<>();
+
+        ScanOptions options = ScanOptions.scanOptions()
+            .match(pattern)
+            .count(100)
+            .build();
+
+        try (
+            RedisConnection connection = Objects.requireNonNull(
+                redisTemplate.getConnectionFactory()).getConnection();
+            Cursor<byte[]> cursor = connection.keyCommands().scan(options)) {
+            while (cursor.hasNext()) {
+                keys.add(new String(cursor.next(), StandardCharsets.UTF_8));
             }
+        } catch (Exception e) {
+            log.error("스캔 중 에러가 발생했습니다, {}", pattern, e);
         }
+        return keys;
     }
 
     /**
