@@ -130,7 +130,6 @@ public class CommentService {
     private final WordFilterService wordFilterService;
     private final ReportReasonRepository reportReasonRepository;
     private final CommentReportRepository commentReportRepository;
-    private final CommentScheduler commentScheduler;
 
 
     /**
