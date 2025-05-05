@@ -367,7 +367,7 @@ public class CommentService {
             List.of(recommendSetKey, recommendCountKey), String.valueOf(memberId));
 
         if (result == null || result != 1) {
-            throw new IllegalStateException("추천 처리 실패");
+            throw new CommentException(CommentExceptionType.COMMENT_RECOMMEND_FAIL);
         }
 
         Recommendation recommendation = Recommendation.addOf(findComment, findMember);
@@ -380,7 +380,7 @@ public class CommentService {
     }
 
     /**
-     * 댓굴 추천 해제
+     * 댓글 추천 해제
      */
     @Transactional
     public int unrecommendComment(Long memberId, Long commentId) {
@@ -397,7 +397,7 @@ public class CommentService {
             List.of(recommendSetKey, recommendCountKey), String.valueOf(memberId));
 
         if (result == null || result != -1) {
-            throw new IllegalStateException("추천 해제 실패");
+            throw new CommentException(CommentExceptionType.COMMENT_UNRECOMMEND_FAIL);
         }
 
         recommendationRepository.deleteByMemberAndComment(memberId, commentId);
@@ -423,7 +423,7 @@ public class CommentService {
         Long result = redisTemplate.execute(notRecommend,
             List.of(notRecommendSetKey, notRecommendCountKey), String.valueOf(memberId));
         if (result == null || result != 1) {
-            throw new IllegalStateException("비추천 처리 실패");
+            throw new CommentException(CommentExceptionType.COMMENT_NOT_RECOMMEND_FAIL);
         }
 
         NotRecommendation notRecommendation = NotRecommendation.addOf(findComment, findMember);
@@ -454,7 +454,7 @@ public class CommentService {
             List.of(notRecommendSetKey, notRecommendCountKey), String.valueOf(memberId));
 
         if (result == null || result != -1) {
-            throw new IllegalStateException("비추천 해제 실패");
+            throw new CommentException(CommentExceptionType.COMMENT_UN_NOT_RECOMMEND_FAIL);
         }
 
         notRecommendationRepository.deleteByMemberAndComment(memberId, commentId);
@@ -490,7 +490,7 @@ public class CommentService {
             String.valueOf(memberId));
 
         if (result == null || result != 1) {
-            throw new IllegalStateException("답글 추천 실패");
+            throw new CommentException(CommentExceptionType.RECOMMENT_RECOMMEND_FAIL);
         }
 
         RecommentRecommendation newRecommentRecommendation = RecommentRecommendation.addOf(
@@ -520,7 +520,7 @@ public class CommentService {
             String.valueOf(memberId));
 
         if (result == null || result != -1) {
-            throw new IllegalStateException("추천 해제 실패");
+            throw new CommentException(CommentExceptionType.RECOMMENT_UNRECOMMEND_FAIL);
         }
 
         recommentRecommendationRepository.deleteByMemberAndRecomment(memberId, recommentId);
@@ -551,7 +551,7 @@ public class CommentService {
             String.valueOf(memberId));
 
         if (result == null || result != 1) {
-            throw new IllegalStateException("비추천 처리 실패");
+            throw new CommentException(CommentExceptionType.RECOMMENT_NOT_RECOMMEND_FAIL);
         }
 
         RecommentNotRecommendation newRecommentNotRecommendation = RecommentNotRecommendation.addOf(
@@ -582,7 +582,7 @@ public class CommentService {
             String.valueOf(memberId));
 
         if (result == null || result != -1) {
-            throw new IllegalStateException("비추천 해제 실패");
+            throw new CommentException(CommentExceptionType.RECOMMENT_UN_NOT_RECOMMEND_FAIL);
         }
 
         recommentNotRecommendationRepository.deleteByMemberAndRecomment(memberId, recommentId);

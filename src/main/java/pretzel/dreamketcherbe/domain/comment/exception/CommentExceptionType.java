@@ -11,6 +11,14 @@ public enum CommentExceptionType implements ExceptionType {
     RECOMMENDATION_NOT_FOUND(HttpStatus.NOT_FOUND, "추천을 찾을 수 없습니다."),
     RECOMMENT_RECOMMENDATION_NOT_FOUND(HttpStatus.NOT_FOUND, "대댓글 추천을 찾을 수 없습니다."),
     RECOMMENT_NOT_RECOMMENDATION_NOT_FOUND(HttpStatus.NOT_FOUND, "대댓글 비추천을 찾을 수 없습니다."),
+    COMMENT_RECOMMEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "댓글 추천에 실패하였습니다."),
+    COMMENT_UNRECOMMEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "댓글 추천 해제에 실패하였습니다."),
+    COMMENT_NOT_RECOMMEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "댓글 비추천에 실패하였습니다."),
+    COMMENT_UN_NOT_RECOMMEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "댓글 비추천 해제에 실패하였습니다."),
+    RECOMMENT_RECOMMEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "답글 추천에 실패하였습니다."),
+    RECOMMENT_UNRECOMMEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "답글 추천에 실패하였습니다."),
+    RECOMMENT_NOT_RECOMMEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "답글 비추천에 실패하였습니다."),
+    RECOMMENT_UN_NOT_RECOMMEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "답글 비추천 해제에 실패하였습니다."),
     REPORTED_COMMENT(HttpStatus.BAD_REQUEST, "이미 신고된 댓글입니다."),
     REPORTED_RECOMMENT(HttpStatus.BAD_REQUEST, "이미 신고된 대댓글입니다.");
 
