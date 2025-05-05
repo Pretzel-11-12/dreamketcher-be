@@ -4,20 +4,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
 
 @Slf4j
@@ -35,7 +30,7 @@ public class CommentScheduler {
     private static final String RECOMMENT_NOT_REOMMEND_PREFIX = "recomment:notRecommendCount:";
     private final CommentRepository commentRepository;
 
-    @Scheduled(cron = "0 0 * * * ?", zone = "Asia/Seoul") // 정각 마다 실행
+    @Scheduled(cron = "0 0 */4 * * ?", zone = "Asia/Seoul") // 4시간 마다 실행
     public void syncAllRecommendationCounts() {
         // 댓글
         for (String key : scanKeys(COMMENT_RECOMMEND_PATTERN)) {
