@@ -210,7 +210,7 @@ public class CommentService {
         Sort sort;
         String order = pageReqDto.getOrder().toLowerCase();
 
-        if ("recommend".equals(order)) {
+        if ("RECOMMEND".equals(order)) {
             sort = Sort.by(
                 Order.desc("recommendationCount"),
                 Order.desc("createdAt")
