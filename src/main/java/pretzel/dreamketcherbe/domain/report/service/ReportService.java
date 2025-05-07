@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pretzel.dreamketcherbe.common.service.AdminAuthorizationService;
 import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto.ReasonDto;
@@ -25,18 +24,15 @@ public class ReportService {
     private final CommentReportRepository commentReportRepository;
     private final EpisodeReportRepository episodeReportRepository;
     private final CommentRepository commentRepository;
-    private final AdminAuthorizationService adminAuthorizationService;
 
     public ReportService(
         CommentReportRepository commentReportRepository,
         EpisodeReportRepository episodeReportRepository,
-        CommentRepository commentRepository,
-        AdminAuthorizationService adminAuthorizationService
+        CommentRepository commentRepository
     ) {
         this.commentReportRepository = commentReportRepository;
         this.episodeReportRepository = episodeReportRepository;
         this.commentRepository = commentRepository;
-        this.adminAuthorizationService = adminAuthorizationService;
     }
 
     @Transactional(readOnly = true)
@@ -46,10 +42,6 @@ public class ReportService {
         ReportType type,
         Pageable pageable
     ) {
-        if (!adminAuthorizationService.isAdmin(memberId)) {
-            throw new IllegalArgumentException("관리자 권한이 없습니다.");
-        }
-
         List<ReportDto> reports = new ArrayList<>();
         long totalCount = 0;
 
