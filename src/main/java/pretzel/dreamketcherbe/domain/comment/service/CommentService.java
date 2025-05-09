@@ -663,7 +663,7 @@ public class CommentService {
                     );
                 }
 
-                if (existingIds.contains(id)) {
+                if (!existingIds.contains(id)) {
                     stringConnection.set(
                         NOT_RECOMMEND_COUNT_KEY_PREFIX + id,
                         String.valueOf(c.getNotRecommendationCount())
