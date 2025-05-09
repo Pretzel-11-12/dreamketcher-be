@@ -208,9 +208,9 @@ public class CommentService {
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
         Sort sort;
-        String order = pageReqDto.getOrder().toLowerCase();
+        String order = Objects.toString(pageReqDto.getOrder(), "").toLowerCase();
 
-        if ("RECOMMEND".equals(order)) {
+        if ("recommend".equals(order)) {
             sort = Sort.by(
                 Order.desc("recommendationCount"),
                 Order.desc("createdAt")
