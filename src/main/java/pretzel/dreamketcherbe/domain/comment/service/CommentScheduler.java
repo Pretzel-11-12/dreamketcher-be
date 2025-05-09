@@ -27,7 +27,7 @@ public class CommentScheduler {
     private static final String COMMENT_RECOMMEND_PATTERN = "comment:recommendCount:*";
     private static final String COMMENT_NOT_RECOMMEND_PREFIX = "comment:notRecommendCount:";
     private static final String RECOMMENT_RECOMMEND_PATTERN = "recomment:recommendCount:*";
-    private static final String RECOMMENT_NOT_REOMMEND_PREFIX = "recomment:notRecommendCount:";
+    private static final String RECOMMENT_NOT_RECOMMEND_PREFIX = "recomment:notRecommendCount:";
     private final CommentRepository commentRepository;
 
     @Scheduled(cron = "0 0 */4 * * ?", zone = "Asia/Seoul") // 4시간 마다 실행
@@ -48,7 +48,7 @@ public class CommentScheduler {
             Long recommentId = extractId(key);
             int recCount = commentService.getRecommentRecommendationCount(key);
             int notRecCount = commentService.getRecommentRecommendationCount(
-                RECOMMENT_NOT_REOMMEND_PREFIX + recommentId);
+                RECOMMENT_NOT_RECOMMEND_PREFIX + recommentId);
             commentService.syncRecommentRecommendationCountToDatabase(
                 recommentId, recCount, notRecCount
             );
