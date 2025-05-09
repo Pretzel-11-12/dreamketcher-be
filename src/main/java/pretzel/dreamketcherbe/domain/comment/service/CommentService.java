@@ -604,7 +604,7 @@ public class CommentService {
             String.valueOf(memberId));
 
         if (result == null || result != -1) {
-            throw new CommentException(CommentExceptionType.RECOMMENT_UN_NOT_RECOMMEND_FAIL);
+            throw new CommentException(CommentExceptionType.RECOMMENT_UNNOT_RECOMMEND_FAIL);
         }
 
         recommentNotRecommendationRepository.deleteByMemberAndRecomment(memberId, recommentId);
