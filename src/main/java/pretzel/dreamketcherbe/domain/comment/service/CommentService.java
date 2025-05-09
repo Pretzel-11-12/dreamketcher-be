@@ -3,6 +3,7 @@ package pretzel.dreamketcherbe.domain.comment.service;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -644,11 +645,15 @@ public class CommentService {
     @Transactional(readOnly = true)
     public void reloadCommentRedisFromDB() {
         List<Comment> comments = commentRepository.findAll();
-        List<String> existingKeys = scanKeys("comment:recommendCount:*");
 
-        Set<Long> existingIds = existingKeys.stream()
-            .map(this::extractId)
+        Set<Long> allIds = comments.stream()
+            .map(Comment::getId)
             .collect(Collectors.toSet());
+
+        Set<Long> missingRecommendIds = missingIds(allIds, "comment:recommendCount:*");
+
+        Set<Long> missingNotRecommendIds = missingIds(allIds,
+            "comment:notRecommendCount:*");
 
         redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             StringRedisConnection stringConnection = (StringRedisConnection) connection;
@@ -656,14 +661,14 @@ public class CommentService {
             for (Comment c : comments) {
                 Long id = c.getId();
 
-                if (!existingIds.contains(id)) {
+                if (missingRecommendIds.contains(id)) {
                     stringConnection.set(
                         RECOMMEND_COUNT_KEY_PREFIX + id,
                         String.valueOf(c.getRecommendationCount())
                     );
                 }
 
-                if (!existingIds.contains(id)) {
+                if (missingNotRecommendIds.contains(id)) {
                     stringConnection.set(
                         NOT_RECOMMEND_COUNT_KEY_PREFIX + id,
                         String.valueOf(c.getNotRecommendationCount())
@@ -680,22 +685,25 @@ public class CommentService {
     @Transactional(readOnly = true)
     public void reloadRecommentRedisFromDB() {
         List<Recomment> recomments = recommentRepository.findAll();
-        List<String> existingRecommendKeys = scanKeys("recomment:recommendCount:*");
-        Set<Long> existingIds = existingRecommendKeys.stream()
-            .map(this::extractId)
+        Set<Long> allIds = recomments.stream()
+            .map(Recomment::getId)
             .collect(Collectors.toSet());
+
+        Set<Long> missingRecommendIds = missingIds(allIds, "recomment:recommendCount:*");
+        Set<Long> missingNotRecommendIds = missingIds(allIds,
+            "recomment:notRecommendCount:*");
 
         redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             StringRedisConnection stringConn = (StringRedisConnection) connection;
             for (Recomment r : recomments) {
                 Long id = r.getId();
-                if (!existingIds.contains(id)) {
+                if (missingRecommendIds.contains(id)) {
                     stringConn.set(
                         RECOMMENT_RECOMMEND_COUNT_KEY_PREFIX + id,
                         String.valueOf(r.getRecommendationCount())
                     );
                 }
-                if (!existingIds.contains(id)) {
+                if (missingNotRecommendIds.contains(id)) {
                     stringConn.set(
                         RECOMMENT_NOT_RECOMMEND_COUNT_KEY_PREFIX + id,
                         String.valueOf(r.getNotRecommendationCount())
@@ -730,6 +738,42 @@ public class CommentService {
             log.error("스캔 중 에러가 발생했습니다, {}", pattern, e);
         }
         return keys;
+    }
+
+    /**
+     * 존재하는 키 스캔
+     */
+    private Set<Long> scanExistingIds(String pattern) {
+        return scanKeys(pattern).stream()
+            .map(this::extractId)
+            .collect(Collectors.toSet());
+    }
+
+    /**
+     * 누락된 ID 반환
+     */
+    private Set<Long> missingIds(Set<Long> allIds, String pattern) {
+        Set<Long> existing = scanExistingIds(pattern);
+        Set<Long> missing = new HashSet<>(allIds);
+        missing.removeAll(existing);
+
+        return missing;
+    }
+
+    /**
+     * 합집합 계산
+     */
+    public Set<Long> idUnion(String patternA, String patternB) {
+        Set<Long> setA = scanKeys(patternA).stream()
+            .map(this::extractId)
+            .collect(Collectors.toSet());
+
+        Set<Long> setB = scanKeys(patternB).stream()
+            .map(this::extractId)
+            .collect(Collectors.toSet());
+
+        setA.addAll(setB);
+        return setA;
     }
 
     /**
