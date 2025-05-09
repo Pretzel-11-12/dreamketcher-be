@@ -28,8 +28,7 @@ public class WordFilterService {
     public String filter(String input) {
         return wordFilter.filter(input);
     }
-
-    @Transactional(readOnly = true)
+    
     public void reload() {
         List<String> badWords = badWordRepository.findAll().stream()
             .map(BadWord::getWord)
