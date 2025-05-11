@@ -1,9 +1,13 @@
 package pretzel.dreamketcherbe.common.config;
 
+import java.util.concurrent.Delayed;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 
 /**
@@ -22,9 +26,49 @@ public class DisableSchedulingConfig {
     public TaskScheduler taskScheduler() {
         return new ConcurrentTaskScheduler() {
             @Override
-            public void schedule(Runnable task, org.springframework.scheduling.Trigger trigger) {
-                // 아무 작업도 실행하지 않음
+            public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
+                // 아무 작업도 실행하지 않고, 이미 완료된 것처럼 동작하는 ScheduledFuture 반환
+                return new NoOpScheduledFuture();
             }
         };
+    }
+
+    // 아무 작업도 수행하지 않는 ScheduledFuture 구현체
+    private static class NoOpScheduledFuture implements ScheduledFuture<Object> {
+
+        @Override
+        public long getDelay(TimeUnit unit) {
+            return 0;
+        }
+
+        @Override
+        public int compareTo(Delayed other) {
+            return 0;
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return true;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return true;
+        }
+
+        @Override
+        public boolean isDone() {
+            return true;
+        }
+
+        @Override
+        public Object get() {
+            return null;
+        }
+
+        @Override
+        public Object get(long timeout, TimeUnit unit) {
+            return null;
+        }
     }
 }
