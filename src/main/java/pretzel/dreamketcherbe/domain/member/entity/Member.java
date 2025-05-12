@@ -64,6 +64,16 @@ public class Member extends BaseTimeEntity {
     @Column(name = "suspension_reason", length = 500)
     private String suspensionReason;
 
+    /**
+     * 소셜 로그인 정보를 기반으로 새로운 회원 엔티티를 생성합니다.
+     *
+     * @param socialType 소셜 로그인 유형
+     * @param socialId 소셜 플랫폼에서 발급된 고유 식별자
+     * @param email 회원의 이메일 주소
+     * @param name 회원 이름
+     * @param nickname 회원 닉네임
+     * @param role 회원 역할
+     */
     @Builder
     public Member(SocialType socialType, String socialId, String email, String name,
         String nickname, Role role) {
@@ -76,15 +86,32 @@ public class Member extends BaseTimeEntity {
         this.status = MemberStatus.ACTIVE;
     }
 
+    /**
+     * 회원이 관리자 권한을 가지고 있는지 여부를 반환합니다.
+     *
+     * @return 관리자인 경우 true, 그렇지 않으면 false
+     */
     public boolean isAdmin() {
         return this.role == Role.ADMIN;
     }
     
+    /**
+     * 현재 회원이 정지 상태인지 여부를 반환합니다.
+     *
+     * 회원의 상태가 SUSPENDED이고, 정지 해제 시간이 없거나 아직 도래하지 않은 경우 true를 반환합니다.
+     *
+     * @return 회원이 현재 정지 상태이면 true, 아니면 false
+     */
     public boolean isSuspended() {
         return this.status == MemberStatus.SUSPENDED && 
                (this.suspendedUntil == null || this.suspendedUntil.isAfter(LocalDateTime.now()));
     }
 
+    /**
+     * 회원의 닉네임을 변경합니다.
+     *
+     * @param nickname 새로 설정할 닉네임
+     */
     public void updateNickname(String nickname) {
         this.nickname = nickname;
     }
@@ -101,16 +128,30 @@ public class Member extends BaseTimeEntity {
         this.imageUrl = imageUrl;
     }
 
+    /**
+     * 회원의 역할(Role)을 변경한다.
+     *
+     * @param role 새로 설정할 역할
+     */
     public void updateRole(Role role) {
         this.role = role;
     }
     
+    /**
+     * 회원을 정지 상태로 전환하고 정지 기간과 사유를 설정합니다.
+     *
+     * @param suspendedUntil 정지 해제 예정 시각
+     * @param reason 정지 사유
+     */
     public void suspend(LocalDateTime suspendedUntil, String reason) {
         this.status = MemberStatus.SUSPENDED;
         this.suspendedUntil = suspendedUntil;
         this.suspensionReason = reason;
     }
     
+    /**
+     * 회원의 상태를 활성화로 변경하고, 모든 정지 관련 정보를 초기화합니다.
+     */
     public void activate() {
         this.status = MemberStatus.ACTIVE;
         this.suspendedUntil = null;

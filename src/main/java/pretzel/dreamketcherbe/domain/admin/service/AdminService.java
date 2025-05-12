@@ -20,6 +20,16 @@ public class AdminService {
 
     private final ModerationLogRepository moderationLogRepository;
 
+    /**
+     * 관리 로그를 필터 및 페이지네이션 조건에 따라 조회하여 반환합니다.
+     *
+     * @param targetType   조회할 대상 타입 (선택)
+     * @param actionType   조회할 액션 타입 (선택)
+     * @param fromDate     조회 시작 날짜 (포함, 선택)
+     * @param toDate       조회 종료 날짜 (포함, 선택)
+     * @param pageable     페이지네이션 정보
+     * @return 필터링 및 페이지네이션된 관리 로그 목록과 메타데이터를 포함한 DTO
+     */
     public AdminLogResDto getLogs(
         TargetType targetType,
         ActionType actionType,
