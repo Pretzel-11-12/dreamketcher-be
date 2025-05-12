@@ -20,6 +20,12 @@ public record MemberListResponseDto(
     public MemberListResponseDto {
     }
 
+    /**
+     * Spring Data의 Page<Member> 객체를 MemberListResponseDto로 변환합니다.
+     *
+     * @param membersPage 변환할 회원 페이지 객체
+     * @return 회원 목록과 페이지네이션 정보를 포함한 MemberListResponseDto
+     */
     public static MemberListResponseDto from(Page<Member> membersPage) {
         List<MemberDto> members = membersPage.getContent().stream()
             .map(MemberDto::from)
@@ -52,6 +58,12 @@ record MemberDto(
     public MemberDto {
     }
 
+    /**
+     * Member 엔티티를 MemberDto로 변환합니다.
+     *
+     * @param member 변환할 Member 엔티티
+     * @return 해당 멤버의 정보를 담은 MemberDto 인스턴스
+     */
     public static MemberDto from(Member member) {
         return MemberDto.builder()
             .id(member.getId())

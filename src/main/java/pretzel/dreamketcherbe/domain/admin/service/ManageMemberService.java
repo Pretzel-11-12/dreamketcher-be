@@ -29,11 +29,11 @@ public class ManageMemberService {
     private final ReportReasonRepository reportReasonRepository;
 
     /**
-     * 회원 목록 조회
+     * 주어진 회원 상태에 따라 회원 목록을 페이징하여 조회한다.
      *
-     * @param status   회원 상태 필터 (활성/정지)
-     * @param pageable 페이징 정보
-     * @return 회원 목록 응답 DTO
+     * @param status 조회할 회원 상태. null이면 모든 회원을 조회한다.
+     * @param pageable 페이징 및 정렬 정보
+     * @return 조회된 회원 목록을 담은 응답 DTO
      */
     @Transactional(readOnly = true)
     public MemberListResponseDto getMembers(MemberStatus status, Pageable pageable) {
@@ -49,11 +49,15 @@ public class ManageMemberService {
     }
 
     /**
-     * 회원 정지
+     * 지정한 회원을 요청된 기간 동안 정지 처리합니다.
      *
-     * @param adminId           관리자 ID
-     * @param memberId          정지할 회원 ID
-     * @param suspendRequestDto 정지 요청 DTO
+     * 회원이 존재하지 않거나 이미 정지된 경우 예외를 발생시킵니다. 정지 사유 코드를 기반으로 사유를 조회하고, 추가 사유가 있으면 함께 기록합니다. 정지 처리 후 관리자 로그 이벤트를 발행합니다.
+     *
+     * @param adminId 정지 처리를 수행하는 관리자 ID
+     * @param memberId 정지 대상 회원의 ID
+     * @param suspendRequestDto 정지 기간, 사유 코드, 추가 사유가 포함된 요청 DTO
+     * @throws MemberException 회원이 존재하지 않거나 이미 정지된 경우
+     * @throws IllegalArgumentException 유효하지 않은 정지 사유 코드인 경우
      */
     @Transactional
     public void suspendMember(Long adminId, Long memberId,
@@ -99,10 +103,13 @@ public class ManageMemberService {
     }
 
     /**
-     * 회원 정지 해제
+     * 정지된 회원의 계정을 활성화합니다.
      *
-     * @param adminId  관리자 ID
-     * @param memberId 정지 해제할 회원 ID
+     * 주어진 회원 ID에 해당하는 회원이 정지 상태일 때만 정지 해제를 수행하며, 관리 로그 이벤트를 발행합니다.
+     *
+     * @param adminId 정지 해제를 수행하는 관리자 ID
+     * @param memberId 정지 해제할 회원의 ID
+     * @throws MemberException 회원이 존재하지 않거나 정지 상태가 아닌 경우 발생
      */
     @Transactional
     public void activateMember(Long adminId, Long memberId) {
