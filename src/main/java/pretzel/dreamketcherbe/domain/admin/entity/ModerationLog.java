@@ -46,7 +46,7 @@ public class ModerationLog extends BaseTimeEntity {
     private Long targetId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reason_id", nullable = false)
+    @JoinColumn(name = "reason_id", nullable = true)
     private ReportReason reason;
 
     /**

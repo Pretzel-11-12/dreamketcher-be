@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Admin;
 import pretzel.dreamketcherbe.domain.admin.dto.MemberListResponseDto;
 import pretzel.dreamketcherbe.domain.admin.dto.MemberSuspendRequestDto;
-import pretzel.dreamketcherbe.domain.admin.service.MemberManagementService;
+import pretzel.dreamketcherbe.domain.admin.service.ManageMemberService;
 import pretzel.dreamketcherbe.domain.member.entity.MemberStatus;
 
 @RestController
@@ -24,15 +24,15 @@ import pretzel.dreamketcherbe.domain.member.entity.MemberStatus;
 @RequiredArgsConstructor
 public class ManageMemberController {
 
-    private final MemberManagementService memberManagementService;
-    
+    private final ManageMemberService memberManagementService;
+
     /**
      * 회원 목록 조회 API
-     * 
+     *
      * @param adminId 관리자 ID (@Admin 어노테이션을 통해 주입)
-     * @param status 회원 상태 필터 (ACTIVE: 활성화, SUSPENDED: 정지)
-     * @param page 페이지 번호 (기본값: 0)
-     * @param size 페이지 크기 (기본값: 20)
+     * @param status  회원 상태 필터 (ACTIVE: 활성화, SUSPENDED: 정지)
+     * @param page    페이지 번호 (기본값: 0)
+     * @param size    페이지 크기 (기본값: 20)
      * @return 회원 목록
      */
     @GetMapping
@@ -46,13 +46,13 @@ public class ManageMemberController {
         MemberListResponseDto response = memberManagementService.getMembers(status, pageable);
         return ResponseEntity.ok(response);
     }
-    
+
     /**
      * 회원 정지 API
-     * 
-     * @param adminId 관리자 ID (@Admin 어노테이션을 통해 주입)
+     *
+     * @param adminId  관리자 ID (@Admin 어노테이션을 통해 주입)
      * @param memberId 정지할 회원 ID
-     * @param request 정지 요청 정보 (정지 일수, 정지 사유)
+     * @param request  정지 요청 정보 (정지 일수, 정지 사유)
      * @return 성공 응답
      */
     @PostMapping("/{memberId}/suspend")
@@ -64,11 +64,11 @@ public class ManageMemberController {
         memberManagementService.suspendMember(adminId, memberId, request);
         return ResponseEntity.ok().build();
     }
-    
+
     /**
      * 회원 정지 해제 API
-     * 
-     * @param adminId 관리자 ID (@Admin 어노테이션을 통해 주입)
+     *
+     * @param adminId  관리자 ID (@Admin 어노테이션을 통해 주입)
      * @param memberId 정지 해제할 회원 ID
      * @return 성공 응답
      */
