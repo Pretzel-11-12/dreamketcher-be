@@ -22,7 +22,8 @@ public class ModerationEventListener {
     @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleModerationEvent(ModerationEventData event) {
-        log.info("관리자 액션 로깅 시작: {}", event.actionType());
+        log.info("관리자 액션 로깅 시작: {} - adminId={}, targetType={}, targetId={}", 
+            event.actionType(), event.adminId(), event.targetType(), event.targetId());
 
         try {
             ModerationLog moderationLog = ModerationLog.builder()
@@ -35,10 +36,11 @@ public class ModerationEventListener {
                 .adminNote(event.adminNote())
                 .build();
 
-            moderationLogRepository.save(moderationLog);
-            log.info("관리자 액션 로깅 완료: id={}", moderationLog.getId());
+            ModerationLog saved = moderationLogRepository.save(moderationLog);
+            log.info("관리자 액션 로깅 완료: id={}, actionType={}, targetId={}", 
+                saved.getId(), saved.getActionType(), saved.getTargetId());
         } catch (Exception e) {
-            log.error("관리자 액션 로깅 실패: {}", e.getMessage());
+            log.error("관리자 액션 로깅 실패: {} - {}", event.actionType(), e.getMessage(), e);
         }
     }
 }
