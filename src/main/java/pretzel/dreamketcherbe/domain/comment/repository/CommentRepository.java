@@ -8,31 +8,45 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    @Query("SELECT c FROM Comment c WHERE c.episode.id = :episodeId AND c.isDeleted = false AND c.episode.published = true ")
+    @Query("SELECT c FROM Comment c WHERE c.episode.id = :episodeId AND c.status = 'NORMAL' AND c.episode.published = true ")
     Page<Comment> findByEpisodeId(Long episodeId, Pageable pageables);
 
     @Query("SELECT c.id FROM Comment c")
     List<Long> findAllCommentIds();
 
-    @Query("SELECT c FROM Comment c WHERE c.member.id = :memberId AND c.isDeleted = false")
+    @Query("SELECT c FROM Comment c WHERE c.member.id = :memberId AND c.status = 'NORMAL'")
     List<Comment> findByMemberIdAndDeletedFalse(@Param("memberId") Long memberId, Sort sort);
 
-    @Query("SELECT c.id FROM Comment c WHERE c.episode.id IN :episodeIds AND c.isDeleted = false AND c.episode.published = true")
+    @Query("SELECT c.id FROM Comment c WHERE c.episode.id IN :episodeIds AND c.status = 'NORMAL' AND c.episode.published = true")
     List<Long> findByEpisodeIds(@Param("episodeIds") List<Long> episodeIds);
 
-    @Query("SELECT c.id FROM Comment c WHERE c.episode.id = :episodeId AND c.isDeleted = false AND c.episode.published = true")
+    @Query("SELECT c.id FROM Comment c WHERE c.episode.id = :episodeId AND c.status = 'NORMAL' AND c.episode.published = true")
     List<Long> findByEpisodeId(@Param("episodeId") Long episodeId);
 
-    @Modifying
-    @Query("UPDATE Comment c SET c.isDeleted = true WHERE c.episode.id IN :episodeIds AND c.isDeleted = false AND c.episode.published = true")
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Comment c SET c.status = 'DELETED' WHERE c.episode.id IN :episodeIds AND c.status = 'NORMAL' AND c.episode.published = true")
     void deleteByEpisodeId(@Param("episodeIds") List<Long> episodeIds);
 
-    @Modifying
-    @Query("UPDATE Comment c SET c.isDeleted = true WHERE c.episode.id = :episodeId AND c.isDeleted = false AND c.episode.published = true")
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Comment c SET c.status = 'DELETED' WHERE c.episode.id = :episodeId AND c.status = 'NORMAL' AND c.episode.published = true")
     void deleteByEpisode(@Param("episodeId") Long episodeId);
 
+    @Modifying
+    @Transactional
+    @Query(
+        "UPDATE Comment c " +
+            "SET c.recommendationCount    = :recommendCount, " +
+            "    c.notRecommendationCount = :notRecommendCount " +
+            "WHERE c.id = :commentId"
+    )
+    int updateCount(
+        @Param("commentId") Long commentId,
+        @Param("recommendCount") int recommendCount,
+        @Param("notRecommendCount") int notRecommendCount
+    );
 }

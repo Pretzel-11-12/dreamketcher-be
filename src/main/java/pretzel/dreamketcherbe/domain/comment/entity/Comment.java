@@ -2,6 +2,8 @@ package pretzel.dreamketcherbe.domain.comment.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,22 +15,23 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
-import pretzel.dreamketcherbe.domain.comment.dto.CreateCommentReqDto;
 import pretzel.dreamketcherbe.domain.comment.exception.CommentException;
 import pretzel.dreamketcherbe.domain.comment.exception.CommentExceptionType;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
-@Table(name = "comments")
 @Getter
 @Entity
+@DynamicUpdate
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLDelete(sql = "UPDATE comments SET is_deleted = true WHERE id = ?")
-@SQLRestriction("is_deleted = false")
+@Table(name = "comments")
+@SQLDelete(sql = "UPDATE comments SET status = 'DELETED' WHERE id = ?")
+@SQLRestriction("status = 'NORMAL'")
 public class Comment extends BaseTimeEntity {
 
     @Id
@@ -49,9 +52,10 @@ public class Comment extends BaseTimeEntity {
     @ColumnDefault("0")
     private int notRecommendationCount;
 
-    @Column(name = "is_deleted", nullable = false)
-    @ColumnDefault("false")
-    private boolean isDeleted;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @ColumnDefault("'NORMAL'")
+    private CommentStatus status;
 
     @ManyToOne
     @JoinColumn(name = "member_id")
@@ -67,8 +71,7 @@ public class Comment extends BaseTimeEntity {
 
     @Builder
     public Comment(String content, int childCommentCount, int recommendationCount,
-        int notRecommendationCount, Member member, Episode episode,
-        Webtoon webtoon) {
+        int notRecommendationCount, Member member, Episode episode, Webtoon webtoon) {
         this.content = content;
         this.childCommentCount = childCommentCount;
         this.recommendationCount = recommendationCount;
@@ -76,11 +79,12 @@ public class Comment extends BaseTimeEntity {
         this.member = member;
         this.episode = episode;
         this.webtoon = webtoon;
+        this.status = CommentStatus.NORMAL;
     }
 
-    public static Comment addOf(CreateCommentReqDto dto, Member member, Episode episode) {
+    public static Comment addOf(String content, Member member, Episode episode) {
         return Comment.builder()
-            .content(dto.content())
+            .content(content)
             .member(member)
             .episode(episode)
             .webtoon(episode.getWebtoon())
@@ -94,8 +98,12 @@ public class Comment extends BaseTimeEntity {
     }
 
     public void softDelete() {
-        if (!this.isDeleted) {
-            this.isDeleted = true;
+        this.status = CommentStatus.DELETED;
+    }
+
+    public void report() {
+        if (this.status == CommentStatus.NORMAL) {
+            this.status = CommentStatus.REPORTED;
         }
     }
 
@@ -109,5 +117,13 @@ public class Comment extends BaseTimeEntity {
 
     public void updateNotRecommendationCount(int count) {
         this.notRecommendationCount = count;
+    }
+
+    public boolean isDeleted() {
+        return this.status == CommentStatus.DELETED;
+    }
+
+    public boolean isReported() {
+        return this.status == CommentStatus.REPORTED;
     }
 }
