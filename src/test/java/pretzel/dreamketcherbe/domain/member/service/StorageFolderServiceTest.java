@@ -102,7 +102,7 @@ class StorageFolderServiceTest {
             storageFolderService.deleteFolder(folderId);
 
             // then
-            assertThat(storageFolder.isDeleted()).isTrue();
+            assertThat(storageFolderRepository.existsById(folderId)).isFalse();
         }
     }
 }

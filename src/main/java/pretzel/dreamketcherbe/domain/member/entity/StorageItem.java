@@ -1,6 +1,5 @@
 package pretzel.dreamketcherbe.domain.member.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,7 +10,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
 @Entity
@@ -34,10 +32,6 @@ public class StorageItem {
     @ManyToOne
     @JoinColumn(name = "webtoon_id")
     private Webtoon webtoon;
-
-    @Column(nullable = false, name = "is_deleted")
-    @ColumnDefault("false")
-    private boolean isDeleted;
 
     @Builder
     private StorageItem(StorageFolder storageFolder, Member member, Webtoon webtoon) {

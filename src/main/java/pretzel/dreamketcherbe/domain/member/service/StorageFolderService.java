@@ -42,7 +42,7 @@ public class StorageFolderService {
     @Transactional
     public void deleteFolder(final Long folderId) {
         StorageFolder storageFolder = findByFolderId(folderId);
-        storageFolder.delete();
+        storageFolderRepository.delete(storageFolder);
     }
 
     private StorageFolder findByFolderId(final Long folderId) {
