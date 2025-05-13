@@ -6,12 +6,12 @@ import pretzel.dreamketcherbe.domain.member.entity.StorageFolder;
 @Builder
 public record CreateFolderResDto(
     Long id,
-    String name
+    String folderName
 ) {
     public static CreateFolderResDto of(StorageFolder storageFolder) {
         return CreateFolderResDto.builder()
             .id(storageFolder.getId())
-            .name(storageFolder.getName())
+            .folderName(storageFolder.getName())
             .build();
     }
 }

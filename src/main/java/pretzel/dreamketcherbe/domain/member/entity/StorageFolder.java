@@ -47,13 +47,13 @@ public class StorageFolder extends BaseTimeEntity {
 
     public static StorageFolder create(CreateFolderReqDto dto, Member member) {
         return StorageFolder.builder()
-            .name(dto.name())
+            .name(dto.folderName())
             .member(member)
             .build();
     }
 
     public void update(UpdateStorageFolderReqDto dto) {
-        this.name = dto.name();
+        this.name = dto.folderName();
     }
 
     public void delete() {

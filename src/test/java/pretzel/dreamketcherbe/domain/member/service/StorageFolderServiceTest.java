@@ -56,7 +56,7 @@ class StorageFolderServiceTest {
 
             // then
             assertThat(result).isNotNull();
-            assertThat(result.name()).isEqualTo("폴더 이름");
+            assertThat(result.folderName()).isEqualTo("폴더 이름");
         }
     }
 
@@ -80,7 +80,7 @@ class StorageFolderServiceTest {
 
             // then
             assertThat(result).isNotNull();
-            assertThat(result.name()).isEqualTo(updateDto.name());
+            assertThat(result.folderName()).isEqualTo(updateDto.folderName());
         }
     }
 
