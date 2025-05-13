@@ -40,6 +40,16 @@ public class StorageItemService {
         return CreateStorageItemResDto.of(storageItemRepository.save(item));
     }
 
+    public void deleteItem(final Long id) {
+        StorageItem item = findByItemId(id);
+        storageItemRepository.delete(item);
+    }
+
+    private StorageItem findByItemId(final Long itemId) {
+        return storageItemRepository.findById(itemId)
+            .orElseThrow(() -> new StorageFolderException(StorageFolderExceptionType.ITEM_NOT_FOUND));
+    }
+
     private Webtoon findByWebtoonId(final Long webtoonId) {
         return webtoonRepository.findById(webtoonId)
             .orElseThrow(() -> new WebtoonException(WebtoonExceptionType.WEBTOON_NOT_FOUND));

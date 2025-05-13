@@ -12,14 +12,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 import pretzel.dreamketcherbe.domain.webtoon.entity.Webtoon;
 
 @Entity
 @Getter
-@SQLDelete(sql = "UPDATE storage_item SET is_deleted = true WHERE id = ?")
-@SQLRestriction("is_deleted = false")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StorageItem {
 
