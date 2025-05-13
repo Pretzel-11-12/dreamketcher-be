@@ -1,10 +1,12 @@
 package pretzel.dreamketcherbe.domain.member.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.member.dto.CreateFolderReqDto;
 import pretzel.dreamketcherbe.domain.member.dto.CreateFolderResDto;
+import pretzel.dreamketcherbe.domain.member.dto.StorageFolderResDto;
 import pretzel.dreamketcherbe.domain.member.dto.UpdateStorageFolderReqDto;
 import pretzel.dreamketcherbe.domain.member.dto.UpdateStorageFolderResDto;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
@@ -23,6 +25,16 @@ public class StorageFolderService {
     private final StorageFolderRepository storageFolderRepository;
 
     private final MemberRepository memberRepository;
+
+    @Transactional
+    public List<StorageFolderResDto> getFolders(final Long memberId) {
+        Member member = findByMemberId(memberId);
+        List<StorageFolder> folders = storageFolderRepository.findStorageItemByMember(member);
+
+        return folders.stream()
+            .map(StorageFolderResDto::of)
+            .toList();
+    }
 
     @Transactional
     public CreateFolderResDto createFolder(final Long memberId, CreateFolderReqDto createFolderReqDto) {

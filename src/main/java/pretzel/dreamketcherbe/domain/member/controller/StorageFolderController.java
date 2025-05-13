@@ -1,9 +1,11 @@
 package pretzel.dreamketcherbe.domain.member.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.domain.member.dto.CreateFolderReqDto;
 import pretzel.dreamketcherbe.domain.member.dto.CreateFolderResDto;
+import pretzel.dreamketcherbe.domain.member.dto.StorageFolderResDto;
 import pretzel.dreamketcherbe.domain.member.dto.UpdateStorageFolderReqDto;
 import pretzel.dreamketcherbe.domain.member.dto.UpdateStorageFolderResDto;
 import pretzel.dreamketcherbe.domain.member.service.StorageFolderService;
@@ -23,6 +26,11 @@ import pretzel.dreamketcherbe.domain.member.service.StorageFolderService;
 public class StorageFolderController {
 
     private final StorageFolderService storageFolderService;
+
+    @GetMapping
+    public ResponseEntity<List<StorageFolderResDto>> getFolders(@Auth Long memberId) {
+        return ResponseEntity.ok(storageFolderService.getFolders(memberId));
+    }
 
     @PostMapping
     public ResponseEntity<CreateFolderResDto> createFolder(
