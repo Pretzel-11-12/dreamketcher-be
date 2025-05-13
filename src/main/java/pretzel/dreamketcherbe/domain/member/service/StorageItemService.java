@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pretzel.dreamketcherbe.domain.member.dto.CreateStorageItemReqDto;
 import pretzel.dreamketcherbe.domain.member.dto.CreateStorageItemResDto;
+import pretzel.dreamketcherbe.domain.member.dto.StorageItemResDto;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.entity.StorageFolder;
 import pretzel.dreamketcherbe.domain.member.entity.StorageItem;
@@ -27,6 +28,9 @@ public class StorageItemService {
     private final StorageFolderRepository storageFolderRepository;
     private final MemberRepository memberRepository;
     private final WebtoonRepository webtoonRepository;
+    public StorageItemResDto getItems(final Long memberId, final Long folderId) {
+        return storageItemRepository.findAllStorageItemWithPage(memberId, folderId);
+    }
 
     public CreateStorageItemResDto createItem(
         final Long memberId,
