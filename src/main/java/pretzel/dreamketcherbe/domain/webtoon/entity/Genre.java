@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
@@ -24,4 +25,9 @@ public class Genre extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
+    @Builder
+    private Genre(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }
