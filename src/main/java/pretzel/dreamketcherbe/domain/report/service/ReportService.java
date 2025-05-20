@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.report.dto.CommentProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.EpisodeProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto.ReasonDto;
@@ -143,5 +144,21 @@ public class ReportService {
         episodeReportRepository.save(report);
 
         return EpisodeProcessResDto.from(report);
+    }
+
+    /**
+     * 댓글 신고 처리
+     */
+    @Transactional
+    public CommentProcessResDto commentReportProcess(Long memberId, Long reportId,
+        ReportStatus status, String note) {
+        CommentReport report = commentReportRepository.findById(reportId)
+            .orElseThrow(() -> new IllegalArgumentException("신고가 존재하지 않습니다."));
+
+        report.reportProcess(status, LocalDateTime.now(), memberId, note);
+
+        commentReportRepository.save(report);
+
+        return CommentProcessResDto.from(report);
     }
 }

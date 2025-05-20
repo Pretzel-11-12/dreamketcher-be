@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Admin;
+import pretzel.dreamketcherbe.domain.report.dto.CommentProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.EpisodeProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto;
 import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
@@ -59,5 +60,17 @@ public class ReportController {
 
         return ResponseEntity.ok(
             reportService.episodeReportProcess(memberId, reportId, status, adminNote));
+    }
+
+    /**
+     * 댓글 신고 관리자 처리
+     */
+    @PatchMapping("/comment")
+    public ResponseEntity<CommentProcessResDto> commentReportProcess(@Admin Long memberId,
+        @RequestParam Long reportId, @RequestParam ReportStatus status,
+        @RequestParam String adminNote) {
+
+        return ResponseEntity.ok(
+            reportService.commentReportProcess(memberId, reportId, status, adminNote));
     }
 }

@@ -103,6 +103,21 @@ public class CommentReport extends BaseTimeEntity {
             .build();
     }
 
+    /**
+     * 신고 관리자 처리
+     */
+    public void reportProcess(
+        ReportStatus status,
+        LocalDateTime processedAt,
+        Long processedBy,
+        String adminNote
+    ) {
+        this.status = status;
+        this.processedAt = processedAt;
+        this.processedBy = processedBy;
+        this.adminNote = adminNote;
+    }
+
     // ---------------------------------------------------
     // JPA 콜백: 저장 전 검증
     // ---------------------------------------------------
