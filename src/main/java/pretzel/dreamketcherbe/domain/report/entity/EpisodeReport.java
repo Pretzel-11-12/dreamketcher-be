@@ -78,7 +78,7 @@ public class EpisodeReport extends BaseTimeEntity {
         ReportReason reason,
         String reasonText
     ) {
-        return EpisodeReport.builder()
+        return pretzel.dreamketcherbe.domain.report.entity.EpisodeReport.builder()
             .webtoonId(webtoonId)
             .episodeId(episodeId)
             .reporterMemberId(memberId)
@@ -100,13 +100,32 @@ public class EpisodeReport extends BaseTimeEntity {
         ReportReason reason,
         String reasonText
     ) {
-        return EpisodeReport.builder()
+        return pretzel.dreamketcherbe.domain.report.entity.EpisodeReport.builder()
             .episodeId(episodeId)
             .reporterMemberId(null)
             .reason(reason)
             .reasonText(reasonText)
             .status(ReportStatus.PENDING)
             .build();
+    }
+
+    /**
+     * 관리자가 신고를 처리할 때 사용.
+     *
+     * @param status      처리 상태
+     * @param processedBy 처리자 회원 ID
+     * @param adminNote   관리자 메모
+     */
+    public void reportProcess(
+        ReportStatus status,
+        Long processedBy,
+        String adminNote,
+        LocalDateTime processedAt
+    ) {
+        this.status = status;
+        this.processedBy = processedBy;
+        this.adminNote = adminNote;
+        this.processedAt = processedAt;
     }
 
     // ---------------------------------------------------

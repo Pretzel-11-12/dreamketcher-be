@@ -6,10 +6,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Admin;
+import pretzel.dreamketcherbe.domain.report.dto.EpisodeProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto;
 import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
 import pretzel.dreamketcherbe.domain.report.entity.ReportType;
@@ -45,5 +47,17 @@ public class ReportController {
 
         return ResponseEntity.ok(
             reportService.getReports(memberId, reportStatus, reportType, pageRequest));
+    }
+
+    /**
+     * 에피소드 신고 관리자 처리
+     */
+    @PatchMapping("/episode")
+    public ResponseEntity<EpisodeProcessResDto> episodeReportProcess(@Admin Long memberId,
+        @RequestParam Long reportId, @RequestParam ReportStatus status,
+        @RequestParam String adminNote) {
+
+        return ResponseEntity.ok(
+            reportService.episodeReportProcess(memberId, reportId, status, adminNote));
     }
 }

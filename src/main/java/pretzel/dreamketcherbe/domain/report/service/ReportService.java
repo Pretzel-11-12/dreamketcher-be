@@ -1,5 +1,6 @@
 package pretzel.dreamketcherbe.domain.report.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -7,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
+import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.report.dto.EpisodeProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto.ReasonDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto.ReportDto;
@@ -24,15 +27,17 @@ public class ReportService {
     private final CommentReportRepository commentReportRepository;
     private final EpisodeReportRepository episodeReportRepository;
     private final CommentRepository commentRepository;
+    private final MemberRepository memberRepository;
 
     public ReportService(
         CommentReportRepository commentReportRepository,
         EpisodeReportRepository episodeReportRepository,
-        CommentRepository commentRepository
-    ) {
+        CommentRepository commentRepository,
+        MemberRepository memberRepository) {
         this.commentReportRepository = commentReportRepository;
         this.episodeReportRepository = episodeReportRepository;
         this.commentRepository = commentRepository;
+        this.memberRepository = memberRepository;
     }
 
     @Transactional(readOnly = true)
@@ -122,5 +127,21 @@ public class ReportService {
                 report.getAdminNote()
             ))
             .toList();
+    }
+
+    /**
+     * 에피소드 신고 처리
+     */
+    @Transactional
+    public EpisodeProcessResDto episodeReportProcess(Long memberId, Long reportId,
+        ReportStatus status, String note) {
+        EpisodeReport report = episodeReportRepository.findById(reportId)
+            .orElseThrow(() -> new IllegalArgumentException("신고가 존재하지 않습니다."));
+
+        report.reportProcess(status, memberId, note, LocalDateTime.now());
+
+        episodeReportRepository.save(report);
+
+        return EpisodeProcessResDto.from(report);
     }
 }
