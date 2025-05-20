@@ -30,6 +30,13 @@ public class ReportService {
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
 
+    /**
+     * ReportService의 인스턴스를 생성하며 필요한 리포지토리들을 주입합니다.
+     *
+     * @param commentReportRepository 댓글 신고 리포지토리
+     * @param episodeReportRepository 에피소드 신고 리포지토리
+     * @param commentRepository 댓글 리포지토리
+     */
     public ReportService(
         CommentReportRepository commentReportRepository,
         EpisodeReportRepository episodeReportRepository,
@@ -41,6 +48,15 @@ public class ReportService {
         this.memberRepository = memberRepository;
     }
 
+    /**
+     * 신고 상태와 유형에 따라 댓글 및 에피소드 신고 목록을 조회하여 최신순으로 정렬하고, 페이징 처리된 결과를 반환합니다.
+     *
+     * @param memberId 조회를 요청한 회원의 ID
+     * @param status 필터링할 신고 상태 (null이면 전체)
+     * @param type 필터링할 신고 유형 (null이면 댓글과 에피소드 모두)
+     * @param pageable 페이지 번호와 크기 등 페이징 정보
+     * @return 페이징된 신고 목록과 전체 신고 개수를 포함한 DTO
+     */
     @Transactional(readOnly = true)
     public ReportResDto getReports(
         Long memberId,

@@ -24,6 +24,17 @@ public class AdminController {
 
     private final AdminService adminService;
 
+    /**
+     * 관리 로그를 필터 및 페이징 조건에 따라 조회하여 반환합니다.
+     *
+     * @param targetType   로그의 대상 유형(선택)
+     * @param actionType   로그의 액션 유형(선택)
+     * @param from         조회 시작일(yyyy.MM.dd, 선택)
+     * @param to           조회 종료일(yyyy.MM.dd, 선택)
+     * @param page         페이지 번호(기본값 0)
+     * @param size         페이지 크기(기본값 20)
+     * @return 필터 및 페이징이 적용된 관리 로그 목록
+     */
     @GetMapping("/logs")
     public ResponseEntity<AdminLogResDto> getLogs(
         @Admin Long adminId,

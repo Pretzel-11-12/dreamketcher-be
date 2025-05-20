@@ -163,7 +163,14 @@ public class WebtoonService {
     }
 
     /**
-     * 웹툰 등록
+     * 새로운 웹툰을 생성하고 태그를 등록합니다.
+     *
+     * @param memberId 웹툰을 등록하는 회원의 ID
+     * @param request 웹툰 생성 요청 정보
+     * @return 생성된 웹툰의 정보를 담은 DTO
+     *
+     * @throws MemberException 회원이 존재하지 않을 경우 발생합니다.
+     * @throws WebtoonException 장르가 존재하지 않을 경우 발생합니다.
      */
     @Transactional
     public CreateWebtoonResDto createWebtoon(Long memberId, CreateWebtoonReqDto request) {
