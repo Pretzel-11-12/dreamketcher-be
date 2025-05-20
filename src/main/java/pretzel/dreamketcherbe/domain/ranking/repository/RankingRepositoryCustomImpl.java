@@ -32,7 +32,7 @@ public class RankingRepositoryCustomImpl implements RankingRepositoryCustom {
                 Projections.constructor(WebtoonPopularityDataDto.class,
                     webtoon.id,
                     webtoon.title,
-                    webtoon.member.name,
+                    webtoon.member.nickname,
                     webtoon.story,
                     webtoon.thumbnail,
                     webtoon.genre.name,
