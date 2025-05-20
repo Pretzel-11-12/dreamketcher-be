@@ -28,7 +28,7 @@ public record WebtoonDetailResDto(
             .webtoonTitle(webtoon.getTitle())
             .webtoonThumbnail(webtoon.getThumbnail())
             .webtoonStory(webtoon.getStory())
-            .authorNickname(webtoon.getMember().getName())
+            .authorNickname(webtoon.getMember().getNickname())
             .interestCount(webtoon.getInterestCount())
             .genreName(webtoon.getGenre().getName())
             .tags(tagDtos)

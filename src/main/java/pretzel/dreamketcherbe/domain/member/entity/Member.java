@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -52,6 +53,16 @@ public class Member extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private MemberStatus status = MemberStatus.ACTIVE;
+    
+    @Column(name = "suspended_until")
+    private LocalDateTime suspendedUntil;
+    
+    @Column(name = "suspension_reason", length = 500)
+    private String suspensionReason;
 
     @Builder
     public Member(SocialType socialType, String socialId, String email, String name,
@@ -62,10 +73,16 @@ public class Member extends BaseTimeEntity {
         this.nickname = nickname;
         this.email = email;
         this.role = role;
+        this.status = MemberStatus.ACTIVE;
     }
 
     public boolean isAdmin() {
         return this.role == Role.ADMIN;
+    }
+    
+    public boolean isSuspended() {
+        return this.status == MemberStatus.SUSPENDED && 
+               (this.suspendedUntil == null || this.suspendedUntil.isAfter(LocalDateTime.now()));
     }
 
     public void updateNickname(String nickname) {
@@ -86,5 +103,17 @@ public class Member extends BaseTimeEntity {
 
     public void updateRole(Role role) {
         this.role = role;
+    }
+    
+    public void suspend(LocalDateTime suspendedUntil, String reason) {
+        this.status = MemberStatus.SUSPENDED;
+        this.suspendedUntil = suspendedUntil;
+        this.suspensionReason = reason;
+    }
+    
+    public void activate() {
+        this.status = MemberStatus.ACTIVE;
+        this.suspendedUntil = null;
+        this.suspensionReason = null;
     }
 }

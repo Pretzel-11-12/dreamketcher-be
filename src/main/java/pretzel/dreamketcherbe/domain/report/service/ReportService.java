@@ -25,8 +25,11 @@ public class ReportService {
     private final EpisodeReportRepository episodeReportRepository;
     private final CommentRepository commentRepository;
 
-    public ReportService(CommentReportRepository commentReportRepository,
-        EpisodeReportRepository episodeReportRepository, CommentRepository commentRepository) {
+    public ReportService(
+        CommentReportRepository commentReportRepository,
+        EpisodeReportRepository episodeReportRepository,
+        CommentRepository commentRepository
+    ) {
         this.commentReportRepository = commentReportRepository;
         this.episodeReportRepository = episodeReportRepository;
         this.commentRepository = commentRepository;
@@ -34,6 +37,7 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public ReportResDto getReports(
+        Long memberId,
         ReportStatus status,
         ReportType type,
         Pageable pageable
@@ -90,7 +94,7 @@ public class ReportService {
                 report.getId(),
                 ReportType.COMMENT,
                 report.getCommentId(),
-                new ReporterDto(report.getReporterMemberId(), report.getReporterIp()),
+                new ReporterDto(report.getReporterMemberId()),
                 new ReasonDto(report.getReason().getCode(), report.getReason().getDescription()),
                 report.getReasonText(),
                 report.getStatus(),
@@ -108,7 +112,7 @@ public class ReportService {
                 report.getId(),
                 ReportType.EPISODE,
                 report.getEpisodeId(),
-                new ReporterDto(report.getReporterMemberId(), report.getReporterIp()),
+                new ReporterDto(report.getReporterMemberId()),
                 new ReasonDto(report.getReason().getCode(), report.getReason().getDescription()),
                 report.getReasonText(),
                 report.getStatus(),

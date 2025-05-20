@@ -27,6 +27,8 @@ import pretzel.dreamketcherbe.domain.comment.dto.CreateRecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.NotRecommendationResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.RecommentResDto;
 import pretzel.dreamketcherbe.domain.comment.service.CommentService;
+import pretzel.dreamketcherbe.domain.report.dto.ReportCommentReqDto;
+import pretzel.dreamketcherbe.domain.report.dto.ReportRecommentReqDto;
 
 @Slf4j
 @RestController
@@ -206,5 +208,28 @@ public class CommentController {
 
         return ResponseEntity.ok(updatedRecommentNotRecommendationCount);
     }
+
+    /**
+     * 댓글 신고
+     */
+    @PostMapping("/{commentId}/report")
+    public ResponseEntity<Void> reportComment(@Auth Long memberId,
+        @PathVariable Long commentId,
+        @RequestBody @Valid ReportCommentReqDto request) {
+        commentService.reportComment(memberId, commentId, request.reasonId(), request.reasonText());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+//    /**
+//     * 답글 신고
+//     */
+//    public ResponseEntity<Void> reportRecomment(@Auth Long memberId,
+//        @PathVariable Long commentId,
+//        @PathVariable Long recommentId,
+//        @RequestBody @Valid ReportRecommentReqDto request) {
+//        commentService.reportRecomment(memberId, commentId, recommentId, request.reasonId(),
+//            request.reasonText());
+//        return ResponseEntity.status(HttpStatus.CREATED).build();
+//    }
 
 }

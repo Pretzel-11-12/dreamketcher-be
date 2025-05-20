@@ -22,8 +22,6 @@ import pretzel.dreamketcherbe.S3Utils.exception.S3Exception;
 import pretzel.dreamketcherbe.S3Utils.exception.S3ExceptionType;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
-import pretzel.dreamketcherbe.domain.admin.entity.ManagementWebtoon;
-import pretzel.dreamketcherbe.domain.admin.repository.ManagementWebtoonRespository;
 import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.NotRecommendationRepository;
 import pretzel.dreamketcherbe.domain.comment.repository.RecommendationRepository;
@@ -74,8 +72,6 @@ public class WebtoonService {
     private final InterestedWebtoonRepository interestedWebtoonRepository;
 
     private final S3Service s3Service;
-
-    private final ManagementWebtoonRespository managementWebtoonRespository;
 
     private final EpisodeRepository episodeRepository;
 
@@ -187,9 +183,6 @@ public class WebtoonService {
 
             newWebtoon.addTag(tag);
         }
-
-        ManagementWebtoon managementWebtoon = ManagementWebtoon.addOf(newWebtoon);
-        managementWebtoonRespository.save(managementWebtoon);
 
         return CreateWebtoonResDto.of(newWebtoon);
     }
