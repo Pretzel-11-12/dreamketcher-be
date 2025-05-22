@@ -3,12 +3,12 @@ package pretzel.dreamketcherbe.domain.report.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
-import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.report.dto.CommentProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.EpisodeProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto;
@@ -19,41 +19,24 @@ import pretzel.dreamketcherbe.domain.report.entity.CommentReport;
 import pretzel.dreamketcherbe.domain.report.entity.EpisodeReport;
 import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
 import pretzel.dreamketcherbe.domain.report.entity.ReportType;
+import pretzel.dreamketcherbe.domain.report.event.EpisodeStatusUpdateEvent;
 import pretzel.dreamketcherbe.domain.report.repository.CommentReportRepository;
 import pretzel.dreamketcherbe.domain.report.repository.EpisodeReportRepository;
 
 @Service
+@RequiredArgsConstructor
 public class ReportService {
 
     private final CommentReportRepository commentReportRepository;
     private final EpisodeReportRepository episodeReportRepository;
-    private final CommentRepository commentRepository;
-    private final MemberRepository memberRepository;
-
-    /**
-     * ReportService의 인스턴스를 생성하며 필요한 리포지토리들을 주입합니다.
-     *
-     * @param commentReportRepository 댓글 신고 리포지토리
-     * @param episodeReportRepository 에피소드 신고 리포지토리
-     * @param commentRepository 댓글 리포지토리
-     */
-    public ReportService(
-        CommentReportRepository commentReportRepository,
-        EpisodeReportRepository episodeReportRepository,
-        CommentRepository commentRepository,
-        MemberRepository memberRepository) {
-        this.commentReportRepository = commentReportRepository;
-        this.episodeReportRepository = episodeReportRepository;
-        this.commentRepository = commentRepository;
-        this.memberRepository = memberRepository;
-    }
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 신고 상태와 유형에 따라 댓글 및 에피소드 신고 목록을 조회하여 최신순으로 정렬하고, 페이징 처리된 결과를 반환합니다.
      *
      * @param memberId 조회를 요청한 회원의 ID
-     * @param status 필터링할 신고 상태 (null이면 전체)
-     * @param type 필터링할 신고 유형 (null이면 댓글과 에피소드 모두)
+     * @param status   필터링할 신고 상태 (null이면 전체)
+     * @param type     필터링할 신고 유형 (null이면 댓글과 에피소드 모두)
      * @param pageable 페이지 번호와 크기 등 페이징 정보
      * @return 페이징된 신고 목록과 전체 신고 개수를 포함한 DTO
      */
@@ -155,9 +138,24 @@ public class ReportService {
         EpisodeReport report = episodeReportRepository.findById(reportId)
             .orElseThrow(() -> new IllegalArgumentException("신고가 존재하지 않습니다."));
 
+        if (report.getStatus() != ReportStatus.PENDING) {
+            throw new IllegalArgumentException("이미 처리된 신고입니다.");
+        }
+
         report.reportProcess(status, memberId, note, LocalDateTime.now());
 
         episodeReportRepository.save(report);
+
+        // RESOLVED 상태 변경 후, 이벤트 발행
+        if (status == ReportStatus.RESOLVED) {
+            EpisodeStatusUpdateEvent event = new EpisodeStatusUpdateEvent(
+                reportId,
+                report.getEpisodeId(),
+                memberId,
+                LocalDateTime.now()
+            );
+            eventPublisher.publishEvent(event);
+        }
 
         return EpisodeProcessResDto.from(report);
     }

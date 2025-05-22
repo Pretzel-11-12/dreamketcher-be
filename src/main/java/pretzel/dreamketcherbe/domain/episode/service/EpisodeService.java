@@ -627,4 +627,18 @@ public class EpisodeService {
         findEpisode.report();
         episodeRepository.save(findEpisode);
     }
+
+    /**
+     * 에피소드 신고 해제
+     */
+    @Transactional
+    public void normalizeEpiosde(Long memberId, Long webtoonId, Long episodeId) {
+        Episode episode = episodeRepository.findReportedEpisodeById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+        if (episodeReportRepository.findResolvedEpisodeReportByEpisodeId(episodeId) != null) {
+            episode.normalize();
+        }
+        episodeRepository.save(episode);
+    }
 }

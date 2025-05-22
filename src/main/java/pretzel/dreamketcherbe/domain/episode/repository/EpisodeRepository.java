@@ -56,4 +56,8 @@ public interface EpisodeRepository extends JpaRepository<Episode, Long> {
     @Transactional
     @Query("UPDATE Episode e SET e.published = true WHERE e.id IN :episodeIds")
     void updatePublishedById(@Param("episodeIds") List<Long> episodeIds);
+
+    // 신고된 에피소드 조회
+    @Query("SELECT e FROM Episode e WHERE e.id = :episodeId AND e.status = 'REPORTED'")
+    Optional<Episode> findReportedEpisodeById(@Param("episodeId") Long episodeId);
 }

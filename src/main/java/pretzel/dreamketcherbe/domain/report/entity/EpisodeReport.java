@@ -122,6 +122,17 @@ public class EpisodeReport extends BaseTimeEntity {
         String adminNote,
         LocalDateTime processedAt
     ) {
+
+        if (this.status != ReportStatus.PENDING) {
+            throw new IllegalStateException(
+                "신고는 대기 상태에서만 처리할 수 있습니다."
+            );
+        }
+
+        if (status == null) {
+            throw new IllegalStateException("처리 상태가 존재하지 않습니다.");
+        }
+
         this.status = status;
         this.processedBy = processedBy;
         this.adminNote = adminNote;
@@ -134,9 +145,9 @@ public class EpisodeReport extends BaseTimeEntity {
 
     @PrePersist
     private void validateReporter() {
-        boolean hasMember = reporterMemberId != null;
+        boolean isMember = reporterMemberId != null;
 
-        if (!hasMember) {
+        if (!isMember) {
             throw new IllegalStateException(
                 "신고는 회원만 가능합니다."
             );
