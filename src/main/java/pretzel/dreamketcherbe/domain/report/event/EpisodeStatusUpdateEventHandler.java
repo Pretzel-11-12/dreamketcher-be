@@ -22,7 +22,7 @@ public class EpisodeStatusUpdateEventHandler {
      * 에피소드 상태 전환 - NORMAL
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleResolvedEpisode(EpisodeStatusUpdateEvent event) {
         try {
             Optional<Episode> episodeOptional = episodeRepository.findReportedEpisodeById(

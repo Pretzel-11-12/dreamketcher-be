@@ -10,7 +10,6 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
-import pretzel.dreamketcherbe.domain.report.repository.CommentReportRepository;
 
 @Slf4j
 @Component
@@ -23,7 +22,7 @@ public class CommentStatusUpdateEventHandler {
      * 댓글 상태 전환 - NORMAL
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleResolvedComment(CommentStatusUpdateEvent event) {
         try {
             Optional<Comment> commentOptional = commentRepository.findReportedComment(
