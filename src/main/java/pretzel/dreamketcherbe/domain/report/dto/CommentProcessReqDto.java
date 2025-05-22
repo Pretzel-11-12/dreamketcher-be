@@ -6,7 +6,7 @@ public record CommentProcessReqDto(
     Long id,
     ReportStatus status,
     Long processedBy,
-    String adminNode,
+    String adminNote,
     String processedAt
 ) {
 
