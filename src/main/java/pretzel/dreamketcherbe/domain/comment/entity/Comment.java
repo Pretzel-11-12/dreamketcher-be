@@ -119,11 +119,4 @@ public class Comment extends BaseTimeEntity {
         this.notRecommendationCount = count;
     }
 
-    public boolean isDeleted() {
-        return this.status == CommentStatus.DELETED;
-    }
-
-    public boolean isReported() {
-        return this.status == CommentStatus.REPORTED;
-    }
 }
