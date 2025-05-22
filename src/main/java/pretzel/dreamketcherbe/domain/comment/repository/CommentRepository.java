@@ -52,6 +52,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     );
 
     // 신고된 댓글 조회
-    @Query("SELECT c FROM Comment c WHERE c.status = 'REPORTED' AND c.episode.published = true")
+    @Query("SELECT c FROM Comment c WHERE c.status = 'REPORTED' AND c.episode.published = true AND c.id = :commentId")
     Optional<Comment> findReportedComment(@Param("commentId") Long commentId);
 }
