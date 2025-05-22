@@ -822,4 +822,17 @@ public class CommentService {
 //        recommentRepository.save(findRecomment);
 //    }
 
+    /**
+     * 댓글 상태 변경 - NORMAL
+     */
+    @Transactional
+    public void updateCommentStatusNormal(Long commentId) {
+        Comment comment = commentRepository.findReportedComment(commentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
+
+        if (commentReportRepository.findResolvedComment(commentId) != null) {
+            comment.normalize();
+        }
+        commentRepository.save(comment);
+    }
 }

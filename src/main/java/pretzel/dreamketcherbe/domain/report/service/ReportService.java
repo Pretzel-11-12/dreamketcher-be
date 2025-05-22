@@ -19,6 +19,7 @@ import pretzel.dreamketcherbe.domain.report.entity.CommentReport;
 import pretzel.dreamketcherbe.domain.report.entity.EpisodeReport;
 import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
 import pretzel.dreamketcherbe.domain.report.entity.ReportType;
+import pretzel.dreamketcherbe.domain.report.event.CommentStatusUpdateEvent;
 import pretzel.dreamketcherbe.domain.report.event.EpisodeStatusUpdateEvent;
 import pretzel.dreamketcherbe.domain.report.repository.CommentReportRepository;
 import pretzel.dreamketcherbe.domain.report.repository.EpisodeReportRepository;
@@ -169,9 +170,24 @@ public class ReportService {
         CommentReport report = commentReportRepository.findById(reportId)
             .orElseThrow(() -> new IllegalArgumentException("신고가 존재하지 않습니다."));
 
+        if (report.getStatus() != ReportStatus.PENDING) {
+            throw new IllegalArgumentException("이미 처리된 신고입니다.");
+        }
+
         report.reportProcess(status, LocalDateTime.now(), memberId, note);
 
         commentReportRepository.save(report);
+
+        if (status == ReportStatus.RESOLVED) {
+            // 댓글 상태 전환 이벤트 발행
+            CommentStatusUpdateEvent event = new CommentStatusUpdateEvent(
+                report.getCommentId(),
+                reportId,
+                memberId,
+                LocalDateTime.now()
+            );
+            eventPublisher.publishEvent(event);
+        }
 
         return CommentProcessResDto.from(report);
     }

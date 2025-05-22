@@ -119,4 +119,9 @@ public class Comment extends BaseTimeEntity {
         this.notRecommendationCount = count;
     }
 
+    public void normalize() {
+        if (this.status == CommentStatus.REPORTED) {
+            this.status = CommentStatus.NORMAL;
+        }
+    }
 }
