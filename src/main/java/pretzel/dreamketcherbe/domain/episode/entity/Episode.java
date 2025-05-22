@@ -144,4 +144,10 @@ public class Episode extends BaseTimeEntity {
     public void updatePublished(boolean published) {
         this.published = published;
     }
+
+    public void normalize() {
+        if (this.status == EpisodeStatus.REPORTED) {
+            this.status = EpisodeStatus.NORMAL;
+        }
+    }
 }

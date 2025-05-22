@@ -6,10 +6,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Admin;
+import pretzel.dreamketcherbe.domain.report.dto.CommentProcessResDto;
+import pretzel.dreamketcherbe.domain.report.dto.EpisodeProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto;
 import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
 import pretzel.dreamketcherbe.domain.report.entity.ReportType;
@@ -22,7 +25,15 @@ public class ReportController {
 
     private final ReportService reportService;
 
-    // todo: admin 확인 애노테이션 추가
+    /**
+     * 관리자가 신고 목록을 필터링 및 페이징하여 조회합니다.
+     *
+     * @param status 조회할 신고 상태(기본값: "PENDING")
+     * @param type   조회할 신고 유형(선택 사항)
+     * @param page   페이지 번호(기본값: 0)
+     * @param size   페이지 크기(기본값: 20)
+     * @return 필터링 및 페이징된 신고 목록 응답
+     */
     @GetMapping
     public ResponseEntity<ReportResDto> getReports(
         @Admin Long memberId,
@@ -45,5 +56,29 @@ public class ReportController {
 
         return ResponseEntity.ok(
             reportService.getReports(memberId, reportStatus, reportType, pageRequest));
+    }
+
+    /**
+     * 에피소드 신고 관리자 처리
+     */
+    @PatchMapping("/episode")
+    public ResponseEntity<EpisodeProcessResDto> episodeReportProcess(@Admin Long memberId,
+        @RequestParam Long reportId, @RequestParam ReportStatus status,
+        @RequestParam String adminNote) {
+
+        return ResponseEntity.ok(
+            reportService.episodeReportProcess(memberId, reportId, status, adminNote));
+    }
+
+    /**
+     * 댓글 신고 관리자 처리
+     */
+    @PatchMapping("/comment")
+    public ResponseEntity<CommentProcessResDto> commentReportProcess(@Admin Long memberId,
+        @RequestParam Long reportId, @RequestParam ReportStatus status,
+        @RequestParam String adminNote) {
+
+        return ResponseEntity.ok(
+            reportService.commentReportProcess(memberId, reportId, status, adminNote));
     }
 }

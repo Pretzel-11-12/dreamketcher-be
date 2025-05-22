@@ -103,15 +103,38 @@ public class CommentReport extends BaseTimeEntity {
             .build();
     }
 
+    /**
+     * 신고 관리자 처리
+     */
+    public void reportProcess(
+        ReportStatus status,
+        LocalDateTime processedAt,
+        Long processedBy,
+        String adminNote
+    ) {
+        if (this.status != ReportStatus.PENDING) {
+            throw new IllegalStateException("신고는 대기 상태에서만 처리할 수 있습니다.");
+        }
+
+        if (status == null) {
+            throw new IllegalStateException("신고 상태가 존재하지 않습니다.");
+        }
+
+        this.status = status;
+        this.processedAt = processedAt;
+        this.processedBy = processedBy;
+        this.adminNote = adminNote;
+    }
+
     // ---------------------------------------------------
     // JPA 콜백: 저장 전 검증
     // ---------------------------------------------------
 
     @PrePersist
     private void validateReporter() {
-        boolean hasMember = reporterMemberId != null;
+        boolean isMember = reporterMemberId != null;
 
-        if (!hasMember) {
+        if (!isMember) {
             throw new IllegalStateException(
                 "신고는 회원만 가능합니다."
             );

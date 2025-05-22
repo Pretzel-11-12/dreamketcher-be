@@ -78,7 +78,7 @@ public class EpisodeReport extends BaseTimeEntity {
         ReportReason reason,
         String reasonText
     ) {
-        return EpisodeReport.builder()
+        return pretzel.dreamketcherbe.domain.report.entity.EpisodeReport.builder()
             .webtoonId(webtoonId)
             .episodeId(episodeId)
             .reporterMemberId(memberId)
@@ -100,7 +100,7 @@ public class EpisodeReport extends BaseTimeEntity {
         ReportReason reason,
         String reasonText
     ) {
-        return EpisodeReport.builder()
+        return pretzel.dreamketcherbe.domain.report.entity.EpisodeReport.builder()
             .episodeId(episodeId)
             .reporterMemberId(null)
             .reason(reason)
@@ -109,15 +109,45 @@ public class EpisodeReport extends BaseTimeEntity {
             .build();
     }
 
+    /**
+     * 관리자가 신고를 처리할 때 사용.
+     *
+     * @param status      처리 상태
+     * @param processedBy 처리자 회원 ID
+     * @param adminNote   관리자 메모
+     */
+    public void reportProcess(
+        ReportStatus status,
+        Long processedBy,
+        String adminNote,
+        LocalDateTime processedAt
+    ) {
+
+        if (this.status != ReportStatus.PENDING) {
+            throw new IllegalStateException(
+                "신고는 대기 상태에서만 처리할 수 있습니다."
+            );
+        }
+
+        if (status == null) {
+            throw new IllegalStateException("처리 상태가 존재하지 않습니다.");
+        }
+
+        this.status = status;
+        this.processedBy = processedBy;
+        this.adminNote = adminNote;
+        this.processedAt = processedAt;
+    }
+
     // ---------------------------------------------------
     // JPA 콜백: 저장 전 검증
     // ---------------------------------------------------
 
     @PrePersist
     private void validateReporter() {
-        boolean hasMember = reporterMemberId != null;
+        boolean isMember = reporterMemberId != null;
 
-        if (!hasMember) {
+        if (!isMember) {
             throw new IllegalStateException(
                 "신고는 회원만 가능합니다."
             );

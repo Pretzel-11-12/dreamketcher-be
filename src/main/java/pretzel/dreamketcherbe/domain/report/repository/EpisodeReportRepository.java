@@ -20,4 +20,8 @@ public interface EpisodeReportRepository extends JpaRepository<EpisodeReport, Lo
         """)
     Boolean existsByEpisodeIdAndMemberId(@Param("episodeId") Long episodeId,
         @Param("memberId") Long memberId);
+
+    // RESOVED 에피소드
+    @Query("SELECT e FROM EpisodeReport e WHERE e.status = 'RESOLVED' AND e.episodeId = :episodeId")
+    EpisodeReport findResolvedEpisodeReportByEpisodeId(@Param("episodeId") Long episodeId);
 }

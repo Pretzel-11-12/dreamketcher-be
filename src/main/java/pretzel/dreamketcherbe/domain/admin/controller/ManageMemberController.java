@@ -27,13 +27,12 @@ public class ManageMemberController {
     private final ManageMemberService memberManagementService;
 
     /**
-     * 회원 목록 조회 API
+     * 관리자가 회원 상태와 페이지 정보를 기준으로 회원 목록을 조회합니다.
      *
-     * @param adminId 관리자 ID (@Admin 어노테이션을 통해 주입)
-     * @param status  회원 상태 필터 (ACTIVE: 활성화, SUSPENDED: 정지)
-     * @param page    페이지 번호 (기본값: 0)
-     * @param size    페이지 크기 (기본값: 20)
-     * @return 회원 목록
+     * @param status 조회할 회원 상태 (선택 사항, ACTIVE 또는 SUSPENDED)
+     * @param page 조회할 페이지 번호 (기본값: 0)
+     * @param size 한 페이지당 회원 수 (기본값: 20)
+     * @return 회원 목록 및 페이징 정보가 포함된 응답
      */
     @GetMapping
     public ResponseEntity<MemberListResponseDto> getMembers(
@@ -48,12 +47,13 @@ public class ManageMemberController {
     }
 
     /**
-     * 회원 정지 API
+     * 지정한 회원을 일정 기간 동안 정지시킵니다.
      *
-     * @param adminId  관리자 ID (@Admin 어노테이션을 통해 주입)
-     * @param memberId 정지할 회원 ID
-     * @param request  정지 요청 정보 (정지 일수, 정지 사유)
-     * @return 성공 응답
+     * 관리자가 회원의 ID와 정지 사유 및 기간을 입력하면 해당 회원을 정지 처리합니다.
+     *
+     * @param memberId 정지할 회원의 식별자
+     * @param request 정지 기간과 사유가 포함된 요청 객체
+     * @return 성공 시 HTTP 200 OK 응답
      */
     @PostMapping("/{memberId}/suspend")
     public ResponseEntity<Void> suspendMember(
@@ -65,12 +65,11 @@ public class ManageMemberController {
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * 회원 정지 해제 API
+    /****
+     * 관리자가 특정 회원의 정지를 해제하는 API입니다.
      *
-     * @param adminId  관리자 ID (@Admin 어노테이션을 통해 주입)
-     * @param memberId 정지 해제할 회원 ID
-     * @return 성공 응답
+     * @param memberId 정지 해제할 회원의 ID
+     * @return HTTP 200 OK 응답
      */
     @PostMapping("/{memberId}/activate")
     public ResponseEntity<Void> activateMember(
