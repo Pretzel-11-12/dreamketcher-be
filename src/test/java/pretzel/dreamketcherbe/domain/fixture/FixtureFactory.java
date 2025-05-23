@@ -27,6 +27,7 @@ public class FixtureFactory {
     public static StorageFolder getStorageFolder(Long id) {
         StorageFolder storageFolder = StorageFolder.builder()
             .name("폴더 이름")
+            .isPrivate(false)
             .member(getMember(1L))
             .build();
 
