@@ -6,11 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -47,6 +49,7 @@ import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.notification.event.ReportNotificationEvent;
 import pretzel.dreamketcherbe.domain.report.entity.EpisodeReport;
 import pretzel.dreamketcherbe.domain.report.entity.ReportReason;
 import pretzel.dreamketcherbe.domain.report.repository.EpisodeReportRepository;
@@ -68,6 +71,7 @@ public class EpisodeService {
     private final EpisodeStarRepository episodeStarRepository;
     private final S3Service s3Service;
     public final RedisTemplate<String, String> redisTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final String RECOMMEND_SET_KEY_PREFIX = "comment:recommend:";
     private static final String RECOMMEND_COUNT_KEY_PREFIX = "comment:recommendCount:";
@@ -615,7 +619,7 @@ public class EpisodeService {
         ReportReason findReason = reportReasonRepository.findById(reasonId)
             .orElseThrow(() -> new IllegalStateException()); // 추후 수정
 
-        EpisodeReport findEpisodeReport = EpisodeReport.forMember(webtoonId, episodeId, memberId,
+        EpisodeReport findEpisodeReport = EpisodeReport.forMember(findEpisode, memberId,
             findReason,
             reasonText);
 
@@ -626,6 +630,20 @@ public class EpisodeService {
 
         findEpisode.report();
         episodeRepository.save(findEpisode);
+
+        // 신고 제출 알림 생성
+        ReportNotificationEvent notificationEvent = new ReportNotificationEvent(
+            findEpisodeReport.getStatus(),
+            findEpisodeReport.getId(),
+            findEpisodeReport.getReporterMemberId(),
+            findEpisode.getMember().getId(),
+            findEpisode.getTitle(),
+            findEpisode.getNo(),
+            findWebtoon.getTitle(),
+            LocalDateTime.now()
+        );
+
+        eventPublisher.publishEvent(notificationEvent);
     }
 
     /**

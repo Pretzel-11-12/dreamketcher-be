@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pretzel.dreamketcherbe.domain.notification.event.ReportNotificationEvent;
 import pretzel.dreamketcherbe.domain.report.dto.CommentProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.EpisodeProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto;
@@ -117,7 +118,7 @@ public class ReportService {
             .map(report -> new ReportDto(
                 report.getId(),
                 ReportType.EPISODE,
-                report.getEpisodeId(),
+                report.getEpisode().getId(),
                 new ReporterDto(report.getReporterMemberId()),
                 new ReasonDto(report.getReason().getCode(), report.getReason().getDescription()),
                 report.getReasonText(),
@@ -151,12 +152,24 @@ public class ReportService {
         if (status == ReportStatus.RESOLVED) {
             EpisodeStatusUpdateEvent event = new EpisodeStatusUpdateEvent(
                 reportId,
-                report.getEpisodeId(),
+                report.getEpisode().getId(),
                 memberId,
                 LocalDateTime.now()
             );
             eventPublisher.publishEvent(event);
         }
+
+        ReportNotificationEvent notificationEvent = new ReportNotificationEvent(
+            report.getStatus(),
+            reportId,
+            report.getReporterMemberId(),
+            report.getEpisode().getMember().getId(),
+            report.getEpisode().getTitle(),
+            report.getEpisode().getNo(),
+            report.getEpisode().getWebtoon().getTitle(),
+            LocalDateTime.now()
+        );
+        eventPublisher.publishEvent(notificationEvent);
 
         return EpisodeProcessResDto.from(report);
     }

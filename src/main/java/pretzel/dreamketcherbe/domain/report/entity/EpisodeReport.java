@@ -20,6 +20,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 
 @Entity
 @Table(name = "episode_report")
@@ -36,8 +37,12 @@ public class EpisodeReport extends BaseTimeEntity {
     @Column(name = "webtoon_id", nullable = false)
     private Long webtoonId;
 
-    @Column(name = "episode_id", nullable = false)
-    private Long episodeId;
+//    @Column(name = "episode_id", nullable = false)
+//    private Long episodeId;
+
+    @ManyToOne
+    @JoinColumn(name = "episode_id", nullable = false)
+    private Episode episode;
 
     @Column(name = "reporter_member_id")
     private Long reporterMemberId;
@@ -66,43 +71,20 @@ public class EpisodeReport extends BaseTimeEntity {
     /**
      * 회원이 신고할 때 사용.
      *
-     * @param episodeId  댓글 ID
      * @param memberId   신고자 회원 ID
      * @param reason     신고 사유 엔티티
      * @param reasonText 텍스트 or null
      */
     public static EpisodeReport forMember(
-        Long webtoonId,
-        Long episodeId,
+        Episode episode,
         Long memberId,
         ReportReason reason,
         String reasonText
     ) {
-        return pretzel.dreamketcherbe.domain.report.entity.EpisodeReport.builder()
-            .webtoonId(webtoonId)
-            .episodeId(episodeId)
+        return EpisodeReport.builder()
+            .webtoonId(episode.getWebtoon().getId())
+            .episode(episode)
             .reporterMemberId(memberId)
-            .reason(reason)
-            .reasonText(reasonText)
-            .status(ReportStatus.PENDING)
-            .build();
-    }
-
-    /**
-     * 비회원(게스트)이 신고할 때 사용.
-     *
-     * @param episodeId  댓글 ID
-     * @param reason     신고 사유 엔티티
-     * @param reasonText 텍스트 or null
-     */
-    public static EpisodeReport forGuest(
-        Long episodeId,
-        ReportReason reason,
-        String reasonText
-    ) {
-        return pretzel.dreamketcherbe.domain.report.entity.EpisodeReport.builder()
-            .episodeId(episodeId)
-            .reporterMemberId(null)
             .reason(reason)
             .reasonText(reasonText)
             .status(ReportStatus.PENDING)
