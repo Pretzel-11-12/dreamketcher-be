@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import pretzel.dreamketcherbe.domain.notification.dto.NotificationDto;
-import pretzel.dreamketcherbe.domain.notification.service.NotificationService;
+import pretzel.dreamketcherbe.domain.notification.service.SSEService;
 import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
 
 @Component
@@ -14,20 +14,20 @@ import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
 @RequiredArgsConstructor
 public class ReportNotificationEventHandler {
 
-    private final NotificationService notificationService;
+    private final SSEService SSEService;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleEpisodeReportNotification(ReportNotificationEvent event) {
         try {
             // 피신고인 에게 알림 전송
             NotificationDto notificationDto = createReportedEpisodeNotification(event);
-            notificationService.sendNotification(event.getReportedMemberId(),
-                String.valueOf(notificationDto));
+            SSEService.sendNotification(event.getReportedMemberId(),
+                notificationDto.message());
 
             // 신고자에게 알림 전송
             NotificationDto reportedNotificationDto = createEpisodeReporterNotification(
                 event);
-            notificationService.sendNotification(event.getReporterId(),
+            SSEService.sendNotification(event.getReporterId(),
                 String.valueOf(reportedNotificationDto));
 
             log.info("신고 알림 전송 완료 - 신고자: {}, 피신고인: {}, 타입: {}",

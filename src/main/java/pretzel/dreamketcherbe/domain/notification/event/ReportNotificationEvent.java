@@ -3,7 +3,6 @@ package pretzel.dreamketcherbe.domain.notification.event;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import pretzel.dreamketcherbe.domain.notification.entity.NotificationType;
 import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
 
 @Getter

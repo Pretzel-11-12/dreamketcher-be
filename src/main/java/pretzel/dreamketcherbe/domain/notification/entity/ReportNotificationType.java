@@ -1,6 +1,6 @@
 package pretzel.dreamketcherbe.domain.notification.entity;
 
-public enum NotificationType {
+public enum ReportNotificationType {
     REPORT_SUBMITTED("신고가 제출되었습니다."),
     REPORT_PROCESSED("신고가 처리 중입니다."),
     REPORT_RECEIVED("에피소드가 신고 접수 되었습니다."),
@@ -9,7 +9,7 @@ public enum NotificationType {
 
     private final String message;
 
-    NotificationType(String message) {
+    ReportNotificationType(String message) {
         this.message = message;
     }
 

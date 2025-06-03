@@ -49,7 +49,7 @@ public class EpisodeReportNotification extends BaseTimeEntity {
     private Long webtoonId;
 
     @Column(name = "notification_type", nullable = false)
-    private NotificationType type;
+    private ReportNotificationType type;
 
     @Column(name = "is_read", nullable = false)
     @ColumnDefault("false")
@@ -78,7 +78,7 @@ public class EpisodeReportNotification extends BaseTimeEntity {
             .episodeReport(episodeReport)
             .episode(episode)
             .webtoonId(episode.getWebtoon().getId())
-            .type(NotificationType.REPORT_SUBMITTED)
+            .type(ReportNotificationType.REPORT_SUBMITTED)
             .isRead(false)
             .expiredAt(LocalDateTime.now().plusDays(14))
             .build();
@@ -96,7 +96,7 @@ public class EpisodeReportNotification extends BaseTimeEntity {
             .episodeReport(episodeReport)
             .episode(episode)
             .webtoonId(episode.getWebtoon().getId())
-            .type(NotificationType.REPORT_RECEIVED)
+            .type(ReportNotificationType.REPORT_RECEIVED)
             .isRead(false)
             .expiredAt(LocalDateTime.now().plusDays(14))
             .build();
@@ -114,7 +114,7 @@ public class EpisodeReportNotification extends BaseTimeEntity {
             .episodeReport(episodeReport)
             .episode(episode)
             .webtoonId(episode.getWebtoon().getId())
-            .type(NotificationType.REPORT_REJECTED)
+            .type(ReportNotificationType.REPORT_REJECTED)
             .isRead(false)
             .expiredAt(LocalDateTime.now().plusDays(14))
             .build();
@@ -132,7 +132,7 @@ public class EpisodeReportNotification extends BaseTimeEntity {
             .episodeReport(episodeReport)
             .episode(episode)
             .webtoonId(episode.getWebtoon().getId())
-            .type(NotificationType.REPORT_REJECTED)
+            .type(ReportNotificationType.REPORT_REJECTED)
             .isRead(false)
             .expiredAt(LocalDateTime.now().plusDays(14))
             .build();
@@ -150,7 +150,7 @@ public class EpisodeReportNotification extends BaseTimeEntity {
             .episodeReport(episodeReport)
             .episode(episode)
             .webtoonId(episode.getWebtoon().getId())
-            .type(NotificationType.REPORT_APPROVED)
+            .type(ReportNotificationType.REPORT_APPROVED)
             .isRead(false)
             .expiredAt(LocalDateTime.now().plusDays(14))
             .build();
@@ -168,7 +168,7 @@ public class EpisodeReportNotification extends BaseTimeEntity {
             .episodeReport(episodeReport)
             .episode(episode)
             .webtoonId(episode.getWebtoon().getId())
-            .type(NotificationType.REPORT_APPROVED)
+            .type(ReportNotificationType.REPORT_APPROVED)
             .isRead(false)
             .expiredAt(LocalDateTime.now().plusDays(14))
             .build();

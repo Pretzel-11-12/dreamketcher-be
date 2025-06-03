@@ -1,85 +1,62 @@
 package pretzel.dreamketcherbe.domain.notification.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.transaction.annotation.Transactional;
+import pretzel.dreamketcherbe.domain.episode.entity.Episode;
+import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
+import pretzel.dreamketcherbe.domain.episode.exception.EpisodeExceptionType;
+import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
+import pretzel.dreamketcherbe.domain.notification.entity.EpisodeLikeNotification;
+import pretzel.dreamketcherbe.domain.notification.event.EpisodeLikeNotificationEvent;
+import pretzel.dreamketcherbe.domain.notification.repository.EpisodeLikeNotificationRepository;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class NotificationService {
 
-    private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
-    private final Map<Long, Set<SseEmitter>> emitterSets = new ConcurrentHashMap<>();
+    private final EpisodeRepository episodeRepository;
+    private final EpisodeLikeNotificationRepository episodeLikeNotificationRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    /**
-     * 연결 생성
-     */
-    public SseEmitter createConnection(Long memberId) {
-        SseEmitter emitter = new SseEmitter(30L * 60 * 1000); // 30분
+    public void likeNotification(Long episodeId, Long memberId) {
+        Episode episode = episodeRepository.findById(episodeId)
+            .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
-        emitterSets.computeIfAbsent(memberId, k -> ConcurrentHashMap.newKeySet()).add(emitter);
+        boolean isNotify = episode.incrementLikeCount();
+        episodeRepository.save(episode);
 
-        emitter.onCompletion(() -> removeEmitter(memberId, emitter));
-        emitter.onTimeout(() -> removeEmitter(memberId, emitter));
-        emitter.onError((e) -> removeEmitter(memberId, emitter));
+        if (isNotify && !hasNotification(episodeId, episode.getLikeCount())) {
 
-        try {
-            emitter.send(SseEmitter.event()
-                .name("connect")
-                .data("연결되었습니다."));
-        } catch (Exception e) {
-            removeEmitter(memberId, emitter);
-        }
-        return emitter;
-    }
+            saveLikeNotification(episode);
 
-    /**
-     * 연결 종료
-     *
-     * @param memberId
-     * @param emitter
-     */
-    private void removeEmitter(Long memberId, SseEmitter emitter) {
-        Set<SseEmitter> emitters = emitterSets.get(memberId);
-
-        if (emitters != null) {
-            emitters.remove(emitter);
-            if (emitters.isEmpty()) {
-                emitterSets.remove(memberId);
-            }
+            EpisodeLikeNotificationEvent event = new EpisodeLikeNotificationEvent(
+                episode.getId(),
+                episode.getMember().getId(),
+                episode.getWebtoon().getTitle(),
+                episode.getNo(),
+                episode.getTitle(),
+                episode.getLikeCount(),
+                LocalDateTime.now()
+            );
+            eventPublisher.publishEvent(event);
         }
     }
 
-    /**
-     * 알림 전송
-     */
-    public void sendNotification(Long memberId, String message) {
-        Set<SseEmitter> emitters = emitterSets.get(memberId);
+    private boolean hasNotification(Long episodeId, int likeCount) {
+        return episodeLikeNotificationRepository.existsByEpisodeIdAndEpisodeLikeCount(episodeId,
+            likeCount);
+    }
 
-        if (emitters.isEmpty() || emitters == null) {
-            log.info("{}, 연결이 존재하지 않습니다.", memberId);
-            return;
-        }
+    private void saveLikeNotification(Episode episode) {
+        EpisodeLikeNotification notification = EpisodeLikeNotification.builder()
+            .episode(episode)
+            .episodeLikeCount(episode.getLikeCount())
+            .build();
 
-        List<SseEmitter> deadEmitters = new ArrayList<>();
-
-        for (SseEmitter emitter : emitters) {
-            try {
-                emitter.send(SseEmitter.event()
-                    .name("notification")
-                    .data(message));
-            } catch (Exception e) {
-                deadEmitters.add(emitter);
-            }
-        }
-        deadEmitters.forEach(emitter -> removeEmitter(memberId, emitter));
+        episodeLikeNotificationRepository.save(notification);
     }
 }

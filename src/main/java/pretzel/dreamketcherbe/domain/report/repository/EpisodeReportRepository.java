@@ -15,13 +15,13 @@ public interface EpisodeReportRepository extends JpaRepository<EpisodeReport, Lo
     @Query("""
         SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END
           FROM EpisodeReport e
-         WHERE e.episodeId        = :episodeId
+         WHERE e.episode.id        = :episodeId
            AND e.reporterMemberId = :memberId
         """)
     Boolean existsByEpisodeIdAndMemberId(@Param("episodeId") Long episodeId,
         @Param("memberId") Long memberId);
 
     // RESOVED 에피소드
-    @Query("SELECT e FROM EpisodeReport e WHERE e.status = 'RESOLVED' AND e.episodeId = :episodeId")
+    @Query("SELECT e FROM EpisodeReport e WHERE e.status = 'RESOLVED' AND e.episode.id = :episodeId")
     EpisodeReport findResolvedEpisodeReportByEpisodeId(@Param("episodeId") Long episodeId);
 }
