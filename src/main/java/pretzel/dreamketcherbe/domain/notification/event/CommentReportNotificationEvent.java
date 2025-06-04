@@ -17,7 +17,7 @@ public class CommentReportNotificationEvent {
     private final int episodeNumber;
     private final String webtoonTitle;
     private final Long commentId;
-    private final String content;
+    private final String adminNote;
     private final LocalDateTime createdAt;
 
 }

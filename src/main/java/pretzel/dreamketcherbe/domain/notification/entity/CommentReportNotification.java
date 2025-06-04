@@ -126,7 +126,7 @@ public class CommentReportNotification extends BaseTimeEntity {
     /**
      * 신고 처리 반려 알림 - 피신고인
      */
-    public static CommentReportNotification createForReportedCompleted(
+    public static CommentReportNotification createForReportedRejected(
         CommentReport commentReport, Comment comment
     ) {
         return CommentReportNotification.builder()
@@ -144,7 +144,7 @@ public class CommentReportNotification extends BaseTimeEntity {
     /**
      * 신고 처리 승인 알림 - 신고자
      */
-    public static CommentReportNotification createForReporterCompleted(
+    public static CommentReportNotification createForReporterApproved(
         CommentReport commentReport, Comment comment
     ) {
         return CommentReportNotification.builder()

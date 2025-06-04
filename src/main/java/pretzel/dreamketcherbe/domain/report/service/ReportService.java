@@ -212,7 +212,7 @@ public class ReportService {
             report.getComment().getEpisode().getNo(),
             report.getComment().getWebtoon().getTitle(),
             report.getComment().getId(),
-            report.getComment().getContent(),
+            report.getAdminNote(),
             LocalDateTime.now()
         );
         eventPublisher.publishEvent(notificationEvent);

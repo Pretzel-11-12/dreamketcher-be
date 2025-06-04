@@ -791,7 +791,7 @@ public class CommentService {
         ReportReason findReason = reportReasonRepository.findById(reasonId)
             .orElseThrow(() -> new IllegalStateException()); // 추후 수정
 
-        CommentReport findCommentReport = CommentReport.forMember(commentId, memberId, findReason,
+        CommentReport findCommentReport = CommentReport.forMember(findComment, memberId, findReason,
             reasonText);
         if (commentReportRepository.existsByCommentIdAndMemberId(commentId, memberId)) {
             throw new CommentException(CommentExceptionType.REPORTED_COMMENT);
@@ -811,7 +811,7 @@ public class CommentService {
             findComment.getEpisode().getNo(),
             findComment.getWebtoon().getTitle(),
             findComment.getId(),
-            findComment.getContent(),
+            findCommentReport.getAdminNote(),
             LocalDateTime.now()
         );
         eventPublisher.publishEvent(notificationEvent);

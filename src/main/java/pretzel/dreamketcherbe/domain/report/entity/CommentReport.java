@@ -64,19 +64,18 @@ public class CommentReport extends BaseTimeEntity {
     /**
      * 회원이 신고할 때 사용.
      *
-     * @param commentId  댓글 ID
      * @param memberId   신고자 회원 ID
      * @param reason     신고 사유 엔티티
      * @param reasonText 텍스트 or null
      */
     public static CommentReport forMember(
-        Long commentId,
+        Comment comment,
         Long memberId,
         ReportReason reason,
         String reasonText
     ) {
         return CommentReport.builder()
-            .commentId(commentId)
+            .comment(comment)
             .reporterMemberId(memberId)
             .reason(reason)
             .reasonText(reasonText)
@@ -87,17 +86,16 @@ public class CommentReport extends BaseTimeEntity {
     /**
      * 비회원(게스트)이 신고할 때 사용.
      *
-     * @param commentId  댓글 ID
      * @param reason     신고 사유 엔티티
      * @param reasonText ETC(기타) 텍스트 or null
      */
     public static CommentReport forGuest(
-        Long commentId,
+        Comment comment,
         ReportReason reason,
         String reasonText
     ) {
         return CommentReport.builder()
-            .commentId(commentId)
+            .comment(comment)
             .reporterMemberId(null)
             .reason(reason)
             .reasonText(reasonText)
