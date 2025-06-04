@@ -49,7 +49,7 @@ import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
-import pretzel.dreamketcherbe.domain.notification.event.ReportNotificationEvent;
+import pretzel.dreamketcherbe.domain.notification.event.EpisodeReportNotificationEvent;
 import pretzel.dreamketcherbe.domain.report.entity.EpisodeReport;
 import pretzel.dreamketcherbe.domain.report.entity.ReportReason;
 import pretzel.dreamketcherbe.domain.report.repository.EpisodeReportRepository;
@@ -632,7 +632,7 @@ public class EpisodeService {
         episodeRepository.save(findEpisode);
 
         // 신고 제출 알림 생성
-        ReportNotificationEvent notificationEvent = new ReportNotificationEvent(
+        EpisodeReportNotificationEvent notificationEvent = new EpisodeReportNotificationEvent(
             findEpisodeReport.getStatus(),
             findEpisodeReport.getId(),
             findEpisodeReport.getReporterMemberId(),

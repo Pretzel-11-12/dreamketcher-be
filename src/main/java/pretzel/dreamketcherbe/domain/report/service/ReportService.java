@@ -9,7 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pretzel.dreamketcherbe.domain.notification.event.ReportNotificationEvent;
+import pretzel.dreamketcherbe.domain.notification.event.CommentReportNotificationEvent;
+import pretzel.dreamketcherbe.domain.notification.event.EpisodeReportNotificationEvent;
 import pretzel.dreamketcherbe.domain.report.dto.CommentProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.EpisodeProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto;
@@ -100,7 +101,7 @@ public class ReportService {
             .map(report -> new ReportDto(
                 report.getId(),
                 ReportType.COMMENT,
-                report.getCommentId(),
+                report.getComment().getId(),
                 new ReporterDto(report.getReporterMemberId()),
                 new ReasonDto(report.getReason().getCode(), report.getReason().getDescription()),
                 report.getReasonText(),
@@ -159,7 +160,7 @@ public class ReportService {
             eventPublisher.publishEvent(event);
         }
 
-        ReportNotificationEvent notificationEvent = new ReportNotificationEvent(
+        EpisodeReportNotificationEvent notificationEvent = new EpisodeReportNotificationEvent(
             report.getStatus(),
             reportId,
             report.getReporterMemberId(),
@@ -194,13 +195,27 @@ public class ReportService {
         if (status == ReportStatus.RESOLVED) {
             // 댓글 상태 전환 이벤트 발행
             CommentStatusUpdateEvent event = new CommentStatusUpdateEvent(
-                report.getCommentId(),
+                report.getComment().getId(),
                 reportId,
                 memberId,
                 LocalDateTime.now()
             );
             eventPublisher.publishEvent(event);
         }
+
+        CommentReportNotificationEvent notificationEvent = new CommentReportNotificationEvent(
+            report.getStatus(),
+            reportId,
+            report.getReporterMemberId(),
+            report.getComment().getMember().getId(),
+            report.getComment().getEpisode().getTitle(),
+            report.getComment().getEpisode().getNo(),
+            report.getComment().getWebtoon().getTitle(),
+            report.getComment().getId(),
+            report.getComment().getContent(),
+            LocalDateTime.now()
+        );
+        eventPublisher.publishEvent(notificationEvent);
 
         return CommentProcessResDto.from(report);
     }

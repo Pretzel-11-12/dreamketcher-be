@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 
 @Entity
 @Table(name = "comment_report")
@@ -32,8 +33,9 @@ public class CommentReport extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "comment_id", nullable = false)
-    private Long commentId;
+    @ManyToOne
+    @JoinColumn(name = "comment_id", nullable = false)
+    private Comment comment;
 
     @Column(name = "reporter_member_id")
     private Long reporterMemberId;

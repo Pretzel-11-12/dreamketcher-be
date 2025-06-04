@@ -7,7 +7,7 @@ import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
 
 @Getter
 @AllArgsConstructor
-public class ReportNotificationEvent {
+public class EpisodeReportNotificationEvent {
 
     private final ReportStatus type;
     private final Long reportId;
