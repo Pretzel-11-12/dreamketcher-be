@@ -19,7 +19,7 @@ public class EpisodeLikeNotificationEventHandler {
     public void handleEpisodeLikeNotification(EpisodeLikeNotificationEvent event) {
         try {
             String message = String.format(
-                "%s의 %s, %d화가 좋아요 %d개를 받았습니다.",
+                "%s의 %s, %d화가 좋아요 %d개를 달성했습니다!",
                 event.getWebtoonTitle(),
                 event.getEpisodeTitle(),
                 event.getEpisodeNumber(),
