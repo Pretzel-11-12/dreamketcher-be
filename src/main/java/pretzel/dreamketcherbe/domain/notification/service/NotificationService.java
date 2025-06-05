@@ -114,6 +114,6 @@ public class NotificationService {
             findExpiredNotifications(LocalDateTime.now());
 
         episodeLikeNotificationRepository.deleteAll(expiredNotifications);
-        log.info("만료되ㅗㄴ 알림 {}개 삭제 완료", expiredNotifications.size());
+        log.info("만료 알림 {}개 삭제 완료", expiredNotifications.size());
     }
 }
