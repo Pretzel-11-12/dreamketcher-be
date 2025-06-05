@@ -5,9 +5,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import pretzel.dreamketcherbe.domain.episode.entity.Episode;
+import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
+import pretzel.dreamketcherbe.domain.episode.exception.EpisodeExceptionType;
+import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
 import pretzel.dreamketcherbe.domain.notification.dto.NotificationDto;
+import pretzel.dreamketcherbe.domain.notification.entity.EpisodeReportNotification;
+import pretzel.dreamketcherbe.domain.notification.repository.EpisodeReportNotificationRepository;
 import pretzel.dreamketcherbe.domain.notification.service.SSEService;
+import pretzel.dreamketcherbe.domain.report.entity.EpisodeReport;
 import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
+import pretzel.dreamketcherbe.domain.report.repository.EpisodeReportRepository;
 
 @Component
 @Slf4j
@@ -15,20 +23,21 @@ import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
 public class EpisodeReportNotificationEventHandler {
 
     private final SSEService SSEService;
+    private final EpisodeReportNotificationRepository episodeReportNotificationRepository;
+    private final EpisodeReportRepository episodeReportRepository;
+    private final EpisodeRepository episodeRepository;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleEpisodeReportNotification(EpisodeReportNotificationEvent event) {
         try {
-            // 피신고인 에게 알림 전송
-            NotificationDto notificationDto = createReportedEpisodeNotification(event);
-            SSEService.sendNotification(event.getReportedMemberId(),
-                notificationDto.message());
+            EpisodeReport episodeReport = episodeReportRepository.findById(event.getReportId())
+                .orElseThrow(() -> new IllegalArgumentException("신고를 찾을 수 없습니다."));
 
-            // 신고자에게 알림 전송
-            NotificationDto reportedNotificationDto = createEpisodeReporterNotification(
-                event);
-            SSEService.sendNotification(event.getReporterId(),
-                String.valueOf(reportedNotificationDto));
+            Episode episode = episodeRepository.findById(event.getEpisodeId())
+                .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
+
+            handleReportedNotification(event, episodeReport, episode);
+            handleReportNotification(event, episodeReport, episode);
 
             log.info("신고 알림 전송 완료 - 신고자: {}, 피신고인: {}, 타입: {}",
                 event.getReporterId(), event.getReportedMemberId(), event.getType());
@@ -37,6 +46,26 @@ public class EpisodeReportNotificationEventHandler {
                 event.getReporterId(), event.getReportedMemberId(), event.getType(),
                 e.getMessage());
         }
+    }
+
+    private void handleReportNotification(EpisodeReportNotificationEvent event,
+        EpisodeReport episodeReport, Episode episode) {
+        EpisodeReportNotification notification = createReporterNotification(event, episodeReport,
+            episode);
+        episodeReportNotificationRepository.save(notification);
+
+        NotificationDto notificationDto = createEpisodeReporterNotification(event);
+        SSEService.sendNotification(event.getReporterId(), notificationDto.message());
+    }
+
+    private void handleReportedNotification(EpisodeReportNotificationEvent event,
+        EpisodeReport episodeReport, Episode episode) {
+        EpisodeReportNotification notification = createReportedNotification(event, episodeReport,
+            episode);
+        episodeReportNotificationRepository.save(notification);
+
+        NotificationDto notificationDto = createReportedEpisodeNotification(event);
+        SSEService.sendNotification(event.getReportedMemberId(), notificationDto.message());
     }
 
     private NotificationDto createEpisodeReporterNotification(
@@ -73,6 +102,28 @@ public class EpisodeReportNotificationEventHandler {
         }
 
         return new NotificationDto(message, event.getCreatedAt());
+    }
+
+    private EpisodeReportNotification createReporterNotification(
+        EpisodeReportNotificationEvent event, EpisodeReport episodeReport, Episode episode) {
+        return switch (event.getType()) {
+            case PENDING -> EpisodeReportNotification.createForReporter(episodeReport, episode);
+            case RESOLVED ->
+                EpisodeReportNotification.createForReporterApproved(episodeReport, episode);
+            case DISMISSED ->
+                EpisodeReportNotification.createForReporterRejected(episodeReport, episode);
+        };
+    }
+
+    private EpisodeReportNotification createReportedNotification(
+        EpisodeReportNotificationEvent event, EpisodeReport episodeReport, Episode episode) {
+        return switch (event.getType()) {
+            case PENDING -> EpisodeReportNotification.createForReported(episodeReport, episode);
+            case RESOLVED ->
+                EpisodeReportNotification.createForReportedApproved(episodeReport, episode);
+            case DISMISSED ->
+                EpisodeReportNotification.createForReportedRejected(episodeReport, episode);
+        };
     }
 
 }

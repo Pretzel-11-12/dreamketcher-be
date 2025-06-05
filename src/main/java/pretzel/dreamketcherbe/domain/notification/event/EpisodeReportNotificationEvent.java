@@ -13,6 +13,7 @@ public class EpisodeReportNotificationEvent {
     private final Long reportId;
     private final Long reporterId;
     private final Long reportedMemberId;
+    private final Long episodeId;
     private final String episodeTitle;
     private final int episodeNumber;
     private final String webtoonTitle;

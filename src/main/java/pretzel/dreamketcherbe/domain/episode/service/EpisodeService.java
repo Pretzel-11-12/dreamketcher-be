@@ -637,6 +637,7 @@ public class EpisodeService {
             findEpisodeReport.getId(),
             findEpisodeReport.getReporterMemberId(),
             findEpisode.getMember().getId(),
+            findEpisode.getId(),
             findEpisode.getTitle(),
             findEpisode.getNo(),
             findWebtoon.getTitle(),

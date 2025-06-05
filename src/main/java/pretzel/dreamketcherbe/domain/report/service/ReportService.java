@@ -165,6 +165,7 @@ public class ReportService {
             reportId,
             report.getReporterMemberId(),
             report.getEpisode().getMember().getId(),
+            report.getEpisode().getId(),
             report.getEpisode().getTitle(),
             report.getEpisode().getNo(),
             report.getEpisode().getWebtoon().getTitle(),
