@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 import pretzel.dreamketcherbe.domain.comment.exception.CommentException;
 import pretzel.dreamketcherbe.domain.comment.exception.CommentExceptionType;
@@ -17,11 +18,15 @@ import pretzel.dreamketcherbe.domain.episode.exception.EpisodeExceptionType;
 import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
 import pretzel.dreamketcherbe.domain.notification.entity.CommentNotificationType;
 import pretzel.dreamketcherbe.domain.notification.entity.CommentRecOrNotRecNotification;
+import pretzel.dreamketcherbe.domain.notification.entity.CommentReportNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.EpisodeLikeNotification;
+import pretzel.dreamketcherbe.domain.notification.entity.EpisodeReportNotification;
 import pretzel.dreamketcherbe.domain.notification.event.CommentRecOrNotRecNotificationEvent;
 import pretzel.dreamketcherbe.domain.notification.event.EpisodeLikeNotificationEvent;
 import pretzel.dreamketcherbe.domain.notification.repository.CommentRecOrNotRecNotificationRepository;
+import pretzel.dreamketcherbe.domain.notification.repository.CommentReportNotificationRepository;
 import pretzel.dreamketcherbe.domain.notification.repository.EpisodeLikeNotificationRepository;
+import pretzel.dreamketcherbe.domain.notification.repository.EpisodeReportNotificationRepository;
 
 @Service
 @Slf4j
@@ -34,7 +39,12 @@ public class NotificationService {
     private final ApplicationEventPublisher eventPublisher;
     private final CommentRepository commentRepository;
     private final CommentRecOrNotRecNotificationRepository commentRecOrNotRecNotificationRepository;
+    private final EpisodeReportNotificationRepository episodeReportNotificationRepository;
+    private final CommentReportNotificationRepository commentReportNotificationRepository;
 
+    /**
+     * 에피소드 좋아요 알림 생성
+     */
     public void likeNotification(Long episodeId, Long memberId) {
         Episode episode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
@@ -78,7 +88,7 @@ public class NotificationService {
     }
 
     /**
-     * 전체 알림 조회
+     * 에피소드 좋아요 전체 알림 조회
      */
     @Transactional(readOnly = true)
     public List<EpisodeLikeNotification> getAllLikeNotifications(Long memberId) {
@@ -87,7 +97,7 @@ public class NotificationService {
     }
 
     /**
-     * 읽지 않은 알림 조회
+     * 에피소드 좋아요 읽지 않은 알림 조회
      */
     @Transactional(readOnly = true)
     public List<EpisodeLikeNotification> getUnreadLikeNotifications(Long memberId) {
@@ -96,7 +106,7 @@ public class NotificationService {
     }
 
     /**
-     * 읽지 않은 알림 갯수 조회
+     * 에피소드 좋아요 읽지 않은 알림 갯수 조회
      */
     @Transactional(readOnly = true)
     public Long getUnreadLikeNotificationCount(Long memberId) {
@@ -105,7 +115,7 @@ public class NotificationService {
     }
 
     /**
-     * 알림 읽음 처리
+     * 에피소드 좋아요 알림 읽음 처리
      */
     public void markAsReadLikeNotification(Long notificationId) {
         EpisodeLikeNotification notification = episodeLikeNotificationRepository.findById(
@@ -117,7 +127,7 @@ public class NotificationService {
     }
 
     /**
-     * 알림 만료 처리
+     * 에피소드 좋아요 알림 만료 처리
      */
     public void cleanupExpiredLikeNotifications() {
         List<EpisodeLikeNotification> expiredNotifications = episodeLikeNotificationRepository.
@@ -125,6 +135,107 @@ public class NotificationService {
 
         episodeLikeNotificationRepository.deleteAll(expiredNotifications);
         log.info("만료 알림 {}개 삭제 완료", expiredNotifications.size());
+    }
+
+    /**
+     * 에피소드 신고 알림 - 전체 조회
+     */
+    @Transactional(readOnly = true)
+    public List<EpisodeReportNotification> getAllReportNotifications(Long memberId) {
+        return episodeReportNotificationRepository.findAllNotificationsByMemberId(memberId,
+            LocalDateTime.now());
+    }
+
+    /**
+     * 에피소드 신고 알림 - 읽지 않은 알림 조회
+     */
+    @Transactional(readOnly = true)
+    public List<EpisodeReportNotification> getUnreadReportNotifications(Long memberId) {
+        return episodeReportNotificationRepository.findUnreadNotificationsByMemberId(memberId,
+            LocalDateTime.now());
+    }
+
+    /**
+     * 에피소드 신고 알림 - 읽지 않은 알림 수
+     */
+    @Transactional(readOnly = true)
+    public Long countUnreadReportNotifications(Long memberId) {
+        return episodeReportNotificationRepository.countUnreadNotificationsByMemberId(memberId,
+            LocalDateTime.now());
+    }
+
+    /**
+     * 에피소드 신고 알림 - 읽음 처리
+     */
+    public void markAsReadEpisodeReportNotification(Long notificationId) {
+        EpisodeReportNotification notification = episodeReportNotificationRepository.findById(
+                notificationId)
+            .orElseThrow(() -> new IllegalArgumentException("알림이 존재하지 않습니다."));
+
+        notification.markAsRead();
+        episodeReportNotificationRepository.save(notification);
+    }
+
+    /**
+     * 에피소드 신고 알림 - 만료된 알림 처리
+     */
+    public void cleanupExpiredEpisodeReportNotifications() {
+        List<EpisodeReportNotification> expiredNotifications = episodeReportNotificationRepository.findExpiredNotifications(
+            LocalDateTime.now());
+
+        episodeReportNotificationRepository.deleteAll(expiredNotifications);
+        log.info("만료된 에피소드 신고 알림 {}개 삭제 완료", expiredNotifications.size());
+    }
+
+    /**
+     * 댓글 신고 알림 - 전체 조회
+     */
+    @Transactional(readOnly = true)
+    public List<CommentReportNotification> getAllCommentReportNotifications(Long memberId) {
+        return commentReportNotificationRepository.findAllCommentReportNotificationsByMemberId(
+            memberId,
+            LocalDateTime.now());
+    }
+
+    /**
+     * 댓글 신고 알림 - 읽지 않은 알림 조회
+     */
+    @Transactional(readOnly = true)
+    public List<CommentReportNotification> getUnreadCommentReportNotifications(Long memberId) {
+        return commentReportNotificationRepository.findUnreadCommentReportNotificationsByMemberId(
+            memberId, LocalDateTime.now());
+    }
+
+    /**
+     * 댓글 신고 알림 - 읽지 않은 알림 수 조회
+     */
+    @Transactional(readOnly = true)
+    public Long countUnreadCommentReportNotifications(Long memberId) {
+        return commentReportNotificationRepository.countUnreadCommentReportNotificationsByMemberId(
+            memberId, LocalDateTime.now());
+    }
+
+    /**
+     * 댓글 신고 알림 - 읽음 처리
+     */
+    public void markAsReadCommentReportNotification(Long notificationId) {
+        CommentReportNotification notification = commentReportNotificationRepository.findById(
+                notificationId)
+            .orElseThrow(() -> new IllegalArgumentException("알림이 존재하지 않습니다."));
+
+        notification.markAsRead();
+        commentReportNotificationRepository.save(notification);
+    }
+
+    /**
+     * 댓글 신고 알림 - 만료 처리
+     */
+    public void cleanupExpiredCommentReportNotifications() {
+        List<CommentReportNotification> expiredNotifications = commentReportNotificationRepository
+            .findExpiredCommentReportNotifications(LocalDateTime.now());
+
+        commentReportNotificationRepository.deleteAll(expiredNotifications);
+        log.info("만료된 댓글 신고 알림 {}개 삭제 완료", expiredNotifications.size());
     }
 
     /**
