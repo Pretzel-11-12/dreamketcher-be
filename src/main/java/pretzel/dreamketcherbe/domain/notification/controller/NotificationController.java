@@ -5,16 +5,19 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.domain.notification.dto.NotificationCountResDto;
 import pretzel.dreamketcherbe.domain.notification.dto.NotificationDto;
+import pretzel.dreamketcherbe.domain.notification.dto.NotificationReqDto;
 import pretzel.dreamketcherbe.domain.notification.dto.NotificationResDto;
 import pretzel.dreamketcherbe.domain.notification.entity.CommentRecOrNotRecNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.CommentReportNotification;
@@ -34,6 +37,58 @@ public class NotificationController {
     @GetMapping(value = "/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter connect(@Auth Long memberId) {
         return SSEService.createConnection(memberId);
+    }
+
+    /**
+     * 전체 알림 - 조회
+     */
+    @GetMapping
+    public ResponseEntity<List<NotificationResDto>> getAllNotifications(@Auth Long memberId) {
+        List<NotificationResDto> notifications = notificationService.getAllNotifications(memberId);
+
+        return ResponseEntity.ok(notifications);
+    }
+
+    /**
+     * 전체 알림 - 읽지 않은 알림 조회
+     */
+    @GetMapping("/unread")
+    public ResponseEntity<List<NotificationResDto>> getAllUnreadNotifications(@Auth Long memberId) {
+        List<NotificationResDto> notifications = notificationService.getUnreadNotifications(
+            memberId);
+
+        return ResponseEntity.ok(notifications);
+    }
+
+    /**
+     * 전체 알림 - 읽지 않은 알림 수 조회
+     */
+    @GetMapping("/unread/count")
+    public ResponseEntity<NotificationCountResDto> getUnreadNotificationCount(@Auth Long memberId) {
+        Long count = notificationService.getUnreadNotificationCount(memberId);
+        return ResponseEntity.ok(new NotificationCountResDto(count));
+    }
+
+    /**
+     * 전체 알림 - 모두 읽음 처리
+     */
+    @PatchMapping("/read-all")
+    public ResponseEntity<Void> readAllNotifications(@Auth Long memberId,
+        @RequestBody NotificationReqDto request) {
+        notificationService.markAsReadAllNotifications(request.notifications());
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 전체 알림 - 모두 삭제
+     */
+    @DeleteMapping("/delete-all")
+    public ResponseEntity<Void> deleteAllNotifications(@Auth Long memberId,
+        @RequestBody NotificationReqDto request) {
+        notificationService.deleteAllNotifications(request.notifications());
+
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -208,7 +263,7 @@ public class NotificationController {
     /**
      * 댓글 비추천 알림
      */
-    @PostMapping("/comments{commentId}/notrecommend-notification")
+    @PostMapping("/comments/{commentId}/notrecommend-notification")
     public ResponseEntity<Void> commentNotRecommendNotification(@Auth Long memberId,
         @PathVariable Long commentId, int notRecommendCount) {
         notificationService.notRecommendationNotification(commentId, notRecommendCount);

@@ -1,6 +1,7 @@
 package pretzel.dreamketcherbe.domain.notification.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,9 @@ import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeExceptionType;
 import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
+import pretzel.dreamketcherbe.domain.notification.dto.NotificationReqDto;
+import pretzel.dreamketcherbe.domain.notification.dto.NotificationReqDto.NotificationItem;
+import pretzel.dreamketcherbe.domain.notification.dto.NotificationResDto;
 import pretzel.dreamketcherbe.domain.notification.entity.CommentNotificationType;
 import pretzel.dreamketcherbe.domain.notification.entity.CommentRecOrNotRecNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.CommentReportNotification;
@@ -27,6 +31,7 @@ import pretzel.dreamketcherbe.domain.notification.repository.CommentRecOrNotRecN
 import pretzel.dreamketcherbe.domain.notification.repository.CommentReportNotificationRepository;
 import pretzel.dreamketcherbe.domain.notification.repository.EpisodeLikeNotificationRepository;
 import pretzel.dreamketcherbe.domain.notification.repository.EpisodeReportNotificationRepository;
+import pretzel.dreamketcherbe.domain.report.entity.EpisodeReport;
 
 @Service
 @Slf4j
@@ -41,6 +46,141 @@ public class NotificationService {
     private final CommentRecOrNotRecNotificationRepository commentRecOrNotRecNotificationRepository;
     private final EpisodeReportNotificationRepository episodeReportNotificationRepository;
     private final CommentReportNotificationRepository commentReportNotificationRepository;
+
+    /**
+     * 모든 알림 - 전체 조회
+     */
+    @Transactional(readOnly = true)
+    public List<NotificationResDto> getAllNotifications(Long memberId) {
+        List<NotificationResDto> notifications = new ArrayList<>();
+
+        List<EpisodeLikeNotification> likeNotifications = getAllLikeNotifications(memberId);
+        notifications.addAll(likeNotifications.stream()
+            .map(NotificationResDto::fromEpisodeLikeNotification)
+            .toList());
+
+        List<EpisodeReportNotification> episodeReportNotifications = getAllReportNotifications(
+            memberId);
+        notifications.addAll(episodeReportNotifications.stream()
+            .map(NotificationResDto::fromEpisodeReportNotification)
+            .toList());
+
+        List<CommentReportNotification> commentReportNotifications = getAllCommentReportNotifications(
+            memberId);
+        notifications.addAll(commentReportNotifications.stream()
+            .map(NotificationResDto::fromCommentReportNotification)
+            .toList());
+
+        List<CommentRecOrNotRecNotification> commentRecOrNotRecNotifications = getAllCommentRecOrNotRecNotifications(
+            memberId);
+        notifications.addAll(commentRecOrNotRecNotifications.stream()
+            .map(NotificationResDto::fromCommentRecOtNOtRecNotification)
+            .toList());
+
+        notifications.sort((n1, n2) -> n2.createdAt().compareTo(n1.createdAt()));
+
+        return notifications;
+    }
+
+    /**
+     * 모든 알림 - 읽지 않은 알림 전체 조회
+     */
+    @Transactional(readOnly = true)
+    public List<NotificationResDto> getUnreadNotifications(Long memberId) {
+        List<NotificationResDto> notifications = new ArrayList<>();
+
+        List<EpisodeLikeNotification> likeNotifications = getUnreadLikeNotifications(memberId);
+        notifications.addAll(likeNotifications.stream()
+            .map(NotificationResDto::fromEpisodeLikeNotification)
+            .toList());
+
+        List<EpisodeReportNotification> episodeReportNotifications = getUnreadReportNotifications(
+            memberId);
+        notifications.addAll(episodeReportNotifications.stream()
+            .map(NotificationResDto::fromEpisodeReportNotification)
+            .toList());
+
+        List<CommentReportNotification> commentReportNotifications = getUnreadCommentReportNotifications(
+            memberId);
+        notifications.addAll(commentReportNotifications.stream()
+            .map(NotificationResDto::fromCommentReportNotification)
+            .toList());
+
+        List<CommentRecOrNotRecNotification> commentRecOrNotRecNotifications = getUnreadCommentRecOrNotRecNotifications(
+            memberId);
+        notifications.addAll(commentRecOrNotRecNotifications.stream()
+            .map(NotificationResDto::fromCommentRecOtNOtRecNotification)
+            .toList());
+
+        notifications.sort((n1, n2) -> n2.createdAt().compareTo(n1.createdAt()));
+
+        return notifications;
+    }
+
+    /**
+     * 모든 알림 - 읽지 않은 알림 수
+     */
+    @Transactional(readOnly = true)
+    public Long getUnreadNotificationCount(Long memberId) {
+        Long likeCount = getUnreadLikeNotificationCount(memberId);
+        Long episodeReportCount = countUnreadReportNotifications(memberId);
+        Long commentReportCount = countUnreadCommentReportNotifications(memberId);
+        Long commentRecOrNotRecCount = getUnreadCommentRecOrNotRecNotificationCount(memberId);
+
+        return likeCount + episodeReportCount + commentReportCount + commentRecOrNotRecCount;
+    }
+
+    /**
+     * 모든 알림 - 전체 읽음 처리
+     */
+    public void markAsReadAllNotifications(List<NotificationItem> notificationIds) {
+
+        for (NotificationItem notification : notificationIds) {
+            switch (notification.type()) {
+                case "EPISODE_LIKE":
+                    markAsReadLikeNotification(notification.notificationId());
+                    break;
+                case "EPISODE_REPORT":
+                    markAsReadEpisodeReportNotification(notification.notificationId());
+                    break;
+                case "COMMENT_REPORT":
+                    markAsReadCommentReportNotification(notification.notificationId());
+                    break;
+                case "COMMENT_RECOMMENDATION":
+                case "COMMENT_NOT_RECOMMENDATION":
+                    markAsReadCommentRecOrNotRecNotification(notification.notificationId());
+                    break;
+                default:
+                    log.warn("알 수 없는 알림 타입: {}", notification.type());
+            }
+        }
+    }
+
+    /**
+     * 모든 알림 - 전체 삭제
+     */
+    public void deleteAllNotifications(List<NotificationItem> notificationIds) {
+        for (NotificationItem notification : notificationIds) {
+            switch (notification.type()) {
+                case "EPISODE_LIKE":
+                    episodeLikeNotificationRepository.deleteById(notification.notificationId());
+                    break;
+                case "EPISODE_REPORT":
+                    episodeReportNotificationRepository.deleteById(notification.notificationId());
+                    break;
+                case "COMMENT_REPORT":
+                    commentReportNotificationRepository.deleteById(notification.notificationId());
+                    break;
+                case "COMMENT_RECOMMENDATION":
+                case "COMMENT_NOT_RECOMMENDATION":
+                    commentRecOrNotRecNotificationRepository.deleteById(
+                        notification.notificationId());
+                    break;
+                default:
+                    log.warn("알 수 없는 알림 타입: {}", notification.type());
+            }
+        }
+    }
 
     /**
      * 에피소드 좋아요 알림 생성
