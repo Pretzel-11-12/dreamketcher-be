@@ -43,7 +43,7 @@ class StorageFolderServiceTest {
         void 폴더_생성_성공_테스트() {
             // given
             Long memberId = 1L;
-            CreateFolderReqDto reqDto = new CreateFolderReqDto("폴더 이름");
+            CreateFolderReqDto reqDto = new CreateFolderReqDto("폴더 이름", false);
 
             Member member = FixtureFactory.getMember(memberId);
             given(memberRepository.findById(memberId)).willReturn(Optional.of(member));

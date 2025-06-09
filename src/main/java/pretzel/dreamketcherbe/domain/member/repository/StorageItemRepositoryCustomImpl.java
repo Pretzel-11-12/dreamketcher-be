@@ -6,11 +6,12 @@ import static pretzel.dreamketcherbe.domain.webtoon.entity.QWebtoon.webtoon;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import pretzel.dreamketcherbe.domain.member.dto.StorageItemContentDto;
+import pretzel.dreamketcherbe.domain.member.dto.StorageItemDetailContentDto;
 import pretzel.dreamketcherbe.domain.member.dto.StorageItemResDto;
 
 @RequiredArgsConstructor
@@ -20,19 +21,22 @@ public class StorageItemRepositoryCustomImpl implements StorageItemRepositoryCus
 
     @Override
     public StorageItemResDto findAllStorageItemWithPage(Long memberId, Long folderId) {
-        List<StorageItemContentDto> content = getStorageItems(memberId, folderId);
+        List<StorageItemDetailContentDto> content = getStorageItems(memberId, folderId);
         long total = getTotalDataCount(memberId, folderId);
         String folderName = getFolderName(folderId);
         return StorageItemResDto.of(folderId, folderName, content, total);
     }
 
-    private List<StorageItemContentDto> getStorageItems(Long memberId, Long folderId) {
+    private List<StorageItemDetailContentDto> getStorageItems(Long memberId, Long folderId) {
         return jpaQueryFactory.select(
-            Projections.constructor(pretzel.dreamketcherbe.domain.member.dto.StorageItemContentDto.class,
+            Projections.constructor(pretzel.dreamketcherbe.domain.member.dto.StorageItemDetailContentDto.class,
                 webtoon.id,
                 webtoon.title,
                 webtoon.thumbnail,
-                webtoon.member.nickname
+                webtoon.member.nickname,
+                webtoon.genre.name,
+                webtoon.episodeCount,
+                Expressions.stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", webtoon.updatedAt)
             ))
             .from(storageItem)
             .join(storageItem.webtoon, webtoon)

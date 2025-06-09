@@ -6,6 +6,9 @@ import jakarta.validation.constraints.Size;
 public record CreateFolderReqDto(
     @NotNull(message = "폴더 이름은 필수값입니다.")
     @Size(min = 1, max = 10, message = "폴더 이름은 10자 이하여야 합니다.")
-    String folderName
+    String folderName,
+
+    @NotNull(message = "공개/비공개 여부는 필수값입니다.")
+    boolean isPrivate
 ) {
 }
