@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,7 +50,9 @@ import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.notification.entity.EpisodeLikeNotification;
 import pretzel.dreamketcherbe.domain.notification.event.EpisodeReportNotificationEvent;
+import pretzel.dreamketcherbe.domain.notification.repository.EpisodeLikeNotificationRepository;
 import pretzel.dreamketcherbe.domain.report.entity.EpisodeReport;
 import pretzel.dreamketcherbe.domain.report.entity.ReportReason;
 import pretzel.dreamketcherbe.domain.report.repository.EpisodeReportRepository;
@@ -60,6 +63,7 @@ import pretzel.dreamketcherbe.domain.webtoon.exception.WebtoonExceptionType;
 import pretzel.dreamketcherbe.domain.webtoon.repository.WebtoonRepository;
 import pretzel.dreamketcherbe.domain.webtoon.service.WebtoonService;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class EpisodeService {
@@ -106,6 +110,7 @@ public class EpisodeService {
     private final WebtoonService webtoonService;
     private final ReportReasonRepository reportReasonRepository;
     private final EpisodeReportRepository episodeReportRepository;
+    private final EpisodeLikeNotificationRepository episodeLikeNotificationRepository;
 
     /**
      * 에피소드 목록 조회
@@ -494,14 +499,37 @@ public class EpisodeService {
 
         if (result == 1) {
             episodeLikeRepository.save(new EpisodeLike(episode, member));
+
+            boolean isLiked = episode.incrementLikeCount();
+            episodeRepository.save(episode);
+
+            if (isLiked) {
+                createLikeNotification(episode, episode.getLikeCount());
+            }
         } else if (result == -1) {
             episodeLikeRepository.deleteByEpisodeAndMember(episodeId, memberId);
+
+            episode.decrementLikeCount();
+            episodeRepository.save(episode);
         }
 
         String likeCount = redisTemplate.opsForValue().get(likeCountKey);
         int likeCountInt = likeCount == null ? 0 : Integer.parseInt(likeCount);
 
         return CreateEpisodeLikeResDto.of(episodeId, likeCountInt);
+    }
+
+    /**
+     * 에피소드 좋아요 알림 생성
+     */
+    private void createLikeNotification(Episode episode, int likeCount) {
+        try {
+            EpisodeLikeNotification notification = EpisodeLikeNotification.createForAuthor(episode,
+                likeCount);
+            episodeLikeNotificationRepository.save(notification);
+        } catch (Exception e) {
+            log.warn("{}, 알림 생성에 실패하였습니다.", episode.getId(), e);
+        }
     }
 
     /**
@@ -517,8 +545,10 @@ public class EpisodeService {
             Episode episode = episodeRepository.findById(episodeId)
                 .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
-            episode.setLikeCount(likeCountInt);
-            episodeRepository.save(episode);
+            if (episode.getLikeCount() != likeCountInt) {
+                episode.setLikeCount(likeCountInt);
+                episodeRepository.save(episode);
+            }
         }
     }
 
