@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 import pretzel.dreamketcherbe.domain.comment.exception.CommentException;
 import pretzel.dreamketcherbe.domain.comment.exception.CommentExceptionType;
@@ -17,7 +17,6 @@ import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeExceptionType;
 import pretzel.dreamketcherbe.domain.episode.repository.EpisodeRepository;
-import pretzel.dreamketcherbe.domain.notification.dto.NotificationReqDto;
 import pretzel.dreamketcherbe.domain.notification.dto.NotificationReqDto.NotificationItem;
 import pretzel.dreamketcherbe.domain.notification.dto.NotificationResDto;
 import pretzel.dreamketcherbe.domain.notification.entity.CommentNotificationType;
@@ -31,13 +30,14 @@ import pretzel.dreamketcherbe.domain.notification.repository.CommentRecOrNotRecN
 import pretzel.dreamketcherbe.domain.notification.repository.CommentReportNotificationRepository;
 import pretzel.dreamketcherbe.domain.notification.repository.EpisodeLikeNotificationRepository;
 import pretzel.dreamketcherbe.domain.notification.repository.EpisodeReportNotificationRepository;
-import pretzel.dreamketcherbe.domain.report.entity.EpisodeReport;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
 public class NotificationService {
+
+    private static final int NOTIFICATION_EXPIRE_DAYS = 14;
+    private static final int RECOMMENDATION_THRESHOLD = 5;
 
     private final EpisodeRepository episodeRepository;
     private final EpisodeLikeNotificationRepository episodeLikeNotificationRepository;
@@ -52,34 +52,7 @@ public class NotificationService {
      */
     @Transactional(readOnly = true)
     public List<NotificationResDto> getAllNotifications(Long memberId) {
-        List<NotificationResDto> notifications = new ArrayList<>();
-
-        List<EpisodeLikeNotification> likeNotifications = getAllLikeNotifications(memberId);
-        notifications.addAll(likeNotifications.stream()
-            .map(NotificationResDto::fromEpisodeLikeNotification)
-            .toList());
-
-        List<EpisodeReportNotification> episodeReportNotifications = getAllReportNotifications(
-            memberId);
-        notifications.addAll(episodeReportNotifications.stream()
-            .map(NotificationResDto::fromEpisodeReportNotification)
-            .toList());
-
-        List<CommentReportNotification> commentReportNotifications = getAllCommentReportNotifications(
-            memberId);
-        notifications.addAll(commentReportNotifications.stream()
-            .map(NotificationResDto::fromCommentReportNotification)
-            .toList());
-
-        List<CommentRecOrNotRecNotification> commentRecOrNotRecNotifications = getAllCommentRecOrNotRecNotifications(
-            memberId);
-        notifications.addAll(commentRecOrNotRecNotifications.stream()
-            .map(NotificationResDto::fromCommentRecOtNOtRecNotification)
-            .toList());
-
-        notifications.sort((n1, n2) -> n2.createdAt().compareTo(n1.createdAt()));
-
-        return notifications;
+        return collectAllNotifications(memberId, false);
     }
 
     /**
@@ -87,27 +60,64 @@ public class NotificationService {
      */
     @Transactional(readOnly = true)
     public List<NotificationResDto> getUnreadNotifications(Long memberId) {
-        List<NotificationResDto> notifications = new ArrayList<>();
+        return collectAllNotifications(memberId, true);
+    }
 
-        List<EpisodeLikeNotification> likeNotifications = getUnreadLikeNotifications(memberId);
-        notifications.addAll(likeNotifications.stream()
+    /**
+     * 모든 알림 - 읽지 않은 알림 수
+     */
+    @Transactional(readOnly = true)
+    public Long getUnreadNotificationCount(Long memberId) {
+        // repository 직접 호출로 self-invocation 방지
+        Long likeCount = episodeLikeNotificationRepository.countUnreadNotificationsByAuthorId(
+            memberId, LocalDateTime.now());
+        Long episodeReportCount = episodeReportNotificationRepository.countUnreadNotificationsByMemberId(
+            memberId, LocalDateTime.now());
+        Long commentReportCount = commentReportNotificationRepository.countUnreadCommentReportNotificationsByMemberId(
+            memberId, LocalDateTime.now());
+        Long commentRecOrNotRecCount = commentRecOrNotRecNotificationRepository.countUnreadNotificationsByMemberId(
+            memberId, LocalDateTime.now());
+
+        return likeCount + episodeReportCount + commentReportCount + commentRecOrNotRecCount;
+    }
+
+    /**
+     * 알림 수집 헬퍼 메서드
+     */
+    private List<NotificationResDto> collectAllNotifications(Long memberId, boolean unreadOnly) {
+
+        List<EpisodeLikeNotification> likeNotifications = unreadOnly
+            ? episodeLikeNotificationRepository.findUnreadNotificationsByAuthorId(memberId,
+            LocalDateTime.now())
+            : episodeLikeNotificationRepository.findAllNotificationsByAuthorId(memberId,
+                LocalDateTime.now());
+        List<NotificationResDto> notifications = new ArrayList<>(likeNotifications.stream()
             .map(NotificationResDto::fromEpisodeLikeNotification)
             .toList());
 
-        List<EpisodeReportNotification> episodeReportNotifications = getUnreadReportNotifications(
-            memberId);
+        List<EpisodeReportNotification> episodeReportNotifications = unreadOnly
+            ? episodeReportNotificationRepository.findUnreadNotificationsByMemberId(memberId,
+            LocalDateTime.now())
+            : episodeReportNotificationRepository.findAllNotificationsByMemberId(memberId,
+                LocalDateTime.now());
         notifications.addAll(episodeReportNotifications.stream()
             .map(NotificationResDto::fromEpisodeReportNotification)
             .toList());
 
-        List<CommentReportNotification> commentReportNotifications = getUnreadCommentReportNotifications(
-            memberId);
+        List<CommentReportNotification> commentReportNotifications = unreadOnly
+            ? commentReportNotificationRepository.findUnreadCommentReportNotificationsByMemberId(
+            memberId, LocalDateTime.now())
+            : commentReportNotificationRepository.findAllCommentReportNotificationsByMemberId(
+                memberId, LocalDateTime.now());
         notifications.addAll(commentReportNotifications.stream()
             .map(NotificationResDto::fromCommentReportNotification)
             .toList());
 
-        List<CommentRecOrNotRecNotification> commentRecOrNotRecNotifications = getUnreadCommentRecOrNotRecNotifications(
-            memberId);
+        List<CommentRecOrNotRecNotification> commentRecOrNotRecNotifications = unreadOnly
+            ? commentRecOrNotRecNotificationRepository.findAllUnreadNotificationsByMemberId(
+            memberId, LocalDateTime.now())
+            : commentRecOrNotRecNotificationRepository.findAllByMemberId(memberId,
+                LocalDateTime.now());
         notifications.addAll(commentRecOrNotRecNotifications.stream()
             .map(NotificationResDto::fromCommentRecOtNOtRecNotification)
             .toList());
@@ -118,24 +128,11 @@ public class NotificationService {
     }
 
     /**
-     * 모든 알림 - 읽지 않은 알림 수
-     */
-    @Transactional(readOnly = true)
-    public Long getUnreadNotificationCount(Long memberId) {
-        Long likeCount = getUnreadLikeNotificationCount(memberId);
-        Long episodeReportCount = countUnreadReportNotifications(memberId);
-        Long commentReportCount = countUnreadCommentReportNotifications(memberId);
-        Long commentRecOrNotRecCount = getUnreadCommentRecOrNotRecNotificationCount(memberId);
-
-        return likeCount + episodeReportCount + commentReportCount + commentRecOrNotRecCount;
-    }
-
-    /**
      * 모든 알림 - 전체 읽음 처리
      */
-    public void markAsReadAllNotifications(List<NotificationItem> notificationIds) {
-
-        for (NotificationItem notification : notificationIds) {
+    @Transactional
+    public void markAsReadAllNotifications(List<NotificationItem> notificationItems) {
+        for (NotificationItem notification : notificationItems) {
             switch (notification.type()) {
                 case "EPISODE_LIKE":
                     markAsReadLikeNotification(notification.notificationId());
@@ -159,8 +156,9 @@ public class NotificationService {
     /**
      * 모든 알림 - 전체 삭제
      */
-    public void deleteAllNotifications(List<NotificationItem> notificationIds) {
-        for (NotificationItem notification : notificationIds) {
+    @Transactional
+    public void deleteAllNotifications(List<NotificationItem> notificationItems) {
+        for (NotificationItem notification : notificationItems) {
             switch (notification.type()) {
                 case "EPISODE_LIKE":
                     episodeLikeNotificationRepository.deleteById(notification.notificationId());
@@ -185,27 +183,54 @@ public class NotificationService {
     /**
      * 에피소드 좋아요 알림 생성
      */
+    @Transactional
     public void likeNotification(Long episodeId, Long memberId) {
+        // 1. 핵심 비즈니스 로직: 좋아요 수 증가
+        Episode episode = incrementEpisodeLike(episodeId);
+
+        // 2. 알림 생성 조건 확인 및 처리 (별도 트랜잭션)
+        if (shouldCreateLikeNotification(episode)) {
+            createLikeNotificationAsync(episode);
+        }
+    }
+
+    /**
+     * 에피소드 좋아요 수 증가
+     */
+    private Episode incrementEpisodeLike(Long episodeId) {
         Episode episode = episodeRepository.findById(episodeId)
             .orElseThrow(() -> new EpisodeException(EpisodeExceptionType.EPISODE_NOT_FOUND));
 
         boolean isNotify = episode.incrementLikeCount();
-        episodeRepository.save(episode);
+        if (!isNotify) {
+            log.debug("좋아요 알림 조건 미충족 - 에피소드: {}, 현재 좋아요: {}",
+                episodeId, episode.getLikeCount());
+        }
 
-        if (isNotify && !hasLikeNotification(episodeId, episode.getLikeCount())) {
+        return episodeRepository.save(episode);
+    }
 
+    /**
+     * 알림 생성 조건 확인
+     */
+    private boolean shouldCreateLikeNotification(Episode episode) {
+        return !hasLikeNotification(episode.getId(), episode.getLikeCount());
+    }
+
+    /**
+     * 좋아요 알림 생성
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void createLikeNotificationAsync(Episode episode) {
+        try {
             saveLikeNotification(episode);
+            publishLikeNotificationEvent(episode);
 
-            EpisodeLikeNotificationEvent event = new EpisodeLikeNotificationEvent(
-                episode.getId(),
-                episode.getMember().getId(),
-                episode.getWebtoon().getTitle(),
-                episode.getNo(),
-                episode.getTitle(),
-                episode.getLikeCount(),
-                LocalDateTime.now()
-            );
-            eventPublisher.publishEvent(event);
+            log.info("좋아요 알림 생성 성공 - 에피소드: {}, 좋아요: {}",
+                episode.getId(), episode.getLikeCount());
+        } catch (Exception e) {
+            log.error("좋아요 알림 생성 실패 - 에피소드: {}, 에러: {}",
+                episode.getId(), e.getMessage(), e);
         }
     }
 
@@ -221,33 +246,40 @@ public class NotificationService {
             .webtoonId(episode.getWebtoon().getId())
             .likeCount(episode.getLikeCount())
             .isRead(false)
-            .expiredAt(LocalDateTime.now().plusDays(14))
+            .expiredAt(LocalDateTime.now().plusDays(NOTIFICATION_EXPIRE_DAYS))
             .build();
 
         episodeLikeNotificationRepository.save(notification);
     }
 
     /**
-     * 에피소드 좋아요 전체 알림 조회
+     * 이벤트 발행
      */
+    private void publishLikeNotificationEvent(Episode episode) {
+        EpisodeLikeNotificationEvent event = new EpisodeLikeNotificationEvent(
+            episode.getId(),
+            episode.getMember().getId(),
+            episode.getWebtoon().getTitle(),
+            episode.getNo(),
+            episode.getTitle(),
+            episode.getLikeCount(),
+            LocalDateTime.now()
+        );
+        eventPublisher.publishEvent(event);
+    }
+
     @Transactional(readOnly = true)
     public List<EpisodeLikeNotification> getAllLikeNotifications(Long memberId) {
         return episodeLikeNotificationRepository.findAllNotificationsByAuthorId(memberId,
             LocalDateTime.now());
     }
 
-    /**
-     * 에피소드 좋아요 읽지 않은 알림 조회
-     */
     @Transactional(readOnly = true)
     public List<EpisodeLikeNotification> getUnreadLikeNotifications(Long memberId) {
         return episodeLikeNotificationRepository.findUnreadNotificationsByAuthorId(memberId,
             LocalDateTime.now());
     }
 
-    /**
-     * 에피소드 좋아요 읽지 않은 알림 갯수 조회
-     */
     @Transactional(readOnly = true)
     public Long getUnreadLikeNotificationCount(Long memberId) {
         return episodeLikeNotificationRepository.countUnreadNotificationsByAuthorId(memberId,
@@ -255,135 +287,12 @@ public class NotificationService {
     }
 
     /**
-     * 에피소드 좋아요 알림 읽음 처리
-     */
-    public void markAsReadLikeNotification(Long notificationId) {
-        EpisodeLikeNotification notification = episodeLikeNotificationRepository.findById(
-                notificationId)
-            .orElseThrow(() -> new IllegalArgumentException("알림이 존재하지 않습니다."));
-
-        notification.markAsRead();
-        episodeLikeNotificationRepository.save(notification);
-    }
-
-    /**
-     * 에피소드 좋아요 알림 만료 처리
-     */
-    public void cleanupExpiredLikeNotifications() {
-        List<EpisodeLikeNotification> expiredNotifications = episodeLikeNotificationRepository.
-            findExpiredNotifications(LocalDateTime.now());
-
-        episodeLikeNotificationRepository.deleteAll(expiredNotifications);
-        log.info("만료 알림 {}개 삭제 완료", expiredNotifications.size());
-    }
-
-    /**
-     * 에피소드 신고 알림 - 전체 조회
-     */
-    @Transactional(readOnly = true)
-    public List<EpisodeReportNotification> getAllReportNotifications(Long memberId) {
-        return episodeReportNotificationRepository.findAllNotificationsByMemberId(memberId,
-            LocalDateTime.now());
-    }
-
-    /**
-     * 에피소드 신고 알림 - 읽지 않은 알림 조회
-     */
-    @Transactional(readOnly = true)
-    public List<EpisodeReportNotification> getUnreadReportNotifications(Long memberId) {
-        return episodeReportNotificationRepository.findUnreadNotificationsByMemberId(memberId,
-            LocalDateTime.now());
-    }
-
-    /**
-     * 에피소드 신고 알림 - 읽지 않은 알림 수
-     */
-    @Transactional(readOnly = true)
-    public Long countUnreadReportNotifications(Long memberId) {
-        return episodeReportNotificationRepository.countUnreadNotificationsByMemberId(memberId,
-            LocalDateTime.now());
-    }
-
-    /**
-     * 에피소드 신고 알림 - 읽음 처리
-     */
-    public void markAsReadEpisodeReportNotification(Long notificationId) {
-        EpisodeReportNotification notification = episodeReportNotificationRepository.findById(
-                notificationId)
-            .orElseThrow(() -> new IllegalArgumentException("알림이 존재하지 않습니다."));
-
-        notification.markAsRead();
-        episodeReportNotificationRepository.save(notification);
-    }
-
-    /**
-     * 에피소드 신고 알림 - 만료된 알림 처리
-     */
-    public void cleanupExpiredEpisodeReportNotifications() {
-        List<EpisodeReportNotification> expiredNotifications = episodeReportNotificationRepository.findExpiredNotifications(
-            LocalDateTime.now());
-
-        episodeReportNotificationRepository.deleteAll(expiredNotifications);
-        log.info("만료된 에피소드 신고 알림 {}개 삭제 완료", expiredNotifications.size());
-    }
-
-    /**
-     * 댓글 신고 알림 - 전체 조회
-     */
-    @Transactional(readOnly = true)
-    public List<CommentReportNotification> getAllCommentReportNotifications(Long memberId) {
-        return commentReportNotificationRepository.findAllCommentReportNotificationsByMemberId(
-            memberId,
-            LocalDateTime.now());
-    }
-
-    /**
-     * 댓글 신고 알림 - 읽지 않은 알림 조회
-     */
-    @Transactional(readOnly = true)
-    public List<CommentReportNotification> getUnreadCommentReportNotifications(Long memberId) {
-        return commentReportNotificationRepository.findUnreadCommentReportNotificationsByMemberId(
-            memberId, LocalDateTime.now());
-    }
-
-    /**
-     * 댓글 신고 알림 - 읽지 않은 알림 수 조회
-     */
-    @Transactional(readOnly = true)
-    public Long countUnreadCommentReportNotifications(Long memberId) {
-        return commentReportNotificationRepository.countUnreadCommentReportNotificationsByMemberId(
-            memberId, LocalDateTime.now());
-    }
-
-    /**
-     * 댓글 신고 알림 - 읽음 처리
-     */
-    public void markAsReadCommentReportNotification(Long notificationId) {
-        CommentReportNotification notification = commentReportNotificationRepository.findById(
-                notificationId)
-            .orElseThrow(() -> new IllegalArgumentException("알림이 존재하지 않습니다."));
-
-        notification.markAsRead();
-        commentReportNotificationRepository.save(notification);
-    }
-
-    /**
-     * 댓글 신고 알림 - 만료 처리
-     */
-    public void cleanupExpiredCommentReportNotifications() {
-        List<CommentReportNotification> expiredNotifications = commentReportNotificationRepository
-            .findExpiredCommentReportNotifications(LocalDateTime.now());
-
-        commentReportNotificationRepository.deleteAll(expiredNotifications);
-        log.info("만료된 댓글 신고 알림 {}개 삭제 완료", expiredNotifications.size());
-    }
-
-    /**
      * 댓글 추천 알림
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recommendationNotification(Long commentId, int recommendationCount) {
-        if (recommendationCount % 5 == 0 && recommendationCount > 0) {
-            processNotification(commentId, CommentNotificationType.RECOMMENDATION,
+        if (recommendationCount % RECOMMENDATION_THRESHOLD == 0 && recommendationCount > 0) {
+            processCommentNotification(commentId, CommentNotificationType.RECOMMENDATION,
                 recommendationCount);
         }
     }
@@ -391,25 +300,34 @@ public class NotificationService {
     /**
      * 댓글 비추천 알림
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void notRecommendationNotification(Long commentId, int notRecommendationCount) {
-        if (notRecommendationCount % 5 == 0 && notRecommendationCount > 0) {
-            processNotification(commentId, CommentNotificationType.NOT_RECOMMENDATION,
+        if (notRecommendationCount % RECOMMENDATION_THRESHOLD == 0 && notRecommendationCount > 0) {
+            processCommentNotification(commentId, CommentNotificationType.NOT_RECOMMENDATION,
                 notRecommendationCount);
         }
     }
 
-    private void processNotification(Long commentId, CommentNotificationType type, int count) {
-        Comment comment = commentRepository.findById(commentId)
-            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
+    /**
+     * 댓글 알림 처리
+     */
+    private void processCommentNotification(Long commentId, CommentNotificationType type,
+        int count) {
+        try {
+            Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
 
-        if (!hasRecOrNotRecNotification(commentId, type)) {
-            saveRecOrNotRecNotification(comment, type, count);
+            if (!hasRecOrNotRecNotification(commentId, type)) {
+                saveRecOrNotRecNotification(comment, type, count);
+                publishCommentNotificationEvent(comment, type, count);
 
-            publisRecOrNotRecNotification(comment, type, count);
-
-            log.info("댓글 {} 알림 생성 - 댓글: {}, 개수: {}",
-                type == CommentNotificationType.RECOMMENDATION ? "추천" : "비추천",
-                commentId, count);
+                log.info("댓글 {} 알림 생성 성공 - 댓글: {}, 개수: {}",
+                    type == CommentNotificationType.RECOMMENDATION ? "추천" : "비추천",
+                    commentId, count);
+            }
+        } catch (Exception e) {
+            log.error("댓글 알림 생성 실패 - 댓글: {}, 타입: {}, 에러: {}",
+                commentId, type, e.getMessage(), e);
         }
     }
 
@@ -419,19 +337,18 @@ public class NotificationService {
 
     private void saveRecOrNotRecNotification(Comment comment, CommentNotificationType type,
         int count) {
-        CommentRecOrNotRecNotification notification;
-
-        if (type == CommentNotificationType.RECOMMENDATION) {
-            notification = CommentRecOrNotRecNotification.createForRecommendation(comment, count);
-        } else {
-            notification = CommentRecOrNotRecNotification.createForNotRecommendation(comment,
-                count);
-        }
+        CommentRecOrNotRecNotification notification =
+            (type == CommentNotificationType.RECOMMENDATION)
+                ? CommentRecOrNotRecNotification.createForRecommendation(comment, count)
+                : CommentRecOrNotRecNotification.createForNotRecommendation(comment, count);
 
         commentRecOrNotRecNotificationRepository.save(notification);
     }
 
-    private void publisRecOrNotRecNotification(Comment comment, CommentNotificationType type,
+    /**
+     * 댓글 알림 이벤트 발행
+     */
+    private void publishCommentNotificationEvent(Comment comment, CommentNotificationType type,
         int count) {
         CommentRecOrNotRecNotificationEvent event = new CommentRecOrNotRecNotificationEvent(
             comment.getId(),
@@ -448,9 +365,42 @@ public class NotificationService {
         eventPublisher.publishEvent(event);
     }
 
-    /**
-     * 모든 댓글 추천/비추천 알림 조회
-     */
+    @Transactional(readOnly = true)
+    public List<EpisodeReportNotification> getAllReportNotifications(Long memberId) {
+        return episodeReportNotificationRepository.findAllNotificationsByMemberId(memberId,
+            LocalDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public List<EpisodeReportNotification> getUnreadReportNotifications(Long memberId) {
+        return episodeReportNotificationRepository.findUnreadNotificationsByMemberId(memberId,
+            LocalDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public Long countUnreadReportNotifications(Long memberId) {
+        return episodeReportNotificationRepository.countUnreadNotificationsByMemberId(memberId,
+            LocalDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommentReportNotification> getAllCommentReportNotifications(Long memberId) {
+        return commentReportNotificationRepository.findAllCommentReportNotificationsByMemberId(
+            memberId, LocalDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommentReportNotification> getUnreadCommentReportNotifications(Long memberId) {
+        return commentReportNotificationRepository.findUnreadCommentReportNotificationsByMemberId(
+            memberId, LocalDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public Long countUnreadCommentReportNotifications(Long memberId) {
+        return commentReportNotificationRepository.countUnreadCommentReportNotificationsByMemberId(
+            memberId, LocalDateTime.now());
+    }
+
     @Transactional(readOnly = true)
     public List<CommentRecOrNotRecNotification> getAllCommentRecOrNotRecNotifications(
         Long memberId) {
@@ -458,41 +408,83 @@ public class NotificationService {
             LocalDateTime.now());
     }
 
-    /**
-     * 읽지 않은 댓글 추천/비추천 알림 조회
-     */
     @Transactional(readOnly = true)
     public List<CommentRecOrNotRecNotification> getUnreadCommentRecOrNotRecNotifications(
         Long memberId) {
         return commentRecOrNotRecNotificationRepository.findAllUnreadNotificationsByMemberId(
-            memberId,
-            LocalDateTime.now());
-    }
-
-    /**
-     * 읽지 않은 알림 갯수 조회
-     */
-    @Transactional(readOnly = true)
-    public Long getUnreadCommentRecOrNotRecNotificationCount(Long memberId) {
-        return commentRecOrNotRecNotificationRepository.countUnreadNotificationsByMemberId(
             memberId, LocalDateTime.now());
     }
 
-    /**
-     * 알림 읽음 처리
-     */
-    public void markAsReadCommentRecOrNotRecNotification(Long notificationId) {
-        CommentRecOrNotRecNotification notification = commentRecOrNotRecNotificationRepository
-            .findById(notificationId)
-            .orElseThrow(() -> new IllegalArgumentException("알림이 존재하지 않습니다."));
+    @Transactional(readOnly = true)
+    public Long getUnreadCommentRecOrNotRecNotificationCount(Long memberId) {
+        return commentRecOrNotRecNotificationRepository.countUnreadNotificationsByMemberId(memberId,
+            LocalDateTime.now());
+    }
 
+    @Transactional
+    public void markAsReadLikeNotification(Long notificationId) {
+        EpisodeLikeNotification notification = episodeLikeNotificationRepository.findById(
+                notificationId)
+            .orElseThrow(() -> new IllegalArgumentException("알림이 존재하지 않습니다."));
+        notification.markAsRead();
+        episodeLikeNotificationRepository.save(notification);
+    }
+
+    @Transactional
+    public void markAsReadEpisodeReportNotification(Long notificationId) {
+        EpisodeReportNotification notification = episodeReportNotificationRepository.findById(
+                notificationId)
+            .orElseThrow(() -> new IllegalArgumentException("알림이 존재하지 않습니다."));
+        notification.markAsRead();
+        episodeReportNotificationRepository.save(notification);
+    }
+
+    @Transactional
+    public void markAsReadCommentReportNotification(Long notificationId) {
+        CommentReportNotification notification = commentReportNotificationRepository.findById(
+                notificationId)
+            .orElseThrow(() -> new IllegalArgumentException("알림이 존재하지 않습니다."));
+        notification.markAsRead();
+        commentReportNotificationRepository.save(notification);
+    }
+
+    @Transactional
+    public void markAsReadCommentRecOrNotRecNotification(Long notificationId) {
+        CommentRecOrNotRecNotification notification = commentRecOrNotRecNotificationRepository.findById(
+                notificationId)
+            .orElseThrow(() -> new IllegalArgumentException("알림이 존재하지 않습니다."));
         notification.markAsRead();
         commentRecOrNotRecNotificationRepository.save(notification);
     }
 
-    /**
-     * 만료된 댓글 추천/비추천 알림 처리
-     */
+    @Transactional
+    public void cleanupExpiredLikeNotifications() {
+        List<EpisodeLikeNotification> expiredNotifications = episodeLikeNotificationRepository
+            .findExpiredNotifications(LocalDateTime.now());
+
+        episodeLikeNotificationRepository.deleteAll(expiredNotifications);
+        log.info("만료된 좋아요 알림 {}개 삭제 완료", expiredNotifications.size());
+    }
+
+    @Transactional
+    public void cleanupExpiredEpisodeReportNotifications() {
+        List<EpisodeReportNotification> expiredNotifications = episodeReportNotificationRepository
+            .findExpiredNotifications(LocalDateTime.now());
+
+        episodeReportNotificationRepository.deleteAll(expiredNotifications);
+        log.info("만료된 에피소드 신고 알림 {}개 삭제 완료", expiredNotifications.size());
+    }
+
+    @Transactional
+    public void cleanupExpiredCommentReportNotifications() {
+        List<CommentReportNotification> expiredNotifications = commentReportNotificationRepository
+            .findExpiredCommentReportNotifications(LocalDateTime.now());
+
+        commentReportNotificationRepository.deleteAll(expiredNotifications);
+        log.info("만료된 댓글 신고 알림 {}개 삭제 완료", expiredNotifications.size());
+    }
+
+    @Transactional
     public void cleanupExpiredCommentRecOrNotRecNotifications() {
         List<CommentRecOrNotRecNotification> expiredNotifications = commentRecOrNotRecNotificationRepository
             .findExpiredNotifications(LocalDateTime.now());
