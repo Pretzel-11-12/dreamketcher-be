@@ -1,6 +1,5 @@
 package pretzel.dreamketcherbe.domain.member.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,13 +26,9 @@ public class StorageFolderService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public List<StorageFolderResDto> getFolders(final Long memberId) {
+    public StorageFolderResDto getFolders(final Long memberId) {
         Member member = findByMemberId(memberId);
-        List<StorageFolder> folders = storageFolderRepository.findStorageItemByMember(member);
-
-        return folders.stream()
-            .map(StorageFolderResDto::of)
-            .toList();
+        return storageFolderRepository.findAllStorageFolderWithPage(member.getId());
     }
 
     @Transactional

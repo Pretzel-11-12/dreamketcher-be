@@ -7,13 +7,13 @@ import lombok.Builder;
 public record StorageItemResDto(
     Long folderId,
     String folderName,
-    List<StorageItemContentDto> content,
+    List<StorageItemDetailContentDto> content,
     long total
 ) {
     public static StorageItemResDto of(
         Long folderId,
         String folderName,
-        List<StorageItemContentDto> content,
+        List<StorageItemDetailContentDto> content,
         long total
     ) {
         return StorageItemResDto.builder()
