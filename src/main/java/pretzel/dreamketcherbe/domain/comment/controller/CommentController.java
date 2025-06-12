@@ -81,8 +81,9 @@ public class CommentController {
      */
     @PostMapping("/{commentId}/recomment/create")
     public ResponseEntity<CreateRecommentResDto> createRecomment(@Auth Long memberId,
-        @PathVariable Long webtoonId,
-        @PathVariable Long episodeId, @PathVariable Long commentId,
+        @PathVariable(name = "webtoonId") Long webtoonId,
+        @PathVariable(name = "episodeId") Long episodeId,
+        @PathVariable(name = "commentId") Long commentId,
         @RequestBody @Valid CreateRecommentReqDto request) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -225,8 +226,8 @@ public class CommentController {
      */
     @PostMapping("/{commentId}/recomment/{recommentId}/report")
     public ResponseEntity<Void> reportRecomment(@Auth Long memberId,
-        @PathVariable Long commentId,
-        @PathVariable Long recommentId,
+        @PathVariable(name = "commentId") Long commentId,
+        @PathVariable(name = "recommentId") Long recommentId,
         @RequestBody @Valid ReportRecommentReqDto request) {
         commentService.reportRecomment(memberId, commentId, recommentId, request.reasonId(),
             request.reasonText());

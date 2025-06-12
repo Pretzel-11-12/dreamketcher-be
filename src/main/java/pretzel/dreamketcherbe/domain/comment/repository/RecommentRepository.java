@@ -18,7 +18,7 @@ public interface RecommentRepository extends JpaRepository<Recomment, Long> {
     Page<Recomment> findActiveRecommentsByParentCommentId(Long commentId, Pageable pageable);
 
     @Query("SELECT COUNT(r) FROM Recomment r WHERE r.comment.id = :commentId AND r.status = 'NORMAL' ORDER BY r.commentOrder ASC")
-    long countByParentCommentIdAndIsDeletedFalse(Long commentId);
+    long countByParentCommentIdAndIsDeletedFalse(@Param("commentId") Long commentId);
 
     @Query("SELECT r.id FROM Recomment r")
     List<Long> findAllRecommentIds();

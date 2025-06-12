@@ -2,6 +2,7 @@ package pretzel.dreamketcherbe.domain.report.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import pretzel.dreamketcherbe.domain.report.entity.RecommentReport;
 
 public interface RecommentReportRepository extends JpaRepository<RecommentReport, Long> {
@@ -12,6 +13,7 @@ public interface RecommentReportRepository extends JpaRepository<RecommentReport
          WHERE c.recomment.id        = :recommentId
            AND c.reporterMemberId = :memberId
         """)
-    Boolean existsByRecommentIdAndMemberId(Long recommentId, Long memberId);
+    Boolean existsByRecommentIdAndMemberId(@Param("recommentId") Long recommentId,
+        @Param("memberId") Long memberId);
 
 }

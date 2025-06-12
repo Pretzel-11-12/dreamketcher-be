@@ -7,12 +7,15 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Admin;
 import pretzel.dreamketcherbe.domain.report.dto.CommentProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.EpisodeProcessResDto;
+import pretzel.dreamketcherbe.domain.report.dto.RecommentProcessReqDto;
 import pretzel.dreamketcherbe.domain.report.dto.RecommentProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto;
 import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
@@ -86,12 +89,13 @@ public class ReportController {
     /**
      * 답글 신고 관리자 처리
      */
-    @PatchMapping("/recomment")
+    @PatchMapping("/{reportId}/recomment")
     public ResponseEntity<RecommentProcessResDto> recommentReportProcess(@Admin Long memberId,
-        @RequestParam Long reportId, @RequestParam ReportStatus status,
-        @RequestParam String adminNote) {
+        @PathVariable(name = "reportId") Long reportId,
+        @RequestBody RecommentProcessReqDto request) {
 
         return ResponseEntity.ok(
-            reportService.recommentReportProcess(memberId, reportId, status, adminNote));
+            reportService.recommentReportProcess(memberId, reportId, request.status(),
+                request.adminNote()));
     }
 }
