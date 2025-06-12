@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Admin;
 import pretzel.dreamketcherbe.domain.report.dto.CommentProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.EpisodeProcessResDto;
+import pretzel.dreamketcherbe.domain.report.dto.RecommentProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto;
 import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
 import pretzel.dreamketcherbe.domain.report.entity.ReportType;
@@ -80,5 +81,17 @@ public class ReportController {
 
         return ResponseEntity.ok(
             reportService.commentReportProcess(memberId, reportId, status, adminNote));
+    }
+
+    /**
+     * 답글 신고 관리자 처리
+     */
+    @PatchMapping("/recomment")
+    public ResponseEntity<RecommentProcessResDto> recommentReportProcess(@Admin Long memberId,
+        @RequestParam Long reportId, @RequestParam ReportStatus status,
+        @RequestParam String adminNote) {
+
+        return ResponseEntity.ok(
+            reportService.recommentReportProcess(memberId, reportId, status, adminNote));
     }
 }
