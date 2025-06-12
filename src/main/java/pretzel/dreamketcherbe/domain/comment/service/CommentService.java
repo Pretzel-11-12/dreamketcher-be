@@ -1,6 +1,7 @@
 package pretzel.dreamketcherbe.domain.comment.service;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -10,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -61,6 +63,7 @@ import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
+import pretzel.dreamketcherbe.domain.notification.event.CommentReportNotificationEvent;
 import pretzel.dreamketcherbe.wordfilter.filtering.WordFilterService;
 import pretzel.dreamketcherbe.domain.report.entity.CommentReport;
 import pretzel.dreamketcherbe.domain.report.entity.ReportReason;
@@ -81,6 +84,7 @@ public class CommentService {
     private final RecommentRecommendationRepository recommentRecommendationRepository;
     private final RecommentNotRecommendationRepository recommentNotRecommendationRepository;
     private final RedisTemplate<String, String> redisTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final String RECOMMEND_SET_KEY_PREFIX = "comment:recommend:";
     private static final String RECOMMEND_COUNT_KEY_PREFIX = "comment:recommendCount:";
@@ -787,7 +791,7 @@ public class CommentService {
         ReportReason findReason = reportReasonRepository.findById(reasonId)
             .orElseThrow(() -> new IllegalStateException()); // 추후 수정
 
-        CommentReport findCommentReport = CommentReport.forMember(commentId, memberId, findReason,
+        CommentReport findCommentReport = CommentReport.forMember(findComment, memberId, findReason,
             reasonText);
         if (commentReportRepository.existsByCommentIdAndMemberId(commentId, memberId)) {
             throw new CommentException(CommentExceptionType.REPORTED_COMMENT);
@@ -796,6 +800,21 @@ public class CommentService {
 
         findComment.report();
         commentRepository.save(findComment);
+
+        // 신고 제출 알림 생성
+        CommentReportNotificationEvent notificationEvent = new CommentReportNotificationEvent(
+            findCommentReport.getStatus(),
+            findCommentReport.getId(),
+            findCommentReport.getReporterMemberId(),
+            findComment.getMember().getId(),
+            findComment.getEpisode().getTitle(),
+            findComment.getEpisode().getNo(),
+            findComment.getWebtoon().getTitle(),
+            findComment.getId(),
+            findCommentReport.getAdminNote(),
+            LocalDateTime.now()
+        );
+        eventPublisher.publishEvent(notificationEvent);
     }
 
 //    /**

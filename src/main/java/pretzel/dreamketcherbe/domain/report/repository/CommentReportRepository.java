@@ -15,12 +15,13 @@ public interface CommentReportRepository extends JpaRepository<CommentReport, Lo
     @Query("""
         SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END
           FROM CommentReport c
-         WHERE c.commentId        = :commentId
+         WHERE c.comment.id        = :commentId
            AND c.reporterMemberId = :memberId
         """)
     Boolean existsByCommentIdAndMemberId(Long commentId, Long memberId);
 
     // RESOLVED 처리된 댓글 조회
-    @Query("SELECT c FROM CommentReport c WHERE c.status = 'RESOLVED' AND c.commentId = :commentId")
+    @Query("SELECT c FROM CommentReport c WHERE c.status = 'RESOLVED' AND c.comment.id"
+        + " = :commentId")
     CommentReport findResolvedComment(@Param("commentId") Long commentId);
 }
