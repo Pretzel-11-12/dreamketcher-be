@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pretzel.dreamketcherbe.common.annotation.Admin;
+import pretzel.dreamketcherbe.domain.report.dto.CommentProcessReqDto;
 import pretzel.dreamketcherbe.domain.report.dto.CommentProcessResDto;
+import pretzel.dreamketcherbe.domain.report.dto.EpisodeProcessReqDto;
 import pretzel.dreamketcherbe.domain.report.dto.EpisodeProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.RecommentProcessReqDto;
 import pretzel.dreamketcherbe.domain.report.dto.RecommentProcessResDto;
@@ -65,25 +67,27 @@ public class ReportController {
     /**
      * 에피소드 신고 관리자 처리
      */
-    @PatchMapping("/episode")
+    @PatchMapping("{reportId}/episode")
     public ResponseEntity<EpisodeProcessResDto> episodeReportProcess(@Admin Long memberId,
-        @RequestParam Long reportId, @RequestParam ReportStatus status,
-        @RequestParam String adminNote) {
+        @PathVariable(name = "reportId") Long reportId,
+        @RequestBody EpisodeProcessReqDto request) {
 
         return ResponseEntity.ok(
-            reportService.episodeReportProcess(memberId, reportId, status, adminNote));
+            reportService.episodeReportProcess(memberId, reportId, request.status(),
+                request.adminNote()));
     }
 
     /**
      * 댓글 신고 관리자 처리
      */
-    @PatchMapping("/comment")
+    @PatchMapping("{reportId}/comment")
     public ResponseEntity<CommentProcessResDto> commentReportProcess(@Admin Long memberId,
-        @RequestParam Long reportId, @RequestParam ReportStatus status,
-        @RequestParam String adminNote) {
+        @PathVariable(name = "reportId") Long reportId,
+        @RequestBody CommentProcessReqDto request) {
 
         return ResponseEntity.ok(
-            reportService.commentReportProcess(memberId, reportId, status, adminNote));
+            reportService.commentReportProcess(memberId, reportId, request.status(),
+                request.adminNote()));
     }
 
     /**
