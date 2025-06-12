@@ -1,6 +1,7 @@
 package pretzel.dreamketcherbe.domain.comment.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -48,4 +49,8 @@ public interface RecommentRepository extends JpaRepository<Recomment, Long> {
     int updateCount(@Param("recommentId") Long recommentId,
         @Param("recommendCount") int recommendCount,
         @Param("notRecommendCount") int notRecommendCount);
+
+    // 신고된 답글 조회
+    @Query("SELECT r FROM Recomment r WHERE r.status = 'REPORTED' AND r.comment.episode.published = true AND r.comment.status != 'DELETED' AND r.id = :recommentId")
+    Optional<Recomment> findReportedRecomment(@Param("recommentId") Long recommentId);
 }

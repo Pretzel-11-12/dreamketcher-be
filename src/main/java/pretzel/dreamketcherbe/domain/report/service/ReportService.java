@@ -13,18 +13,22 @@ import pretzel.dreamketcherbe.domain.notification.event.CommentReportNotificatio
 import pretzel.dreamketcherbe.domain.notification.event.EpisodeReportNotificationEvent;
 import pretzel.dreamketcherbe.domain.report.dto.CommentProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.EpisodeProcessResDto;
+import pretzel.dreamketcherbe.domain.report.dto.RecommentProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto.ReasonDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto.ReportDto;
 import pretzel.dreamketcherbe.domain.report.dto.ReportResDto.ReporterDto;
 import pretzel.dreamketcherbe.domain.report.entity.CommentReport;
 import pretzel.dreamketcherbe.domain.report.entity.EpisodeReport;
+import pretzel.dreamketcherbe.domain.report.entity.RecommentReport;
 import pretzel.dreamketcherbe.domain.report.entity.ReportStatus;
 import pretzel.dreamketcherbe.domain.report.entity.ReportType;
 import pretzel.dreamketcherbe.domain.report.event.CommentStatusUpdateEvent;
 import pretzel.dreamketcherbe.domain.report.event.EpisodeStatusUpdateEvent;
+import pretzel.dreamketcherbe.domain.report.event.RecommentStatusUpdateEvent;
 import pretzel.dreamketcherbe.domain.report.repository.CommentReportRepository;
 import pretzel.dreamketcherbe.domain.report.repository.EpisodeReportRepository;
+import pretzel.dreamketcherbe.domain.report.repository.RecommentReportRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +36,7 @@ public class ReportService {
 
     private final CommentReportRepository commentReportRepository;
     private final EpisodeReportRepository episodeReportRepository;
+    private final RecommentReportRepository recommentReportRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     /**
@@ -220,4 +225,36 @@ public class ReportService {
 
         return CommentProcessResDto.from(report);
     }
+
+    /**
+     * 답글 신고 처리
+     */
+    @Transactional
+    public RecommentProcessResDto recommentReportProcess(
+        Long memberId, Long reportId, ReportStatus status, String note
+    ) {
+        RecommentReport report = recommentReportRepository.findById(reportId)
+            .orElseThrow(() -> new IllegalArgumentException("신고가 존재하지 않습니다."));
+
+        if (report.getStatus() != ReportStatus.PENDING) {
+            throw new IllegalArgumentException("이미 처리된 신고입니다.");
+        }
+
+        report.reportProcess(status, LocalDateTime.now(), memberId, note);
+
+        recommentReportRepository.save(report);
+
+        if (status == ReportStatus.RESOLVED) {
+            RecommentStatusUpdateEvent event = new RecommentStatusUpdateEvent(
+                reportId,
+                report.getRecomment().getId(),
+                memberId,
+                LocalDateTime.now()
+            );
+            eventPublisher.publishEvent(event);
+        }
+
+        return RecommentProcessResDto.from(report);
+    }
+
 }

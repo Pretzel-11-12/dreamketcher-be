@@ -138,4 +138,10 @@ public class Recomment extends BaseTimeEntity {
     public boolean isReported() {
         return this.status == RecommentStatus.REPORTED;
     }
+
+    public void normalize() {
+        if (this.status == RecommentStatus.REPORTED) {
+            this.status = RecommentStatus.NORMAL;
+        }
+    }
 }
