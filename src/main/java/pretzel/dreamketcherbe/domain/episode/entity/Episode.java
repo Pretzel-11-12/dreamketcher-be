@@ -28,7 +28,6 @@ import java.time.LocalDate;
 @DynamicInsert
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE episodes SET status = 'DELETED' WHERE id = ?")
-@SQLRestriction("status = 'NORMAL'")
 public class Episode extends BaseTimeEntity {
 
     @Id
