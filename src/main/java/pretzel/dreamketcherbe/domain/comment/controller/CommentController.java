@@ -220,16 +220,17 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-//    /**
-//     * 답글 신고
-//     */
-//    public ResponseEntity<Void> reportRecomment(@Auth Long memberId,
-//        @PathVariable Long commentId,
-//        @PathVariable Long recommentId,
-//        @RequestBody @Valid ReportRecommentReqDto request) {
-//        commentService.reportRecomment(memberId, commentId, recommentId, request.reasonId(),
-//            request.reasonText());
-//        return ResponseEntity.status(HttpStatus.CREATED).build();
-//    }
+    /**
+     * 답글 신고
+     */
+    @PostMapping("/{commentId}/recomment/{recommentId}/report")
+    public ResponseEntity<Void> reportRecomment(@Auth Long memberId,
+        @PathVariable Long commentId,
+        @PathVariable Long recommentId,
+        @RequestBody @Valid ReportRecommentReqDto request) {
+        commentService.reportRecomment(memberId, commentId, recommentId, request.reasonId(),
+            request.reasonText());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 
 }

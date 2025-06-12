@@ -64,6 +64,8 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.notification.event.CommentReportNotificationEvent;
+import pretzel.dreamketcherbe.domain.report.entity.RecommentReport;
+import pretzel.dreamketcherbe.domain.report.repository.RecommentReportRepository;
 import pretzel.dreamketcherbe.wordfilter.filtering.WordFilterService;
 import pretzel.dreamketcherbe.domain.report.entity.CommentReport;
 import pretzel.dreamketcherbe.domain.report.entity.ReportReason;
@@ -136,6 +138,7 @@ public class CommentService {
     private final WordFilterService wordFilterService;
     private final ReportReasonRepository reportReasonRepository;
     private final CommentReportRepository commentReportRepository;
+    private final RecommentReportRepository recommentReportRepository;
 
 
     /**
@@ -817,29 +820,32 @@ public class CommentService {
         eventPublisher.publishEvent(notificationEvent);
     }
 
-//    /**
-//     * 답글 신고 요청
-//     */
-//    @Transactional
-//    public void reportRecomment(Long memberId, Long commentId, Long recommentId, Long reasonId,
-//        String reasonText) {
-//        Comment findComment = commentRepository.findById(commentId)
-//            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
-//
-//        Recomment findRecomment = recommentRepository.findById(recommentId)
-//            .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
-//
-//        ReportReason findReason = reportReasonRepository.findById(reasonId)
-//            .orElseThrow(() -> new IllegalStateException()); // 추후 수정
-//
-//        CommentReport findCommentReport = CommentReport.forMember(memberId, commentId, recommentId,
-//            findReason,
-//            reasonText);
-//        commentReportRepository.save(findCommentReport);
-//
-//        findRecomment.report();
-//        recommentRepository.save(findRecomment);
-//    }
+    /**
+     * 답글 신고 요청
+     */
+    @Transactional
+    public void reportRecomment(Long memberId, Long commentId, Long recommentId, Long reasonId,
+        String reasonText) {
+        Comment findComment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.COMMENT_NOT_FOUND));
+
+        Recomment findRecomment = recommentRepository.findById(recommentId)
+            .orElseThrow(() -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
+
+        ReportReason findReason = reportReasonRepository.findById(reasonId)
+            .orElseThrow(() -> new IllegalStateException()); // 추후 수정
+
+        RecommentReport findRecommentReport = RecommentReport.forMember(findRecomment, memberId,
+            findReason,
+            reasonText);
+        if (recommentReportRepository.existsByRecommentIdAndMemberId(recommentId, memberId)) {
+            throw new CommentException(CommentExceptionType.REPORTED_RECOMMENT);
+        }
+        recommentReportRepository.save(findRecommentReport);
+
+        findRecomment.report();
+        recommentRepository.save(findRecomment);
+    }
 
     /**
      * 댓글 상태 변경 - NORMAL
