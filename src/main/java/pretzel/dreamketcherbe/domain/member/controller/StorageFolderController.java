@@ -28,7 +28,7 @@ public class StorageFolderController {
     private final StorageFolderService storageFolderService;
 
     @GetMapping
-    public ResponseEntity<List<StorageFolderResDto>> getFolders(@Auth Long memberId) {
+    public ResponseEntity<StorageFolderResDto> getFolders(@Auth Long memberId) {
         return ResponseEntity.ok(storageFolderService.getFolders(memberId));
     }
 
@@ -45,7 +45,8 @@ public class StorageFolderController {
         @PathVariable Long folderId,
         @RequestBody @Valid UpdateStorageFolderReqDto updateStorageFolderReqDto
     ) {
-        return ResponseEntity.ok(storageFolderService.updateFolder(folderId, updateStorageFolderReqDto));
+        return ResponseEntity.ok(
+            storageFolderService.updateFolder(folderId, updateStorageFolderReqDto));
     }
 
     @DeleteMapping("/{folderId}")
