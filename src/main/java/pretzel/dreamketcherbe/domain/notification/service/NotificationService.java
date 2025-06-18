@@ -24,12 +24,14 @@ import pretzel.dreamketcherbe.domain.notification.entity.CommentRecOrNotRecNotif
 import pretzel.dreamketcherbe.domain.notification.entity.CommentReportNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.EpisodeLikeNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.EpisodeReportNotification;
+import pretzel.dreamketcherbe.domain.notification.entity.RecommentReportNotification;
 import pretzel.dreamketcherbe.domain.notification.event.CommentRecOrNotRecNotificationEvent;
 import pretzel.dreamketcherbe.domain.notification.event.EpisodeLikeNotificationEvent;
 import pretzel.dreamketcherbe.domain.notification.repository.CommentRecOrNotRecNotificationRepository;
 import pretzel.dreamketcherbe.domain.notification.repository.CommentReportNotificationRepository;
 import pretzel.dreamketcherbe.domain.notification.repository.EpisodeLikeNotificationRepository;
 import pretzel.dreamketcherbe.domain.notification.repository.EpisodeReportNotificationRepository;
+import pretzel.dreamketcherbe.domain.notification.repository.RecommentReportNotificationRepository;
 
 @Service
 @Slf4j
@@ -46,6 +48,7 @@ public class NotificationService {
     private final CommentRecOrNotRecNotificationRepository commentRecOrNotRecNotificationRepository;
     private final EpisodeReportNotificationRepository episodeReportNotificationRepository;
     private final CommentReportNotificationRepository commentReportNotificationRepository;
+    private final RecommentReportNotificationRepository recommentReportNotificationRepository;
 
     /**
      * 모든 알림 - 전체 조회
@@ -77,8 +80,11 @@ public class NotificationService {
             memberId, LocalDateTime.now());
         Long commentRecOrNotRecCount = commentRecOrNotRecNotificationRepository.countUnreadNotificationsByMemberId(
             memberId, LocalDateTime.now());
+        Long recommentReportCount = recommentReportNotificationRepository.countUnreadRecommentReportNotificationsByMemberId(
+            memberId, LocalDateTime.now());
 
-        return likeCount + episodeReportCount + commentReportCount + commentRecOrNotRecCount;
+        return likeCount + episodeReportCount + commentReportCount + commentRecOrNotRecCount
+            + recommentReportCount;
     }
 
     /**
@@ -122,6 +128,15 @@ public class NotificationService {
             .map(NotificationResDto::fromCommentRecOtNotRecNotification)
             .toList());
 
+        List<RecommentReportNotification> recommentReportNotifications = unreadOnly
+            ? recommentReportNotificationRepository.findUnreadRecommentReportNotificationsByMemberId(
+            memberId, LocalDateTime.now())
+            : recommentReportNotificationRepository.findAllRecommentReportNotificationsByMemberId(
+                memberId, LocalDateTime.now());
+        notifications.addAll(recommentReportNotifications.stream()
+            .map(NotificationResDto::fromRecommentReportNotification)
+            .toList());
+
         notifications.sort((n1, n2) -> n2.createdAt().compareTo(n1.createdAt()));
 
         return notifications;
@@ -147,6 +162,9 @@ public class NotificationService {
                 case "COMMENT_RECOMMENDATION":
                 case "COMMENT_NOT_RECOMMENDATION":
                     markAsReadCommentRecOrNotRecNotification(notification.notificationId());
+                    break;
+                case "RECOMMENT_REPORT":
+                    markAsReadRecommentReportNotification(notification.notificationId());
                     break;
                 default:
                     log.warn("알 수 없는 알림 타입: {}", notification.type());
@@ -174,6 +192,9 @@ public class NotificationService {
                 case "COMMENT_NOT_RECOMMENDATION":
                     commentRecOrNotRecNotificationRepository.deleteById(
                         notification.notificationId());
+                    break;
+                case "RECOMMENT_REPORT":
+                    recommentReportNotificationRepository.deleteById(notification.notificationId());
                     break;
                 default:
                     log.warn("알 수 없는 알림 타입: {}", notification.type());
@@ -422,6 +443,24 @@ public class NotificationService {
             LocalDateTime.now());
     }
 
+    @Transactional(readOnly = true)
+    public List<RecommentReportNotification> getAllRecommentReportNotifications(Long memberId) {
+        return recommentReportNotificationRepository.findAllRecommentReportNotificationsByMemberId(
+            memberId, LocalDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public List<RecommentReportNotification> getUnreadRecommentReportNotifications(Long memberId) {
+        return recommentReportNotificationRepository.findUnreadRecommentReportNotificationsByMemberId(
+            memberId, LocalDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public Long countUnreadRecommentReportNotifications(Long memberId) {
+        return recommentReportNotificationRepository.countUnreadRecommentReportNotificationsByMemberId(
+            memberId, LocalDateTime.now());
+    }
+
     @Transactional
     public void markAsReadLikeNotification(Long notificationId) {
         EpisodeLikeNotification notification = episodeLikeNotificationRepository.findById(
@@ -459,6 +498,15 @@ public class NotificationService {
     }
 
     @Transactional
+    public void markAsReadRecommentReportNotification(Long notificationId) {
+        RecommentReportNotification notification = recommentReportNotificationRepository.findById(
+                notificationId)
+            .orElseThrow(() -> new IllegalArgumentException("알림이 존재하지 않습니다."));
+        notification.markAsRead();
+        recommentReportNotificationRepository.save(notification);
+    }
+
+    @Transactional
     public void cleanupExpiredLikeNotifications() {
         List<EpisodeLikeNotification> expiredNotifications = episodeLikeNotificationRepository
             .findExpiredNotifications(LocalDateTime.now());
@@ -492,5 +540,14 @@ public class NotificationService {
 
         commentRecOrNotRecNotificationRepository.deleteAll(expiredNotifications);
         log.info("만료된 댓글 추천/비추천 알림 {}개 삭제 완료", expiredNotifications.size());
+    }
+
+    @Transactional
+    public void cleanupExpiredRecommentReportNotifications() {
+        List<RecommentReportNotification> expiredNotifications = recommentReportNotificationRepository
+            .findExpiredRecommentReportNotifications(LocalDateTime.now());
+
+        recommentReportNotificationRepository.deleteAll(expiredNotifications);
+        log.info("만료된 대댓글 신고 알림 {}개 삭제 완료", expiredNotifications.size());
     }
 }

@@ -64,6 +64,7 @@ import pretzel.dreamketcherbe.domain.member.exception.MemberException;
 import pretzel.dreamketcherbe.domain.member.exception.MemberExceptionType;
 import pretzel.dreamketcherbe.domain.member.repository.MemberRepository;
 import pretzel.dreamketcherbe.domain.notification.event.CommentReportNotificationEvent;
+import pretzel.dreamketcherbe.domain.notification.event.RecommentReportNotificationEvent;
 import pretzel.dreamketcherbe.domain.report.entity.RecommentReport;
 import pretzel.dreamketcherbe.domain.report.repository.RecommentReportRepository;
 import pretzel.dreamketcherbe.wordfilter.filtering.WordFilterService;
@@ -845,6 +846,22 @@ public class CommentService {
 
         findRecomment.report();
         recommentRepository.save(findRecomment);
+
+        // 신고 제출 알림 생성
+        RecommentReportNotificationEvent notificationEvent = new RecommentReportNotificationEvent(
+            findRecommentReport.getStatus(),
+            findRecommentReport.getId(),
+            findRecommentReport.getReporterMemberId(),
+            findRecomment.getMember().getId(),
+            findRecomment.getEpisode().getTitle(),
+            findRecomment.getEpisode().getNo(),
+            findRecomment.getWebtoon().getTitle(),
+            findRecomment.getComment().getContent(),
+            findRecomment.getId(),
+            findRecommentReport.getAdminNote(),
+            LocalDateTime.now()
+        );
+        eventPublisher.publishEvent(notificationEvent);
     }
 
     /**

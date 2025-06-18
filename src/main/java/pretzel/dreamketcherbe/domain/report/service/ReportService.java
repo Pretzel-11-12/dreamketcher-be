@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.notification.event.CommentReportNotificationEvent;
 import pretzel.dreamketcherbe.domain.notification.event.EpisodeReportNotificationEvent;
+import pretzel.dreamketcherbe.domain.notification.event.RecommentReportNotificationEvent;
 import pretzel.dreamketcherbe.domain.report.dto.CommentProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.EpisodeProcessResDto;
 import pretzel.dreamketcherbe.domain.report.dto.RecommentProcessResDto;
@@ -253,6 +254,21 @@ public class ReportService {
             );
             eventPublisher.publishEvent(event);
         }
+
+        RecommentReportNotificationEvent notificationEvent = new RecommentReportNotificationEvent(
+            report.getStatus(),
+            reportId,
+            report.getReporterMemberId(),
+            report.getRecomment().getMember().getId(),
+            report.getRecomment().getEpisode().getTitle(),
+            report.getRecomment().getEpisode().getNo(),
+            report.getRecomment().getWebtoon().getTitle(),
+            report.getRecomment().getComment().getContent(),
+            report.getRecomment().getId(),
+            report.getAdminNote(),
+            LocalDateTime.now()
+        );
+        eventPublisher.publishEvent(notificationEvent);
 
         return RecommentProcessResDto.from(report);
     }

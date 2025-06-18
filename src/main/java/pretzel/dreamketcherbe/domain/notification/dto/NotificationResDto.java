@@ -7,6 +7,7 @@ import pretzel.dreamketcherbe.domain.notification.entity.CommentRecOrNotRecNotif
 import pretzel.dreamketcherbe.domain.notification.entity.CommentReportNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.EpisodeLikeNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.EpisodeReportNotification;
+import pretzel.dreamketcherbe.domain.notification.entity.RecommentReportNotification;
 
 @Builder
 public record NotificationResDto(
@@ -125,4 +126,32 @@ public record NotificationResDto(
         }
     }
 
+    public static NotificationResDto fromRecommentReportNotification(
+        RecommentReportNotification recommentReportNotification
+    ) {
+        String type = recommentReportNotificationType(recommentReportNotification);
+
+        return NotificationResDto.builder()
+            .notificationId(recommentReportNotification.getId())
+            .type(type)
+            .webtoonTitle(
+                recommentReportNotification.getRecomment().getEpisode().getWebtoon().getTitle())
+            .episodeTitle(recommentReportNotification.getRecomment().getEpisode().getTitle())
+            .episodeNo(recommentReportNotification.getRecomment().getEpisode().getNo())
+            .count(null)
+            .message(String.format(
+                "대댓글 '%s'에 신고가 접수되었습니다.",
+                recommentReportNotification.getRecomment().getContent()
+            ))
+            .build();
+    }
+
+    private static String recommentReportNotificationType(
+        RecommentReportNotification notification) {
+        if (notification.getReporterId() != null) {
+            return "RECOMMENT_REPORT_REPORTER";
+        } else {
+            return "RECOMMENT_REPORT_REPORTED";
+        }
+    }
 }

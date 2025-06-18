@@ -1,7 +1,6 @@
 package pretzel.dreamketcherbe.domain.notification.controller;
 
 import java.util.List;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import pretzel.dreamketcherbe.common.annotation.Auth;
 import pretzel.dreamketcherbe.domain.notification.dto.NotificationCountResDto;
-import pretzel.dreamketcherbe.domain.notification.dto.NotificationDto;
 import pretzel.dreamketcherbe.domain.notification.dto.NotificationReqDto;
 import pretzel.dreamketcherbe.domain.notification.dto.NotificationResDto;
 import pretzel.dreamketcherbe.domain.notification.entity.CommentRecOrNotRecNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.CommentReportNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.EpisodeLikeNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.EpisodeReportNotification;
+import pretzel.dreamketcherbe.domain.notification.entity.RecommentReportNotification;
 import pretzel.dreamketcherbe.domain.notification.service.NotificationService;
 import pretzel.dreamketcherbe.domain.notification.service.SSEService;
 
@@ -322,6 +321,60 @@ public class NotificationController {
     public ResponseEntity<Void> readCommentRecommendationNotification(@Auth Long memberId,
         @PathVariable Long notificationId) {
         notificationService.markAsReadCommentRecOrNotRecNotification(notificationId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 답글 신고 알림 - 전체 조회
+     */
+    @GetMapping("/recomments/reports")
+    public ResponseEntity<List<NotificationResDto>> getAllRecommentReportNotifications(
+        @Auth Long memberId) {
+        List<RecommentReportNotification> notifications = notificationService.getAllRecommentReportNotifications(
+            memberId);
+
+        List<NotificationResDto> response = notifications.stream()
+            .map(NotificationResDto::fromRecommentReportNotification)
+            .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 답글 신고 알림 - 읽지 않은 알림 조회
+     */
+    @GetMapping("/recomments/reports/unread")
+    public ResponseEntity<List<NotificationResDto>> getUnreadRecommentReportNotifications(
+        @Auth Long memberId) {
+        List<RecommentReportNotification> notifications = notificationService.getUnreadRecommentReportNotifications(
+            memberId);
+
+        List<NotificationResDto> response = notifications.stream()
+            .map(NotificationResDto::fromRecommentReportNotification)
+            .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 답글 신고 알림 - 읽지 않은 알림 수 조회
+     */
+    @GetMapping("/recomments/reports/unread/count")
+    public ResponseEntity<NotificationCountResDto> getUnreadRecommentReportNotificationCount(
+        @Auth Long memberId) {
+        Long count = notificationService.countUnreadRecommentReportNotifications(memberId);
+
+        return ResponseEntity.ok(new NotificationCountResDto(count));
+    }
+
+    /**
+     * 답글 신고 알림 - 읽음 처리
+     */
+    @PatchMapping("/recomments/reports/{notificationId}/read")
+    public ResponseEntity<Void> readRecommentReportNotification(@Auth Long memberId,
+        @PathVariable Long notificationId) {
+        notificationService.markAsReadRecommentReportNotification(notificationId);
 
         return ResponseEntity.ok().build();
     }
