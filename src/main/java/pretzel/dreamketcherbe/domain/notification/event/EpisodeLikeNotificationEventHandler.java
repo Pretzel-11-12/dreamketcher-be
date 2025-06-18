@@ -13,7 +13,7 @@ import pretzel.dreamketcherbe.domain.notification.service.SSEService;
 @RequiredArgsConstructor
 public class EpisodeLikeNotificationEventHandler {
 
-    private final SSEService SSEservice;
+    private final SSEService sseService;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleEpisodeLikeNotification(EpisodeLikeNotificationEvent event) {
@@ -27,7 +27,7 @@ public class EpisodeLikeNotificationEventHandler {
             );
 
             NotificationDto notificationDto = new NotificationDto(message, event.getCreatedAt());
-            SSEservice.sendNotification(event.getMemberId(), notificationDto.message());
+            sseService.sendNotification(event.getMemberId(), notificationDto.message());
 
             log.info("좋아요 알림 전송 완료 - 작성자: {}, 에피소드: {}, 좋아요: {}",
                 event.getMemberId(), event.getEpisodeId(), event.getCurrentLikeCount());

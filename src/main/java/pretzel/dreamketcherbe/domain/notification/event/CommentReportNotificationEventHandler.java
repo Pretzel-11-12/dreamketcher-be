@@ -24,7 +24,7 @@ import pretzel.dreamketcherbe.domain.report.repository.CommentReportRepository;
 @RequiredArgsConstructor
 public class CommentReportNotificationEventHandler {
 
-    private final SSEService SSEService;
+    private final SSEService sseService;
     private final CommentReportRepository commentReportRepository;
     private final CommentRepository commentRepository;
     private final CommentReportNotificationRepository commentReportNotificationRepository;
@@ -86,7 +86,7 @@ public class CommentReportNotificationEventHandler {
                     }
                     default -> log.warn("알 수 없는 신고 알림 타입: {}", notification.getType());
                 }
-                SSEService.sendNotification(targetMemberId, message);
+                sseService.sendNotification(targetMemberId, message);
             }
 
             log.info("신고 알림 전송 완료 - 신고자: {}, 피신고인: {}, 타입: {}",

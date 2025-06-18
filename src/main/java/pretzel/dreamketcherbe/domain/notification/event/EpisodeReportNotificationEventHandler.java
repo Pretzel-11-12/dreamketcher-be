@@ -22,7 +22,7 @@ import pretzel.dreamketcherbe.domain.report.repository.EpisodeReportRepository;
 @RequiredArgsConstructor
 public class EpisodeReportNotificationEventHandler {
 
-    private final SSEService SSEService;
+    private final SSEService sseService;
     private final EpisodeReportNotificationRepository episodeReportNotificationRepository;
     private final EpisodeReportRepository episodeReportRepository;
     private final EpisodeRepository episodeRepository;
@@ -55,7 +55,7 @@ public class EpisodeReportNotificationEventHandler {
         episodeReportNotificationRepository.save(notification);
 
         NotificationDto notificationDto = createEpisodeReporterNotification(event);
-        SSEService.sendNotification(event.getReporterId(), notificationDto.message());
+        sseService.sendNotification(event.getReporterId(), notificationDto.message());
     }
 
     private void handleReportedNotification(EpisodeReportNotificationEvent event,
@@ -65,7 +65,7 @@ public class EpisodeReportNotificationEventHandler {
         episodeReportNotificationRepository.save(notification);
 
         NotificationDto notificationDto = createReportedEpisodeNotification(event);
-        SSEService.sendNotification(event.getReportedMemberId(), notificationDto.message());
+        sseService.sendNotification(event.getReportedMemberId(), notificationDto.message());
     }
 
     private NotificationDto createEpisodeReporterNotification(
