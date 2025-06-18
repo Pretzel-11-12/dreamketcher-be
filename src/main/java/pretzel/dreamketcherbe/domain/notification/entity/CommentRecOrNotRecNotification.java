@@ -30,8 +30,8 @@ import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 public class CommentRecOrNotRecNotification extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long Id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "member_id", nullable = false)
     private Long memberId;

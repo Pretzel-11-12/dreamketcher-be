@@ -151,10 +151,13 @@ public class Episode extends BaseTimeEntity {
     }
 
     public boolean incrementLikeCount() {
-        int preCount = this.likeCount;
         this.likeCount++;
 
-        return (preCount % 5 != 0 || preCount == 0) && this.likeCount % 5 == 0;
+        return countCalculation(this.likeCount);
+    }
+
+    private boolean countCalculation(int count) {
+        return count > 0 && count % 5 == 0;
     }
 
     public void decrementLikeCount() {

@@ -10,12 +10,12 @@ public interface CommentReportNotificationRepository extends
     JpaRepository<CommentReportNotification, Long> {
 
     // 모든 댓글 신고 알림 조회
-    @Query("SELECT n FROM CommentReportNotification n WHERE n.memberId = :memberId OR n.reporterId = :memberId AND n.expiredAt >: dateTime ORDER BY n.createdAt DESC")
+    @Query("SELECT n FROM CommentReportNotification n WHERE (n.memberId = :memberId OR n.reporterId = :memberId) AND n.expiredAt >: dateTime ORDER BY n.createdAt DESC")
     List<CommentReportNotification> findAllCommentReportNotificationsByMemberId(Long memberId,
         LocalDateTime dateTime);
 
     // 읽지 않은 댓글 신고 알림 조회
-    @Query("SELECT n FROM CommentReportNotification n WHERE n.memberId = :memberId OR n.reporterId = :memberId AND n.isRead = false AND n.expiredAt >: dateTime ORDER BY n.createdAt DESC")
+    @Query("SELECT n FROM CommentReportNotification n WHERE (n.memberId = :memberId OR n.reporterId = :memberId) AND n.isRead = false AND n.expiredAt >: dateTime ORDER BY n.createdAt DESC")
     List<CommentReportNotification> findUnreadCommentReportNotificationsByMemberId(Long memberId,
         LocalDateTime dateTime);
 

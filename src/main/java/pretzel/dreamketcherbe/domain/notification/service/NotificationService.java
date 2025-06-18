@@ -119,7 +119,7 @@ public class NotificationService {
             : commentRecOrNotRecNotificationRepository.findAllByMemberId(memberId,
                 LocalDateTime.now());
         notifications.addAll(commentRecOrNotRecNotifications.stream()
-            .map(NotificationResDto::fromCommentRecOtNOtRecNotification)
+            .map(NotificationResDto::fromCommentRecOtNotRecNotification)
             .toList());
 
         notifications.sort((n1, n2) -> n2.createdAt().compareTo(n1.createdAt()));
@@ -137,7 +137,8 @@ public class NotificationService {
                 case "EPISODE_LIKE":
                     markAsReadLikeNotification(notification.notificationId());
                     break;
-                case "EPISODE_REPORT":
+                case "EPISODE_REPORT_REPORTER":
+                case "EPISODE_REPORT_REPORTED":
                     markAsReadEpisodeReportNotification(notification.notificationId());
                     break;
                 case "COMMENT_REPORT":

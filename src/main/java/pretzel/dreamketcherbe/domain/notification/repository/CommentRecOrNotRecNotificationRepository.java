@@ -16,16 +16,16 @@ public interface CommentRecOrNotRecNotificationRepository extends
         CommentNotificationType type);
 
     // 모든 알림 조회
-    @Query("SELECT c FROM CommentRecOrNotRecNotification c WHERE c.memberId = :memberId AND c.expiredAt >: date ORDER BY c.createdAt DESC")
+    @Query("SELECT c FROM CommentRecOrNotRecNotification c WHERE c.memberId = :memberId AND c.expiredAt > :date ORDER BY c.createdAt DESC")
     List<CommentRecOrNotRecNotification> findAllByMemberId(Long memberId, LocalDateTime date);
 
     // 읽지 않은 모든 알림 조회
-    @Query("SELECT c FROM CommentRecOrNotRecNotification c WHERE c.memberId = :memberId AND c.isRead = false AND c.expiredAt >: date ORDER BY c.createdAt DESC")
+    @Query("SELECT c FROM CommentRecOrNotRecNotification c WHERE c.memberId = :memberId AND c.isRead = false AND c.expiredAt > :date ORDER BY c.createdAt DESC")
     List<CommentRecOrNotRecNotification> findAllUnreadNotificationsByMemberId(Long memberId,
         LocalDateTime date);
 
     // 읽지 않은 알림 수
-    @Query("SELECT COUNT(c) FROM CommentRecOrNotRecNotification c WHERE c.memberId = :memberId AND c.isRead = false AND c.expiredAt >: date")
+    @Query("SELECT COUNT(c) FROM CommentRecOrNotRecNotification c WHERE c.memberId = :memberId AND c.isRead = false AND c.expiredAt > :date")
     Long countUnreadNotificationsByMemberId(Long memberId, LocalDateTime date);
 
     // 만료 알림 조회

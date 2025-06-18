@@ -9,7 +9,7 @@ import pretzel.dreamketcherbe.domain.notification.entity.EpisodeLikeNotification
 public interface EpisodeLikeNotificationRepository extends
     JpaRepository<EpisodeLikeNotification, Long> {
 
-    boolean existsByEpisodeIdAndEpisodeLikeCount(Long episodeId, int episodeLikeCount);
+    boolean existsByEpisodeIdAndEpisodeLikeCount(Long episodeId, int likeCount);
 
     // 전체 알림 조회
     @Query("SELECT n from EpisodeLikeNotification n WHERE n.authorId = :memberId AND n.expiredAt > :date ORDER BY n.createdAt DESC")

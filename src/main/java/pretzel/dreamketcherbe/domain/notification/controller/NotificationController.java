@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import pretzel.dreamketcherbe.common.annotation.Auth;
@@ -254,7 +255,7 @@ public class NotificationController {
      */
     @PostMapping("/comments/{commentId}/recommend-notification")
     public ResponseEntity<Void> commentRecommendNotification(@Auth Long memberId,
-        @PathVariable Long commentId, int recommendCount) {
+        @PathVariable Long commentId, @RequestParam int recommendCount) {
         notificationService.recommendationNotification(commentId, recommendCount);
 
         return ResponseEntity.ok().build();
@@ -265,7 +266,7 @@ public class NotificationController {
      */
     @PostMapping("/comments/{commentId}/notrecommend-notification")
     public ResponseEntity<Void> commentNotRecommendNotification(@Auth Long memberId,
-        @PathVariable Long commentId, int notRecommendCount) {
+        @PathVariable Long commentId, @RequestParam int notRecommendCount) {
         notificationService.notRecommendationNotification(commentId, notRecommendCount);
 
         return ResponseEntity.ok().build();
@@ -281,7 +282,7 @@ public class NotificationController {
             memberId);
 
         List<NotificationResDto> response = notifications.stream()
-            .map(NotificationResDto::fromCommentRecOtNOtRecNotification)
+            .map(NotificationResDto::fromCommentRecOtNotRecNotification)
             .toList();
 
         return ResponseEntity.ok(response);
@@ -297,7 +298,7 @@ public class NotificationController {
             memberId);
 
         List<NotificationResDto> response = notifications.stream()
-            .map(NotificationResDto::fromCommentRecOtNOtRecNotification)
+            .map(NotificationResDto::fromCommentRecOtNotRecNotification)
             .toList();
 
         return ResponseEntity.ok(response);

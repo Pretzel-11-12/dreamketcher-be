@@ -28,17 +28,17 @@ import pretzel.dreamketcherbe.domain.report.entity.CommentReport;
 public class CommentReportNotification extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "member_id", nullable = false)
+    @Column(name = "member_id")
     private Long memberId;
 
     @ManyToOne
     @JoinColumn(name = "report_id", nullable = false)
     private CommentReport commentReport;
 
-    @Column(name = "reporter_id", nullable = false)
+    @Column(name = "reporter_id")
     private Long reporterId;
 
     @Column(name = "webtoon_id", nullable = false)

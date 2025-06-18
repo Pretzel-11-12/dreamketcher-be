@@ -68,7 +68,7 @@ public record NotificationResDto(
     public static NotificationResDto fromCommentReportNotification(
         CommentReportNotification commentReportNotification
     ) {
-        String type = CommentReportNotificationType(commentReportNotification);
+        String type = commentReportNotificationType(commentReportNotification);
 
         return NotificationResDto.builder()
             .notificationId(commentReportNotification.getId())
@@ -85,7 +85,7 @@ public record NotificationResDto(
             .build();
     }
 
-    private static String CommentReportNotificationType(CommentReportNotification notification) {
+    private static String commentReportNotificationType(CommentReportNotification notification) {
         if (notification.getReporterId() != null) {
             return "COMMENT_REPORT_REPORTER";
         } else {
@@ -93,7 +93,7 @@ public record NotificationResDto(
         }
     }
 
-    public static NotificationResDto fromCommentRecOtNOtRecNotification(
+    public static NotificationResDto fromCommentRecOtNotRecNotification(
         CommentRecOrNotRecNotification commentRecOrNotRecNotification
     ) {
         String type = recOrNotRecType(commentRecOrNotRecNotification.getType());
