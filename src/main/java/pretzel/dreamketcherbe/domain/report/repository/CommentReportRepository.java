@@ -18,7 +18,8 @@ public interface CommentReportRepository extends JpaRepository<CommentReport, Lo
          WHERE c.comment.id        = :commentId
            AND c.reporterMemberId = :memberId
         """)
-    Boolean existsByCommentIdAndMemberId(Long commentId, Long memberId);
+    Boolean existsByCommentIdAndMemberId(@Param("commentId") Long commentId,
+        @Param("memberId") Long memberId);
 
     // RESOLVED 처리된 댓글 조회
     @Query("SELECT c FROM CommentReport c WHERE c.status = 'RESOLVED' AND c.comment.id"
