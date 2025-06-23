@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-public record NicknameRequest(
+public record NicknameReqDto(
     @NotBlank(message = "닉네임은 필수 입력값입니다.")
     @Size(max = 15, message = "닉네임은 최대 15글자까지 허용됩니다.")
     @Pattern(
