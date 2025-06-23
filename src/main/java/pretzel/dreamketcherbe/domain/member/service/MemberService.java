@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import pretzel.dreamketcherbe.S3Utils.S3Service;
 import pretzel.dreamketcherbe.common.dto.PageReqDto;
-import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
-import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
-import pretzel.dreamketcherbe.domain.member.dto.UpdateProfileRequest;
+import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResDto;
+import pretzel.dreamketcherbe.domain.member.dto.MemberInfoResDto;
+import pretzel.dreamketcherbe.domain.member.dto.UpdateProfileReqDto;
 import pretzel.dreamketcherbe.domain.member.dto.WorkResDto;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
@@ -37,15 +37,23 @@ public class MemberService {
     @Value("${default.profile.image.url}")
     private String defaultProfileImageUrl;
 
-    public SelfInfoResponse getSelfInfo(Long memberId) {
+    public MemberInfoResDto getSelfInfo(Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        return SelfInfoResponse.of(member);
+        return MemberInfoResDto.ofSelf(member);
+    }
+
+
+    public MemberInfoResDto getMemberInfo(String nickname) {
+        Member member = memberRepository.findByNickname(nickname)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+        return MemberInfoResDto.ofProfile(member);
     }
 
     private void updateBusinessEmail(Member member, String newBusinessEmail, Long memberId) {
         Optional.ofNullable(newBusinessEmail)
+
             .map(String::trim)
             .ifPresent(email -> {
                 if (email.isEmpty()) {
@@ -93,7 +101,7 @@ public class MemberService {
     // NOTE: s3Service 메서드 와 Transactional 관계 확인
     @Transactional
     public void updateProfileWithImage(Long memberId, MultipartFile image,
-        UpdateProfileRequest profileData) {
+        UpdateProfileReqDto profileData) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
@@ -147,7 +155,7 @@ public class MemberService {
             .isPresent();
     }
 
-    public List<InterestedWebtoonResponse> getAllFavoriteWebtoon(Long memberId) {
+    public List<InterestedWebtoonResDto> getAllFavoriteWebtoon(Long memberId) {
 
         List<InterestedWebtoon> favoriteWebtoons = interestedWebtoonRepository.findAllByMemberId(
             memberId);
@@ -157,7 +165,7 @@ public class MemberService {
                 Webtoon webtoon = interestedWebtoon.getWebtoon();
                 Member author = webtoon.getMember();
 
-                return InterestedWebtoonResponse.from(
+                return InterestedWebtoonResDto.from(
                     interestedWebtoon,
                     author.getNickname(),
                     webtoon.getEpisodeCount(),
@@ -196,8 +204,16 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public WorkResDto getAllWorks(final Long memberId, final String status,
+    public WorkResDto getAllWorksByMemberId(final Long memberId, final String status,
         final PageReqDto pageReqDto) {
         return memberRepository.findAllWorkWithPage(memberId, status, pageReqDto);
+    }
+
+    @Transactional(readOnly = true)
+    public WorkResDto getAllWorksByNickname(String nickname, final String status,
+        final PageReqDto pageReqDto) {
+        Member member = memberRepository.findByNickname(nickname)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+        return memberRepository.findAllWorkWithPageWithStatus(member.getId(), status, pageReqDto);
     }
 }

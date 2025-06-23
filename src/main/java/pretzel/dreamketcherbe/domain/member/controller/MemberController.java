@@ -18,9 +18,9 @@ import pretzel.dreamketcherbe.common.dto.PageReqDto;
 import pretzel.dreamketcherbe.common.dto.PageResDto;
 import pretzel.dreamketcherbe.domain.comment.dto.MyCommentsAndRecommentsListResDto;
 import pretzel.dreamketcherbe.domain.comment.service.CommentService;
-import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResponse;
-import pretzel.dreamketcherbe.domain.member.dto.SelfInfoResponse;
-import pretzel.dreamketcherbe.domain.member.dto.UpdateProfileRequest;
+import pretzel.dreamketcherbe.domain.member.dto.InterestedWebtoonResDto;
+import pretzel.dreamketcherbe.domain.member.dto.MemberInfoResDto;
+import pretzel.dreamketcherbe.domain.member.dto.UpdateProfileReqDto;
 import pretzel.dreamketcherbe.domain.member.dto.WorkResDto;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.service.MemberService;
@@ -34,7 +34,7 @@ public class MemberController {
     private final CommentService commentService;
 
     @GetMapping("/me")
-    public ResponseEntity<SelfInfoResponse> me(@Auth Long memberId) {
+    public ResponseEntity<MemberInfoResDto> me(@Auth Long memberId) {
         return ResponseEntity.ok(memberService.getSelfInfo(memberId));
     }
 
@@ -42,7 +42,7 @@ public class MemberController {
     public ResponseEntity<Void> updateProfileWithImage(
         @Auth Long memberId,
         @RequestPart(value = "image", required = false) MultipartFile image,
-        @RequestPart(value = "profileData", required = false) @Valid UpdateProfileRequest profileData
+        @RequestPart(value = "profileData", required = false) @Valid UpdateProfileReqDto profileData
     ) {
         memberService.updateProfileWithImage(memberId, image, profileData);
         return ResponseEntity.ok().build();
@@ -63,7 +63,7 @@ public class MemberController {
     }
 
     @GetMapping("/favorite")
-    public ResponseEntity<List<InterestedWebtoonResponse>> getAllFavoriteWebtoon(
+    public ResponseEntity<List<InterestedWebtoonResDto>> getAllFavoriteWebtoon(
         @Auth Long memberId) {
         return ResponseEntity.ok(memberService.getAllFavoriteWebtoon(memberId));
     }
@@ -81,7 +81,24 @@ public class MemberController {
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "25") int size) {
         PageReqDto pageReqDto = PageReqDto.of(page, size);
-        return ResponseEntity.ok(memberService.getAllWorks(memberId, status, pageReqDto));
+        return ResponseEntity.ok(memberService.getAllWorksByMemberId(memberId, status, pageReqDto));
+    }
+
+    @GetMapping("/profile/{nickname}")
+    public ResponseEntity<MemberInfoResDto> getMemberProfile(
+        @PathVariable("nickname") String nickname
+    ) {
+        return ResponseEntity.ok(memberService.getMemberInfo(nickname));
+    }
+
+    @GetMapping("/{nickname}/works")
+    public ResponseEntity<WorkResDto> getWorksByMember(
+        @PathVariable("nickname") String nickname,
+        @RequestParam(defaultValue = "all") String status,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "25") int size) {
+        PageReqDto pageReqDto = PageReqDto.of(page, size);
+        return ResponseEntity.ok(memberService.getAllWorksByNickname(nickname, status, pageReqDto));
     }
 
     /**
