@@ -32,6 +32,11 @@ public class StorageFolderController {
         return ResponseEntity.ok(storageFolderService.getFolders(memberId));
     }
 
+    @GetMapping("/{nickname}")
+    public ResponseEntity<List<StorageFolderResDto>> getFolder(@PathVariable String nickname) {
+        return ResponseEntity.ok(storageFolderService.getFoldersByNickname(nickname));
+    }
+
     @PostMapping
     public ResponseEntity<CreateFolderResDto> createFolder(
         @Auth Long memberId,
@@ -45,7 +50,8 @@ public class StorageFolderController {
         @PathVariable Long folderId,
         @RequestBody @Valid UpdateStorageFolderReqDto updateStorageFolderReqDto
     ) {
-        return ResponseEntity.ok(storageFolderService.updateFolder(folderId, updateStorageFolderReqDto));
+        return ResponseEntity.ok(
+            storageFolderService.updateFolder(folderId, updateStorageFolderReqDto));
     }
 
     @DeleteMapping("/{folderId}")

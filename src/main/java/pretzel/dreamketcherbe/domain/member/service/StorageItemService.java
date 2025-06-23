@@ -28,8 +28,18 @@ public class StorageItemService {
     private final StorageFolderRepository storageFolderRepository;
     private final MemberRepository memberRepository;
     private final WebtoonRepository webtoonRepository;
+
     public StorageItemResDto getItems(final Long memberId, final Long folderId) {
         return storageItemRepository.findAllStorageItemWithPage(memberId, folderId);
+    }
+
+    // 공개 폴더 조회 (memberId 없이)
+    public StorageItemResDto getPublicItems(final Long folderId) {
+        StorageFolder folder = findByFolderId(folderId);
+        if (folder.isPrivated()) {
+            throw new StorageFolderException(StorageFolderExceptionType.PRIVATED_FOLDER_FORBIDDEN);
+        }
+        return storageItemRepository.findAllStorageItemWithPagePublic(folderId);
     }
 
     public CreateStorageItemResDto createItem(

@@ -8,4 +8,7 @@ import pretzel.dreamketcherbe.domain.member.entity.StorageFolder;
 public interface StorageFolderRepository extends JpaRepository<StorageFolder, Long> {
 
     List<StorageFolder> findStorageItemByMember(Member member);
+
+    // 공개 폴더만 조회
+    List<StorageFolder> findByMemberAndIsPrivatedFalse(Member member);
 }

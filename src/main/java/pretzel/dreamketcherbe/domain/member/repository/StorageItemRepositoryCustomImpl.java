@@ -26,6 +26,14 @@ public class StorageItemRepositoryCustomImpl implements StorageItemRepositoryCus
         return StorageItemResDto.of(folderId, folderName, content, total);
     }
 
+    @Override
+    public StorageItemResDto findAllStorageItemWithPagePublic(Long folderId) {
+        List<StorageItemContentDto> content = getStorageItemsPublic(folderId);
+        long total = getTotalDataCountPublic(folderId);
+        String folderName = getFolderName(folderId);
+        return StorageItemResDto.of(folderId, folderName, content, total);
+    }
+
     private List<StorageItemContentDto> getStorageItems(Long memberId, Long folderId) {
         return jpaQueryFactory.select(
             Projections.constructor(pretzel.dreamketcherbe.domain.member.dto.StorageItemContentDto.class,
@@ -40,6 +48,20 @@ public class StorageItemRepositoryCustomImpl implements StorageItemRepositoryCus
             .fetch();
     }
 
+    private List<StorageItemContentDto> getStorageItemsPublic(Long folderId) {
+        return jpaQueryFactory.select(
+                Projections.constructor(pretzel.dreamketcherbe.domain.member.dto.StorageItemContentDto.class,
+                    webtoon.id,
+                    webtoon.title,
+                    webtoon.thumbnail,
+                    webtoon.member.nickname
+                ))
+            .from(storageItem)
+            .join(storageItem.webtoon, webtoon)
+            .where(storageItem.storageFolder.id.eq(folderId))
+            .fetch();
+    }
+
     private long getTotalDataCount(Long memberId, Long folderId) {
         return Optional.ofNullable(jpaQueryFactory
                 .select(storageItem.count())
@@ -48,6 +70,15 @@ public class StorageItemRepositoryCustomImpl implements StorageItemRepositoryCus
                 .where(getWhereConditions(memberId, folderId))
                 .fetchOne()
             )
+            .orElse(0L);
+    }
+
+    private long getTotalDataCountPublic(Long folderId) {
+        return Optional.ofNullable(jpaQueryFactory
+                .select(storageItem.count())
+                .from(storageItem)
+                .where(storageItem.storageFolder.id.eq(folderId))
+                .fetchOne())
             .orElse(0L);
     }
 
