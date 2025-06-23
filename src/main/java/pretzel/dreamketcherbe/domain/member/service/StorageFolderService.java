@@ -1,6 +1,5 @@
 package pretzel.dreamketcherbe.domain.member.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,27 +26,17 @@ public class StorageFolderService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public List<StorageFolderResDto> getFolders(final Long memberId) {
+    public StorageFolderResDto getFolders(final Long memberId) {
         Member member = findByMemberId(memberId);
-        // 본인은 모든 폴더 조회
-        List<StorageFolder> folders = storageFolderRepository.findStorageItemByMember(member);
-
-        return folders.stream()
-            .map(StorageFolderResDto::of)
-            .toList();
+        return storageFolderRepository.findAllStorageFolderWithPage(member.getId());
     }
 
     @Transactional(readOnly = true)
-    public List<StorageFolderResDto> getFoldersByNickname(final String nickname) {
+    public StorageFolderResDto getFoldersByNickname(final String nickname) {
         Member member = memberRepository.findByNickname(nickname)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        // 공개 폴더만 조회
-        List<StorageFolder> storageFolder = storageFolderRepository.findByMemberAndIsPrivatedFalse(member);
-
-        return storageFolder.stream()
-            .map(StorageFolderResDto::of)
-            .toList();
+        return storageFolderRepository.findAllPublicStorageFolderWithPage(member.getId());
     }
 
     @Transactional

@@ -18,6 +18,11 @@ public class ModerationEventListener {
 
     private final ModerationLogRepository moderationLogRepository;
 
+    /**
+     * 비동기적으로 모더레이션 이벤트를 수신하여 새로운 트랜잭션에서 모더레이션 로그를 저장합니다.
+     *
+     * @param event 저장할 모더레이션 이벤트 데이터
+     */
     @Async
     @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)

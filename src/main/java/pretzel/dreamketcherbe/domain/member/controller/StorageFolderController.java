@@ -1,7 +1,6 @@
 package pretzel.dreamketcherbe.domain.member.controller;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,12 +27,13 @@ public class StorageFolderController {
     private final StorageFolderService storageFolderService;
 
     @GetMapping
-    public ResponseEntity<List<StorageFolderResDto>> getFolders(@Auth Long memberId) {
+    public ResponseEntity<StorageFolderResDto> getFolders(@Auth Long memberId) {
         return ResponseEntity.ok(storageFolderService.getFolders(memberId));
     }
 
     @GetMapping("/{nickname}")
-    public ResponseEntity<List<StorageFolderResDto>> getFolder(@PathVariable String nickname) {
+    public ResponseEntity<StorageFolderResDto> getPublicFolder(
+        @PathVariable String nickname) {
         return ResponseEntity.ok(storageFolderService.getFoldersByNickname(nickname));
     }
 

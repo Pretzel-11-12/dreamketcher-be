@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.comment.entity.Comment;
 
 @Entity
 @Table(name = "comment_report")
@@ -32,8 +33,9 @@ public class CommentReport extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "comment_id", nullable = false)
-    private Long commentId;
+    @ManyToOne
+    @JoinColumn(name = "comment_id", nullable = false)
+    private Comment comment;
 
     @Column(name = "reporter_member_id")
     private Long reporterMemberId;
@@ -62,19 +64,18 @@ public class CommentReport extends BaseTimeEntity {
     /**
      * 회원이 신고할 때 사용.
      *
-     * @param commentId  댓글 ID
      * @param memberId   신고자 회원 ID
      * @param reason     신고 사유 엔티티
      * @param reasonText 텍스트 or null
      */
     public static CommentReport forMember(
-        Long commentId,
+        Comment comment,
         Long memberId,
         ReportReason reason,
         String reasonText
     ) {
         return CommentReport.builder()
-            .commentId(commentId)
+            .comment(comment)
             .reporterMemberId(memberId)
             .reason(reason)
             .reasonText(reasonText)
@@ -85,22 +86,44 @@ public class CommentReport extends BaseTimeEntity {
     /**
      * 비회원(게스트)이 신고할 때 사용.
      *
-     * @param commentId  댓글 ID
      * @param reason     신고 사유 엔티티
      * @param reasonText ETC(기타) 텍스트 or null
      */
     public static CommentReport forGuest(
-        Long commentId,
+        Comment comment,
         ReportReason reason,
         String reasonText
     ) {
         return CommentReport.builder()
-            .commentId(commentId)
+            .comment(comment)
             .reporterMemberId(null)
             .reason(reason)
             .reasonText(reasonText)
             .status(ReportStatus.PENDING)
             .build();
+    }
+
+    /**
+     * 신고 관리자 처리
+     */
+    public void reportProcess(
+        ReportStatus status,
+        LocalDateTime processedAt,
+        Long processedBy,
+        String adminNote
+    ) {
+        if (this.status != ReportStatus.PENDING) {
+            throw new IllegalStateException("신고는 대기 상태에서만 처리할 수 있습니다.");
+        }
+
+        if (status == null) {
+            throw new IllegalStateException("신고 상태가 존재하지 않습니다.");
+        }
+
+        this.status = status;
+        this.processedAt = processedAt;
+        this.processedBy = processedBy;
+        this.adminNote = adminNote;
     }
 
     // ---------------------------------------------------
@@ -109,9 +132,9 @@ public class CommentReport extends BaseTimeEntity {
 
     @PrePersist
     private void validateReporter() {
-        boolean hasMember = reporterMemberId != null;
+        boolean isMember = reporterMemberId != null;
 
-        if (!hasMember) {
+        if (!isMember) {
             throw new IllegalStateException(
                 "신고는 회원만 가능합니다."
             );

@@ -11,14 +11,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import org.hibernate.annotations.ColumnDefault;
 import pretzel.dreamketcherbe.domain.member.dto.CreateFolderReqDto;
 import pretzel.dreamketcherbe.domain.member.dto.UpdateStorageFolderReqDto;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StorageFolder extends BaseTimeEntity {
+public class StorageFolder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,25 +26,26 @@ public class StorageFolder extends BaseTimeEntity {
 
     private String name;
 
+    @ColumnDefault("false")
+    @Column(nullable = false)
+    private Boolean isPrivate;
+
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
 
-    // 0: public, 1: private
-    @Column(name = "is_private", nullable = false)
-    private boolean isPrivated = false;
-
     @Builder
-    private StorageFolder(String name, Member member) {
+    private StorageFolder(String name, Boolean isPrivate, Member member) {
         this.name = name;
+        this.isPrivate = isPrivate;
         this.member = member;
-        this.isPrivated = false; // default public
     }
 
     public static StorageFolder create(CreateFolderReqDto dto, Member member) {
         return StorageFolder.builder()
             .name(dto.folderName())
             .member(member)
+            .isPrivate(dto.isPrivate())
             .build();
     }
 
@@ -52,8 +53,7 @@ public class StorageFolder extends BaseTimeEntity {
         this.name = dto.folderName();
     }
 
-    public boolean isPrivated() {
-        return isPrivated;
+    public boolean isPrivate() {
+        return isPrivate;
     }
-
 }

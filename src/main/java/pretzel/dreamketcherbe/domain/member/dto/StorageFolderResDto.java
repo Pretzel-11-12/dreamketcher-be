@@ -1,17 +1,17 @@
 package pretzel.dreamketcherbe.domain.member.dto;
 
+import java.util.List;
 import lombok.Builder;
-import pretzel.dreamketcherbe.domain.member.entity.StorageFolder;
 
 @Builder
 public record StorageFolderResDto(
-    Long folderId,
-    String folderName
+    List<StorageFolderContentDto> folders,
+    long total
 ) {
-    public static StorageFolderResDto of(StorageFolder storageFolder) {
+    public static StorageFolderResDto of(List<StorageFolderContentDto> content, long total) {
         return StorageFolderResDto.builder()
-            .folderId(storageFolder.getId())
-            .folderName(storageFolder.getName())
+            .folders(content)
+            .total(total)
             .build();
     }
 }

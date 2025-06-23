@@ -20,6 +20,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pretzel.dreamketcherbe.common.entity.BaseTimeEntity;
+import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 
 @Entity
 @Table(name = "episode_report")
@@ -36,8 +37,12 @@ public class EpisodeReport extends BaseTimeEntity {
     @Column(name = "webtoon_id", nullable = false)
     private Long webtoonId;
 
-    @Column(name = "episode_id", nullable = false)
-    private Long episodeId;
+//    @Column(name = "episode_id", nullable = false)
+//    private Long episodeId;
+
+    @ManyToOne
+    @JoinColumn(name = "episode_id", nullable = false)
+    private Episode episode;
 
     @Column(name = "reporter_member_id")
     private Long reporterMemberId;
@@ -66,21 +71,19 @@ public class EpisodeReport extends BaseTimeEntity {
     /**
      * 회원이 신고할 때 사용.
      *
-     * @param episodeId  댓글 ID
      * @param memberId   신고자 회원 ID
      * @param reason     신고 사유 엔티티
      * @param reasonText 텍스트 or null
      */
     public static EpisodeReport forMember(
-        Long webtoonId,
-        Long episodeId,
+        Episode episode,
         Long memberId,
         ReportReason reason,
         String reasonText
     ) {
         return EpisodeReport.builder()
-            .webtoonId(webtoonId)
-            .episodeId(episodeId)
+            .webtoonId(episode.getWebtoon().getId())
+            .episode(episode)
             .reporterMemberId(memberId)
             .reason(reason)
             .reasonText(reasonText)
@@ -89,24 +92,33 @@ public class EpisodeReport extends BaseTimeEntity {
     }
 
     /**
-     * 비회원(게스트)이 신고할 때 사용.
+     * 관리자가 신고를 처리할 때 사용.
      *
-     * @param episodeId  댓글 ID
-     * @param reason     신고 사유 엔티티
-     * @param reasonText 텍스트 or null
+     * @param status      처리 상태
+     * @param processedBy 처리자 회원 ID
+     * @param adminNote   관리자 메모
      */
-    public static EpisodeReport forGuest(
-        Long episodeId,
-        ReportReason reason,
-        String reasonText
+    public void reportProcess(
+        ReportStatus status,
+        Long processedBy,
+        String adminNote,
+        LocalDateTime processedAt
     ) {
-        return EpisodeReport.builder()
-            .episodeId(episodeId)
-            .reporterMemberId(null)
-            .reason(reason)
-            .reasonText(reasonText)
-            .status(ReportStatus.PENDING)
-            .build();
+
+        if (this.status != ReportStatus.PENDING) {
+            throw new IllegalStateException(
+                "신고는 대기 상태에서만 처리할 수 있습니다."
+            );
+        }
+
+        if (status == null) {
+            throw new IllegalStateException("처리 상태가 존재하지 않습니다.");
+        }
+
+        this.status = status;
+        this.processedBy = processedBy;
+        this.adminNote = adminNote;
+        this.processedAt = processedAt;
     }
 
     // ---------------------------------------------------
@@ -115,9 +127,9 @@ public class EpisodeReport extends BaseTimeEntity {
 
     @PrePersist
     private void validateReporter() {
-        boolean hasMember = reporterMemberId != null;
+        boolean isMember = reporterMemberId != null;
 
-        if (!hasMember) {
+        if (!isMember) {
             throw new IllegalStateException(
                 "신고는 회원만 가능합니다."
             );
