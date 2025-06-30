@@ -31,13 +31,22 @@ public class StorageItemController {
         return ResponseEntity.ok(storageItemService.getItems(memberId, folderId));
     }
 
+    // 공개 폴더 조회용
+    @GetMapping("/public")
+    public ResponseEntity<StorageItemResDto> getItemsPublic(
+        @PathVariable Long folderId
+    ) {
+        return ResponseEntity.ok(storageItemService.getPublicItems(folderId));
+    }
+
     @PostMapping
     public ResponseEntity<CreateStorageItemResDto> createItem(
         @Auth Long memberId,
         @PathVariable Long folderId,
         @RequestBody @Valid CreateStorageItemReqDto createStorageItemReqDto
     ) {
-        return ResponseEntity.ok(storageItemService.createItem(memberId, folderId, createStorageItemReqDto));
+        return ResponseEntity.ok(
+            storageItemService.createItem(memberId, folderId, createStorageItemReqDto));
     }
 
     @DeleteMapping("/{id}")

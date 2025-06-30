@@ -5,7 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import pretzel.dreamketcherbe.domain.member.entity.Member;
 import pretzel.dreamketcherbe.domain.member.entity.StorageFolder;
 
-public interface StorageFolderRepository extends JpaRepository<StorageFolder, Long>, StorageFolderRepositoryCustom {
+public interface StorageFolderRepository extends JpaRepository<StorageFolder, Long>,
+    StorageFolderRepositoryCustom {
 
     List<StorageFolder> findStorageItemByMember(Member member);
+
+    // 공개 폴더만 조회
+    List<StorageFolder> findByMemberAndIsPrivateFalse(Member member);
 }

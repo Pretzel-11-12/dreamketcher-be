@@ -30,4 +30,6 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long>, Webtoon
 
     // 특정 작가의 작품 수
     long countByMemberAndIsDeletedFalse(Member member);
+
+    Optional<Webtoon> findByMember(Member member);
 }

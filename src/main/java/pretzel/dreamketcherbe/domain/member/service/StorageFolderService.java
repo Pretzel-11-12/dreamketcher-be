@@ -31,8 +31,17 @@ public class StorageFolderService {
         return storageFolderRepository.findAllStorageFolderWithPage(member.getId());
     }
 
+    @Transactional(readOnly = true)
+    public StorageFolderResDto getFoldersByNickname(final String nickname) {
+        Member member = memberRepository.findByNickname(nickname)
+            .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        return storageFolderRepository.findAllPublicStorageFolderWithPage(member.getId());
+    }
+
     @Transactional
-    public CreateFolderResDto createFolder(final Long memberId, CreateFolderReqDto createFolderReqDto) {
+    public CreateFolderResDto createFolder(final Long memberId,
+        CreateFolderReqDto createFolderReqDto) {
         Member member = findByMemberId(memberId);
         StorageFolder storageFolder = StorageFolder.create(createFolderReqDto, member);
         storageFolderRepository.save(storageFolder);
@@ -40,7 +49,8 @@ public class StorageFolderService {
     }
 
     @Transactional
-    public UpdateStorageFolderResDto updateFolder(final Long folderId, UpdateStorageFolderReqDto updateStorageFolderReqDto) {
+    public UpdateStorageFolderResDto updateFolder(final Long folderId,
+        UpdateStorageFolderReqDto updateStorageFolderReqDto) {
         StorageFolder storageFolder = findByFolderId(folderId);
         storageFolder.update(updateStorageFolderReqDto);
         return UpdateStorageFolderResDto.of(storageFolder);
@@ -54,7 +64,8 @@ public class StorageFolderService {
 
     private StorageFolder findByFolderId(final Long folderId) {
         return storageFolderRepository.findById(folderId)
-            .orElseThrow(() -> new StorageFolderException(StorageFolderExceptionType.FOLDER_NOT_FOUND));
+            .orElseThrow(
+                () -> new StorageFolderException(StorageFolderExceptionType.FOLDER_NOT_FOUND));
     }
 
     private Member findByMemberId(Long memberId) {

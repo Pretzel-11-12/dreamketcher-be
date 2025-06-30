@@ -28,8 +28,18 @@ public class StorageItemService {
     private final StorageFolderRepository storageFolderRepository;
     private final MemberRepository memberRepository;
     private final WebtoonRepository webtoonRepository;
+
     public StorageItemResDto getItems(final Long memberId, final Long folderId) {
         return storageItemRepository.findAllStorageItemWithPage(memberId, folderId);
+    }
+
+    // 공개 폴더 조회 (memberId 없이)
+    public StorageItemResDto getPublicItems(final Long folderId) {
+        StorageFolder folder = findByFolderId(folderId);
+        if (folder.isPrivate()) {
+            throw new StorageFolderException(StorageFolderExceptionType.PRIVATED_FOLDER_FORBIDDEN);
+        }
+        return storageItemRepository.findAllStorageItemWithPagePublic(folderId);
     }
 
     public CreateStorageItemResDto createItem(
@@ -51,7 +61,8 @@ public class StorageItemService {
 
     private StorageItem findByItemId(final Long itemId) {
         return storageItemRepository.findById(itemId)
-            .orElseThrow(() -> new StorageFolderException(StorageFolderExceptionType.ITEM_NOT_FOUND));
+            .orElseThrow(
+                () -> new StorageFolderException(StorageFolderExceptionType.ITEM_NOT_FOUND));
     }
 
     private Webtoon findByWebtoonId(final Long webtoonId) {
@@ -61,7 +72,8 @@ public class StorageItemService {
 
     private StorageFolder findByFolderId(final Long folderId) {
         return storageFolderRepository.findById(folderId)
-            .orElseThrow(() -> new StorageFolderException(StorageFolderExceptionType.FOLDER_NOT_FOUND));
+            .orElseThrow(
+                () -> new StorageFolderException(StorageFolderExceptionType.FOLDER_NOT_FOUND));
     }
 
     private Member findByMemberId(Long memberId) {

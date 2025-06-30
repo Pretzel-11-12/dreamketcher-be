@@ -18,6 +18,9 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 
     Optional<Member> findById(Long memberId);
 
+    // New method to find member by nickname
+    Optional<Member> findByNickname(String nickname);
+
     boolean existsByBusinessEmailAndIdNot(String newBusinessEmail, Long memberId);
 
     boolean existsByNicknameAndIdNot(String newNickname, Long memberId);

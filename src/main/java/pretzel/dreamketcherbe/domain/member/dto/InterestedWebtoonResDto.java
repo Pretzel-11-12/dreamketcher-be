@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import pretzel.dreamketcherbe.domain.member.entity.InterestedWebtoon;
 
-public record InterestedWebtoonResponse(
+public record InterestedWebtoonResDto(
     Long interestedWebtoonId,
     Long webtoonId,
     String title,
@@ -16,9 +16,9 @@ public record InterestedWebtoonResponse(
     String genre
 ) {
 
-    public static InterestedWebtoonResponse from(InterestedWebtoon interestedWebtoon,
+    public static InterestedWebtoonResDto from(InterestedWebtoon interestedWebtoon,
         String authorNickname, int episodeCount, LocalDateTime updatedAt, String genre) {
-        return new InterestedWebtoonResponse(
+        return new InterestedWebtoonResDto(
             interestedWebtoon.getId(),
             interestedWebtoon.getWebtoon().getId(),
             interestedWebtoon.getWebtoon().getTitle(),

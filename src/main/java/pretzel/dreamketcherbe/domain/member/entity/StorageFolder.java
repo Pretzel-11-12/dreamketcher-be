@@ -53,4 +53,7 @@ public class StorageFolder {
         this.name = dto.folderName();
     }
 
+    public boolean isPrivate() {
+        return isPrivate;
+    }
 }
