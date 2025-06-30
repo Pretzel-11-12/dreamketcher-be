@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import pretzel.dreamketcherbe.domain.comment.entity.Comment;
+import pretzel.dreamketcherbe.domain.comment.entity.Recomment;
 import pretzel.dreamketcherbe.domain.comment.exception.CommentException;
 import pretzel.dreamketcherbe.domain.comment.exception.CommentExceptionType;
 import pretzel.dreamketcherbe.domain.comment.repository.CommentRepository;
+import pretzel.dreamketcherbe.domain.comment.repository.RecommentRepository;
 import pretzel.dreamketcherbe.domain.episode.entity.Episode;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeException;
 import pretzel.dreamketcherbe.domain.episode.exception.EpisodeExceptionType;
@@ -24,13 +26,17 @@ import pretzel.dreamketcherbe.domain.notification.entity.CommentRecOrNotRecNotif
 import pretzel.dreamketcherbe.domain.notification.entity.CommentReportNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.EpisodeLikeNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.EpisodeReportNotification;
+import pretzel.dreamketcherbe.domain.notification.entity.RecommentNotificationType;
+import pretzel.dreamketcherbe.domain.notification.entity.RecommentRecOrNotRecNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.RecommentReportNotification;
 import pretzel.dreamketcherbe.domain.notification.event.CommentRecOrNotRecNotificationEvent;
 import pretzel.dreamketcherbe.domain.notification.event.EpisodeLikeNotificationEvent;
+import pretzel.dreamketcherbe.domain.notification.event.RecommentRecOrNotRecNotificationEvent;
 import pretzel.dreamketcherbe.domain.notification.repository.CommentRecOrNotRecNotificationRepository;
 import pretzel.dreamketcherbe.domain.notification.repository.CommentReportNotificationRepository;
 import pretzel.dreamketcherbe.domain.notification.repository.EpisodeLikeNotificationRepository;
 import pretzel.dreamketcherbe.domain.notification.repository.EpisodeReportNotificationRepository;
+import pretzel.dreamketcherbe.domain.notification.repository.RecommentRecOrNotRecNotificationRepository;
 import pretzel.dreamketcherbe.domain.notification.repository.RecommentReportNotificationRepository;
 
 @Service
@@ -49,6 +55,8 @@ public class NotificationService {
     private final EpisodeReportNotificationRepository episodeReportNotificationRepository;
     private final CommentReportNotificationRepository commentReportNotificationRepository;
     private final RecommentReportNotificationRepository recommentReportNotificationRepository;
+    private final RecommentRecOrNotRecNotificationRepository recommentRecOrNotRecNotificationRepository;
+    private final RecommentRepository recommentRepository;
 
     /**
      * 모든 알림 - 전체 조회
@@ -82,9 +90,11 @@ public class NotificationService {
             memberId, LocalDateTime.now());
         Long recommentReportCount = recommentReportNotificationRepository.countUnreadRecommentReportNotificationsByMemberId(
             memberId, LocalDateTime.now());
+        Long recommentRecOrNotRecCount = recommentRecOrNotRecNotificationRepository.countUnreadNotificationsByMemberId(
+            memberId, LocalDateTime.now());
 
         return likeCount + episodeReportCount + commentReportCount + commentRecOrNotRecCount
-            + recommentReportCount;
+            + recommentReportCount + recommentRecOrNotRecCount;
     }
 
     /**
@@ -137,6 +147,15 @@ public class NotificationService {
             .map(NotificationResDto::fromRecommentReportNotification)
             .toList());
 
+        List<RecommentRecOrNotRecNotification> recommentRecOrNotRecNotifications = unreadOnly
+            ? recommentRecOrNotRecNotificationRepository.findAllUnreadNotificationsByMemberId(
+            memberId, LocalDateTime.now())
+            : recommentRecOrNotRecNotificationRepository.findAllByMemberId(memberId,
+                LocalDateTime.now());
+        notifications.addAll(recommentRecOrNotRecNotifications.stream()
+            .map(NotificationResDto::fromRecommentRecOrNotRecNotification)
+            .toList());
+
         notifications.sort((n1, n2) -> n2.createdAt().compareTo(n1.createdAt()));
 
         return notifications;
@@ -165,6 +184,10 @@ public class NotificationService {
                     break;
                 case "RECOMMENT_REPORT":
                     markAsReadRecommentReportNotification(notification.notificationId());
+                    break;
+                case "RECOMMENT_RECOMMENDATION":
+                case "RECOMMENT_NOT_RECOMMENDATION":
+                    markAsReadRecommentRecOrNotRecNotification(notification.notificationId());
                     break;
                 default:
                     log.warn("알 수 없는 알림 타입: {}", notification.type());
@@ -196,6 +219,12 @@ public class NotificationService {
                 case "RECOMMENT_REPORT":
                     recommentReportNotificationRepository.deleteById(notification.notificationId());
                     break;
+                case "RECOMMENT_RECOMMENDATION":
+                case "RECOMMENT_NOT_RECOMMENDATION":
+                    recommentRecOrNotRecNotificationRepository.deleteById(
+                        notification.notificationId());
+                    break;
+
                 default:
                     log.warn("알 수 없는 알림 타입: {}", notification.type());
             }
@@ -387,6 +416,92 @@ public class NotificationService {
         eventPublisher.publishEvent(event);
     }
 
+    /**
+     * 대댓글 추천 알림
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void recommentRecommendationNotification(Long recommentId, int recommendationCount) {
+        if (recommendationCount % RECOMMENDATION_THRESHOLD == 0 && recommendationCount > 0) {
+            processRecommentNotification(recommentId, RecommentNotificationType.RECOMMENDATION,
+                recommendationCount);
+        }
+    }
+
+    /**
+     * 대댓글 비추천 알림
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void recommentNotRecommendationNotification(Long recommentId,
+        int notRecommendationCount) {
+        if (notRecommendationCount % RECOMMENDATION_THRESHOLD == 0 && notRecommendationCount > 0) {
+            processRecommentNotification(recommentId, RecommentNotificationType.NOT_RECOMMENDATION,
+                notRecommendationCount);
+        }
+    }
+
+    /**
+     * 대댓글 알림 처리
+     */
+    private void processRecommentNotification(Long recommentId, RecommentNotificationType type,
+        int count) {
+        try {
+            Recomment recomment = recommentRepository.findById(recommentId)
+                .orElseThrow(
+                    () -> new CommentException(CommentExceptionType.RECOMMENT_NOT_FOUND));
+
+            if (!hasRecommentRecOrNotRecNotification(recommentId, type)) {
+                saveRecommentRecOrNotRecNotification(recomment, type, count);
+                publishRecommentNotificationEvent(recomment, type, count);
+
+                log.info("대댓글 {} 알림 생성 성공 - 대댓글: {}, 개수: {}",
+                    type == RecommentNotificationType.RECOMMENDATION ? "추천" : "비추천",
+                    recommentId, count);
+            }
+        } catch (Exception e) {
+            log.error("대댓글 알림 생성 실패 - 대댓글: {}, 타입: {}, 에러: {}",
+                recommentId, type, e.getMessage(), e);
+        }
+    }
+
+    private boolean hasRecommentRecOrNotRecNotification(Long recommentId,
+        RecommentNotificationType type) {
+        return recommentRecOrNotRecNotificationRepository.existsByRecommentIdAndType(recommentId,
+            type);
+    }
+
+    private void saveRecommentRecOrNotRecNotification(Recomment recomment,
+        RecommentNotificationType type,
+        int count) {
+        RecommentRecOrNotRecNotification notification =
+            (type == RecommentNotificationType.RECOMMENDATION)
+                ? RecommentRecOrNotRecNotification.createForRecommendation(recomment, count)
+                : RecommentRecOrNotRecNotification.createForNotRecommendation(recomment, count);
+
+        recommentRecOrNotRecNotificationRepository.save(notification);
+    }
+
+    /**
+     * 대댓글 알림 이벤트 발행
+     */
+    private void publishRecommentNotificationEvent(Recomment recomment,
+        RecommentNotificationType type,
+        int count) {
+        RecommentRecOrNotRecNotificationEvent event = new RecommentRecOrNotRecNotificationEvent(
+            recomment.getId(),
+            recomment.getMember().getId(),
+            recomment.getComment().getId(),
+            recomment.getComment().getEpisode().getId(),
+            recomment.getComment().getEpisode().getTitle(),
+            recomment.getComment().getEpisode().getNo(),
+            recomment.getComment().getWebtoon().getId(),
+            recomment.getComment().getWebtoon().getTitle(),
+            type,
+            count,
+            LocalDateTime.now()
+        );
+        eventPublisher.publishEvent(event);
+    }
+
     @Transactional(readOnly = true)
     public List<EpisodeReportNotification> getAllReportNotifications(Long memberId) {
         return episodeReportNotificationRepository.findAllNotificationsByMemberId(memberId,
@@ -461,6 +576,27 @@ public class NotificationService {
             memberId, LocalDateTime.now());
     }
 
+    @Transactional(readOnly = true)
+    public List<RecommentRecOrNotRecNotification> getAllRecommentRecOrNotRecNotifications(
+        Long memberId) {
+        return recommentRecOrNotRecNotificationRepository.findAllByMemberId(memberId,
+            LocalDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public List<RecommentRecOrNotRecNotification> getUnreadRecommentRecOrNotRecNotifications(
+        Long memberId) {
+        return recommentRecOrNotRecNotificationRepository.findAllUnreadNotificationsByMemberId(
+            memberId, LocalDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public Long getUnreadRecommentRecOrNotRecNotificationCount(Long memberId) {
+        return recommentRecOrNotRecNotificationRepository.countUnreadNotificationsByMemberId(
+            memberId,
+            LocalDateTime.now());
+    }
+
     @Transactional
     public void markAsReadLikeNotification(Long notificationId) {
         EpisodeLikeNotification notification = episodeLikeNotificationRepository.findById(
@@ -507,6 +643,15 @@ public class NotificationService {
     }
 
     @Transactional
+    public void markAsReadRecommentRecOrNotRecNotification(Long notificationId) {
+        RecommentRecOrNotRecNotification notification = recommentRecOrNotRecNotificationRepository.findById(
+                notificationId)
+            .orElseThrow(() -> new IllegalArgumentException("알림이 존재하지 않습니다."));
+        notification.markAsRead();
+        recommentRecOrNotRecNotificationRepository.save(notification);
+    }
+
+    @Transactional
     public void cleanupExpiredLikeNotifications() {
         List<EpisodeLikeNotification> expiredNotifications = episodeLikeNotificationRepository
             .findExpiredNotifications(LocalDateTime.now());
@@ -549,5 +694,14 @@ public class NotificationService {
 
         recommentReportNotificationRepository.deleteAll(expiredNotifications);
         log.info("만료된 대댓글 신고 알림 {}개 삭제 완료", expiredNotifications.size());
+    }
+
+    @Transactional
+    public void cleanupExpiredRecommentRecOrNotRecNotifications() {
+        List<RecommentRecOrNotRecNotification> expiredNotifications = recommentRecOrNotRecNotificationRepository
+            .findExpiredNotifications(LocalDateTime.now());
+
+        recommentRecOrNotRecNotificationRepository.deleteAll(expiredNotifications);
+        log.info("만료된 대댓글 추천/비추천 알림 {}개 삭제 완료", expiredNotifications.size());
     }
 }

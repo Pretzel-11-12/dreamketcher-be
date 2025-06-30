@@ -22,6 +22,7 @@ import pretzel.dreamketcherbe.domain.notification.entity.CommentRecOrNotRecNotif
 import pretzel.dreamketcherbe.domain.notification.entity.CommentReportNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.EpisodeLikeNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.EpisodeReportNotification;
+import pretzel.dreamketcherbe.domain.notification.entity.RecommentRecOrNotRecNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.RecommentReportNotification;
 import pretzel.dreamketcherbe.domain.notification.service.NotificationService;
 import pretzel.dreamketcherbe.domain.notification.service.SSEService;
@@ -375,6 +376,82 @@ public class NotificationController {
     public ResponseEntity<Void> readRecommentReportNotification(@Auth Long memberId,
         @PathVariable Long notificationId) {
         notificationService.markAsReadRecommentReportNotification(notificationId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 대댓글 추천 알림
+     */
+    @PostMapping("/recomments/{recommentId}/recommend-notification")
+    public ResponseEntity<Void> recommentRecommendNotification(@Auth Long memberId,
+        @PathVariable Long recommentId, @RequestParam int recommendCount) {
+        notificationService.recommentRecommendationNotification(recommentId, recommendCount);
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 대댓글 비추천 알림
+     */
+    @PostMapping("/recomments/{recommentId}/notrecommend-notification")
+    public ResponseEntity<Void> recommentNotRecommendNotification(@Auth Long memberId,
+        @PathVariable Long recommentId, @RequestParam int notRecommendCount) {
+        notificationService.recommentNotRecommendationNotification(recommentId, notRecommendCount);
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 대댓글 추천/비추천 알림 - 전체 조회
+     */
+    @GetMapping("/recomments/recommendations")
+    public ResponseEntity<List<NotificationResDto>> getAllRecommentRecommendationNotifications(
+        @Auth Long memberId) {
+        List<RecommentRecOrNotRecNotification> notifications = notificationService.getAllRecommentRecOrNotRecNotifications(
+            memberId);
+
+        List<NotificationResDto> response = notifications.stream()
+            .map(NotificationResDto::fromRecommentRecOrNotRecNotification)
+            .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 대댓글 추천/비추천 알림 - 읽지 않은 알림 조회
+     */
+    @GetMapping("/recomments/recommendations/unread")
+    public ResponseEntity<List<NotificationResDto>> getUnreadRecommentRecommendationNotifications(
+        @Auth Long memberId) {
+        List<RecommentRecOrNotRecNotification> notifications = notificationService.getUnreadRecommentRecOrNotRecNotifications(
+            memberId);
+
+        List<NotificationResDto> response = notifications.stream()
+            .map(NotificationResDto::fromRecommentRecOrNotRecNotification)
+            .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 대댓글 추천/비추천 알림 - 읽지 않은 알림 수 조회
+     */
+    @GetMapping("/recomments/recommendations/unread/count")
+    public ResponseEntity<NotificationCountResDto> getUnreadRecommentRecommendationNotificationCount(
+        @Auth Long memberId) {
+        Long count = notificationService.getUnreadRecommentRecOrNotRecNotificationCount(memberId);
+
+        return ResponseEntity.ok(new NotificationCountResDto(count));
+    }
+
+    /**
+     * 대댓글 추천/비추천 알림 - 읽음 처리
+     */
+    @PatchMapping("/recomments/recommendations/{notificationId}/read")
+    public ResponseEntity<Void> readRecommentRecommendationNotification(@Auth Long memberId,
+        @PathVariable Long notificationId) {
+        notificationService.markAsReadRecommentRecOrNotRecNotification(notificationId);
 
         return ResponseEntity.ok().build();
     }

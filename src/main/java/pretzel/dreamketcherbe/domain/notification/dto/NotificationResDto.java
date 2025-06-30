@@ -7,6 +7,8 @@ import pretzel.dreamketcherbe.domain.notification.entity.CommentRecOrNotRecNotif
 import pretzel.dreamketcherbe.domain.notification.entity.CommentReportNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.EpisodeLikeNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.EpisodeReportNotification;
+import pretzel.dreamketcherbe.domain.notification.entity.RecommentNotificationType;
+import pretzel.dreamketcherbe.domain.notification.entity.RecommentRecOrNotRecNotification;
 import pretzel.dreamketcherbe.domain.notification.entity.RecommentReportNotification;
 
 @Builder
@@ -152,6 +154,44 @@ public record NotificationResDto(
             return "RECOMMENT_REPORT_REPORTER";
         } else {
             return "RECOMMENT_REPORT_REPORTED";
+        }
+    }
+
+    public static NotificationResDto fromRecommentRecOrNotRecNotification(
+        RecommentRecOrNotRecNotification recommentRecOrNotRecNotification
+    ) {
+        String type = recommentRecOrNotRecType(recommentRecOrNotRecNotification.getType());
+        String action =
+            recommentRecOrNotRecNotification.getType() == RecommentNotificationType.RECOMMENDATION
+                ? "추천"
+                : "비추천";
+
+        return NotificationResDto.builder()
+            .notificationId(recommentRecOrNotRecNotification.getId())
+            .type(type)
+            .webtoonTitle(
+                recommentRecOrNotRecNotification.getRecomment().getComment().getEpisode()
+                    .getWebtoon().getTitle())
+            .episodeTitle(recommentRecOrNotRecNotification.getRecomment().getComment().getEpisode()
+                .getTitle())
+            .episodeNo(
+                recommentRecOrNotRecNotification.getRecomment().getComment().getEpisode().getNo())
+            .count(recommentRecOrNotRecNotification.getCount())
+            .message(String.format(
+                "대댓글 '%s'에 %s이 %d개 추가되었습니다.",
+                recommentRecOrNotRecNotification.getRecomment().getContent(),
+                action,
+                recommentRecOrNotRecNotification.getCount()
+            ))
+            .createdAt(recommentRecOrNotRecNotification.getCreatedAt())
+            .build();
+    }
+
+    private static String recommentRecOrNotRecType(RecommentNotificationType type) {
+        if (type == RecommentNotificationType.RECOMMENDATION) {
+            return "RECOMMENT_RECOMMENDATION";
+        } else {
+            return "RECOMMENT_NOT_RECOMMENDATION";
         }
     }
 }
