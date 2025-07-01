@@ -50,6 +50,7 @@ public class StorageItemService {
         Member member = findByMemberId(memberId);
         StorageFolder folder = findByFolderId(folderId);
         Webtoon webtoon = findByWebtoonId(createStorageItemReqDto.webtoonId());
+        checkWebtoonInFolder(folder, webtoon);
         StorageItem item = StorageItem.create(folder, member, webtoon);
         return CreateStorageItemResDto.of(storageItemRepository.save(item));
     }
@@ -79,5 +80,11 @@ public class StorageItemService {
     private Member findByMemberId(Long memberId) {
         return memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberExceptionType.MEMBER_NOT_FOUND));
+    }
+
+    private void checkWebtoonInFolder(StorageFolder folder, Webtoon webtoon) {
+        if (storageItemRepository.existsByStorageFolderAndWebtoon(folder, webtoon)) {
+            throw new StorageFolderException(StorageFolderExceptionType.DUPLICATE_ITEM);
+        }
     }
 }
