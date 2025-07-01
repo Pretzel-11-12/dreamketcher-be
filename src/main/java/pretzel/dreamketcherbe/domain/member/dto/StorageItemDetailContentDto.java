@@ -1,6 +1,7 @@
 package pretzel.dreamketcherbe.domain.member.dto;
 
 public record StorageItemDetailContentDto(
+    Long itemId,
     Long webtoonId,
     String title,
     String thumbnail,
