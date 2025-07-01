@@ -39,6 +39,7 @@ public class StorageItemRepositoryCustomImpl implements StorageItemRepositoryCus
         return jpaQueryFactory.select(
                 Projections.constructor(
                     pretzel.dreamketcherbe.domain.member.dto.StorageItemDetailContentDto.class,
+                    storageItem.id,
                     webtoon.id,
                     webtoon.title,
                     webtoon.thumbnail,
@@ -69,6 +70,7 @@ public class StorageItemRepositoryCustomImpl implements StorageItemRepositoryCus
         return jpaQueryFactory.select(
                 Projections.constructor(
                     pretzel.dreamketcherbe.domain.member.dto.StorageItemDetailContentDto.class,
+                    storageItem.id,
                     webtoon.id,
                     webtoon.title,
                     webtoon.thumbnail,
